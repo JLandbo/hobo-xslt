@@ -6,9 +6,11 @@ using HoboXslt.Core.Languages;
 
 namespace HoboXslt.Core;
 
-// One run or debug session in a worker process; Stop kills the process, which stops any transformation at once.
+// One run or debug session in a worker process; Stop ends the process, which stops any transformation at once.
 public sealed class WorkerSession : IDisposable
 {
+    private static readonly TimeSpan StopGrace = TimeSpan.FromMilliseconds(200);
+
     private readonly Process _process;
     private readonly Translator _translator;
     private volatile bool _stopRequested;
@@ -54,9 +56,23 @@ public sealed class WorkerSession : IDisposable
 
     public void StepOut() => Send(DebugCommand.StepOut);
 
+    // The worker sends its remaining output and ends itself; one that does not end in time is killed.
     public void Stop()
     {
         _stopRequested = true;
+        Send(Worker.StopCommand);
+        _ = Task.Delay(StopGrace).ContinueWith(_ => Kill());
+    }
+
+    public void Dispose()
+    {
+        _stopRequested = true;
+        Kill();
+        _process.Dispose();
+    }
+
+    private void Kill()
+    {
         try
         {
             _process.Kill();
@@ -65,12 +81,6 @@ public sealed class WorkerSession : IDisposable
         {
             // The worker has already ended.
         }
-    }
-
-    public void Dispose()
-    {
-        Stop();
-        _process.Dispose();
     }
 
     private Task<DebugResult> Start(WorkerRequest request)

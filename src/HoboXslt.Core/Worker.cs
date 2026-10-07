@@ -9,6 +9,8 @@ public static class Worker
 {
     public const string Argument = "--worker";
 
+    internal const string StopCommand = "Stop";
+
     internal static readonly UTF8Encoding Encoding = new(false);
 
     private static readonly TimeSpan OutputInterval = TimeSpan.FromMilliseconds(100);
@@ -60,7 +62,7 @@ public static class Worker
             };
         }
 
-        new Thread(() => ReadCommands(input, session)) { IsBackground = true }.Start();
+        new Thread(() => ReadCommands(input, session, Flush)) { IsBackground = true }.Start();
 
         using var timer = new Timer(_ => Flush(), null, OutputInterval, OutputInterval);
         var result = session?.Start().Result ?? ToDebugResult(runner.Run(request.XsltPath, request.XmlPath));
@@ -73,10 +75,19 @@ public static class Worker
         new(result.Output is null ? DebugOutcome.Failed : DebugOutcome.Completed, result.Output, result.Diagnostics, []);
 
     // The input closes when the app ends, also when it is killed, so a worker in an endless loop never outlives it.
-    private static void ReadCommands(TextReader input, DebugSession? session)
+    // Stop is read here, beside the transformation, so the batched output is sent even while Saxon is stuck in a loop.
+    private static void ReadCommands(TextReader input, DebugSession? session, Action flush)
     {
         while (input.ReadLine() is { } line)
+        {
+            if (line == StopCommand)
+            {
+                flush();
+                break;
+            }
+
             session?.Send(Enum.Parse<DebugCommand>(line));
+        }
 
         Environment.Exit(1);
     }

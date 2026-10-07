@@ -141,6 +141,41 @@ public sealed class WorkerSessionTests : IDisposable
     }
 
     [Fact]
+    public async Task Run_WhenStoppedRightAfterOutput_ThenOutputIsKept()
+    {
+        // Arrange
+        var xslt = _files.Write("main.xsl", """
+            <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+              <xsl:output omit-xml-declaration="yes"/>
+              <xsl:template match="/">
+                <xsl:message>warm up</xsl:message>
+                <xsl:message select="sum(for $i in 1 to 3000000 return $i)"/>
+                <r><before/><xsl:message>written</xsl:message><xsl:value-of select="count(for $i in 1 to 2000000000, $j in 1 to 2000000000 return $j)"/></r>
+              </xsl:template>
+            </xsl:stylesheet>
+            """);
+        using var session = new WorkerSession(WorkerPath, _translator);
+        var output = new StringBuilder();
+        var reported = new TaskCompletionSource();
+        session.Written += text => output.Append(text);
+        // The first messages warm the worker up, so the stop lands while <before/> still waits for its batch.
+        session.Reported += diagnostic =>
+        {
+            if (diagnostic.Text == "written")
+                reported.TrySetResult();
+        };
+        var run = session.Run(xslt, _xml);
+        await reported.Task.WaitAsync(Timeout);
+
+        // Act
+        var result = await Stop(session, run);
+
+        // Assert
+        Assert.Equal(DebugOutcome.Stopped, result.Outcome);
+        Assert.Equal("<r><before/>", output.ToString());
+    }
+
+    [Fact]
     public async Task Debug_WhenPausedAfterOutput_ThenOutputHasArrived()
     {
         // Arrange
