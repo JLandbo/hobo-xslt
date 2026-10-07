@@ -30,9 +30,25 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <ToolBar Grid.Row="0">
-            <Button x:Name="RunButton" Content="Kør" IsEnabled="False" Click="Run_Click" />
-        </ToolBar>
+        <StackPanel Grid.Row="0">
+            <ToolBar>
+                <Button x:Name="RunButton" Content="Kør" IsEnabled="False" Click="Run_Click" />
+            </ToolBar>
+
+            <Grid Margin="6,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="XPath" Margin="0,0,8,0" VerticalAlignment="Top" Padding="0,2" Style="{StaticResource PaneTitle}" />
+                <TextBox x:Name="XPathBox" Grid.Column="1" VerticalAlignment="Top" FontFamily="Consolas" KeyDown="XPathBox_KeyDown" />
+                <Button x:Name="XPathButton" Grid.Column="2" VerticalAlignment="Top" Content="Evaluér" IsEnabled="False" Style="{StaticResource PaneButton}" Click="EvaluateXPath_Click" />
+                <TextBox x:Name="XPathResultBox" Grid.Column="3" Margin="8,0,0,0" MaxHeight="120" IsReadOnly="True" FontFamily="Consolas"
+                         VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" />
+            </Grid>
+        </StackPanel>
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>

@@ -2,6 +2,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml;
 using HoboXslt.Core;
@@ -18,6 +19,7 @@ public partial class MainWindow : Window
     private readonly EditorDocument _xml;
     private readonly EditorDocument _xslt;
     private XsltRunner? _runner;
+    private XPathEvaluator? _xpath;
 
     public MainWindow()
     {
@@ -33,7 +35,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            _runner = await Task.Run(() => new XsltRunner());
+            (_runner, _xpath) = await Task.Run(() => (new XsltRunner(), new XPathEvaluator()));
         }
         catch (Exception ex)
         {
@@ -43,6 +45,38 @@ public partial class MainWindow : Window
 
         StatusText.Text = "Klar";
         RunButton.IsEnabled = true;
+        XPathButton.IsEnabled = true;
+    }
+
+    private async void XPathBox_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+            await EvaluateXPath();
+    }
+
+    private async void EvaluateXPath_Click(object sender, RoutedEventArgs e) => await EvaluateXPath();
+
+    private async Task EvaluateXPath()
+    {
+        if (_xpath is not { } xpath || !XPathButton.IsEnabled)
+            return;
+
+        var (expression, xml) = (XPathBox.Text, XmlEditor.Text);
+        XPathButton.IsEnabled = false;
+
+        XPathResult result;
+        try
+        {
+            result = await Task.Run(() => xpath.Evaluate(expression, xml));
+        }
+        catch (Exception ex)
+        {
+            result = new([], ex.Message);
+        }
+
+        XPathResultBox.Text = result.Error ?? (result.Items.Count == 0 ? "Tom sekvens" : string.Join(Environment.NewLine, result.Items));
+        XPathResultBox.Foreground = result.Error is null ? SystemColors.ControlTextBrush : Brushes.Firebrick;
+        XPathButton.IsEnabled = true;
     }
 
     private void OpenXml_Click(object sender, RoutedEventArgs e) => _xml.Open();
