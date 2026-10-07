@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using net.sf.saxon.expr;
 using net.sf.saxon.expr.instruct;
 using net.sf.saxon.lib;
@@ -12,6 +13,7 @@ internal sealed class DebugTraceListener(DebugSession session, IReadOnlySet<Brea
     private DebugCommand _mode = DebugCommand.Continue;
     private int _modeDepth;
     private Breakpoint? _pausedAt;
+    private int _pausedDepth;
     private int _depth;
     private bool _readingVariables;
 
@@ -23,6 +25,16 @@ internal sealed class DebugTraceListener(DebugSession session, IReadOnlySet<Brea
             return;
 
         session.ThrowIfStopRequested();
+
+        var location = instruction.getLocation();
+        var file = FileKey.FromSystemId(location?.getSystemId());
+        var line = location?.getLineNumber() ?? -1;
+
+        // Aborting before the stack runs out turns infinite recursion into a failed run instead of a process crash.
+        if (!RuntimeHelpers.TryEnsureSufficientExecutionStack())
+            throw new StackExhaustedException(new(DiagnosticKind.RuntimeError, file, line > 0 ? line : null,
+                "Too many nested template or function calls to continue debugging; possibly infinite recursion."));
+
         if (instruction is Block)
             return;
 
@@ -30,9 +42,6 @@ internal sealed class DebugTraceListener(DebugSession session, IReadOnlySet<Brea
         if (AddsDepth(instruction))
             _depth++;
 
-        var location = instruction.getLocation();
-        var file = FileKey.FromSystemId(location?.getSystemId());
-        var line = location?.getLineNumber() ?? -1;
         if (file is null || line <= 0)
             return;
 
@@ -51,12 +60,20 @@ internal sealed class DebugTraceListener(DebugSession session, IReadOnlySet<Brea
         _mode = session.WaitForCommand(new(file, line, ReadVariables(context)));
         _modeDepth = depth;
         _pausedAt = position;
+        _pausedDepth = _depth;
     }
 
     public void leave(Traceable instruction)
     {
-        if (!_readingVariables && AddsDepth(instruction))
+        if (_readingVariables)
+            return;
+
+        if (AddsDepth(instruction))
             _depth--;
+
+        // Leaving a direct child of the paused instruction ends the visit, so a one-line loop body pauses on each iteration.
+        if (_depth <= _pausedDepth)
+            _pausedAt = null;
     }
 
     // A Block only groups a sequence constructor (its location is its first child's), and a LetExpression
@@ -111,4 +128,9 @@ internal sealed class DebugTraceListener(DebugSession session, IReadOnlySet<Brea
     public void endRuleSearch(object rule, net.sf.saxon.trans.Mode mode, Item item) { }
     public object? checkpoint() => null;
     public void recover(object rule, net.sf.saxon.trans.XPathException exception) { }
+}
+
+internal sealed class StackExhaustedException(Diagnostic diagnostic) : Exception
+{
+    public Diagnostic Diagnostic { get; } = diagnostic;
 }

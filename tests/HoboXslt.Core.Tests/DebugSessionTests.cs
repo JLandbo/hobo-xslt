@@ -164,6 +164,99 @@ public sealed class DebugSessionTests : IDisposable
     }
 
     [Fact]
+    public async Task Stop_WhenMessageEmittedBeforeStop_ThenResultKeepsMessage()
+    {
+        // Arrange
+        var xslt = _files.Write("main.xsl", """
+            <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+              <xsl:template match="/">
+                <xsl:message>hello</xsl:message>
+                <out/>
+              </xsl:template>
+            </xsl:stylesheet>
+            """);
+        using var session = CreateSession(xslt, new Breakpoint(xslt, 4));
+        var run = session.Start();
+        NextPause();
+
+        // Act
+        session.Stop();
+        var result = await run.WaitAsync(Timeout);
+
+        // Assert
+        Assert.Contains(result.Diagnostics, d => d is { Kind: DiagnosticKind.Message, Text: "hello" });
+    }
+
+    [Theory]
+    [InlineData("for-each")]
+    [InlineData("iterate")]
+    public async Task Continue_WhenBreakpointOnOneLineLoop_ThenPausesOnEveryIteration(string loop)
+    {
+        // Arrange
+        var xslt = _files.Write("main.xsl", $"""
+            <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+              <xsl:template match="/">
+                <xsl:{loop} select="1 to 3"><xsl:value-of select="."/></xsl:{loop}>
+              </xsl:template>
+            </xsl:stylesheet>
+            """);
+        using var session = CreateSession(xslt, new Breakpoint(xslt, 3));
+        session.Paused += _ => session.Continue();
+
+        // Act
+        await session.Start().WaitAsync(Timeout);
+
+        // Assert
+        Assert.Equal(3, _pauses.Count);
+    }
+
+    [Fact]
+    public async Task Start_WhenInfiniteRecursion_ThenSessionEndsFailedWithDiagnostic()
+    {
+        // Arrange
+        var xslt = _files.Write("main.xsl", """
+            <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+              <xsl:template match="/">
+                <xsl:call-template name="r"/>
+              </xsl:template>
+              <xsl:template name="r">
+                <xsl:call-template name="r"/>
+              </xsl:template>
+            </xsl:stylesheet>
+            """);
+        using var session = CreateSession(xslt);
+
+        // Act
+        var result = await session.Start().WaitAsync(Timeout);
+
+        // Assert
+        Assert.Equal(DebugOutcome.Failed, result.Outcome);
+        Assert.Contains(result.Diagnostics, d => d.Kind == DiagnosticKind.RuntimeError);
+    }
+
+    [Fact]
+    public void Paused_WhenVariableHasLiteralValue_ThenSnapshotListsIt()
+    {
+        // Arrange
+        var xslt = _files.Write("main.xsl", """
+            <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+              <xsl:template match="/">
+                <xsl:variable name="lit" select="5"/>
+                <out><xsl:value-of select="$lit"/></out>
+              </xsl:template>
+            </xsl:stylesheet>
+            """);
+        using var session = CreateSession(xslt, new Breakpoint(xslt, 4));
+
+        // Act
+        session.Start();
+        var pause = NextPause();
+
+        // Assert
+        Assert.Contains(new Variable("lit", "5"), pause.Variables);
+    }
+
+    [Fact]
     public void Paused_WhenInsideCalledTemplate_ThenSnapshotListsParamAndVariableValues()
     {
         // Arrange

@@ -1,4 +1,5 @@
 using javax.xml.transform.stream;
+using net.sf.saxon.expr.parser;
 using net.sf.saxon.lib;
 using net.sf.saxon.s9api;
 using JavaFile = java.io.File;
@@ -10,13 +11,20 @@ public sealed class XsltRunner
 {
     private readonly Processor _processor = new(false);
 
-    public RunResult Run(string xsltPath, string xmlPath, TraceListener? traceListener = null)
-    {
-        List<Diagnostic> diagnostics = [];
+    public RunResult Run(string xsltPath, string xmlPath, TraceListener? traceListener = null) =>
+        Run(xsltPath, xmlPath, traceListener, []);
 
+    internal RunResult Run(string xsltPath, string xmlPath, TraceListener? traceListener, List<Diagnostic> diagnostics)
+    {
         var compiler = _processor.newXsltCompiler();
         compiler.setErrorReporter(new CompileErrorReporter(diagnostics));
         compiler.setCompileWithTracing(traceListener is not null);
+        if (traceListener is not null)
+        {
+            // Saxon's miscellaneous optimizations inline literal variables, which hides them from the debugger.
+            var info = compiler.getUnderlyingCompilerInfo();
+            info.setOptimizerOptions(info.getOptimizerOptions().except(new OptimizerOptions(OptimizerOptions.MISCELLANEOUS)));
+        }
 
         XsltExecutable executable;
         try

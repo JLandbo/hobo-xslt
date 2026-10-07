@@ -2,6 +2,8 @@ namespace HoboXslt.Core;
 
 public sealed class DebugSession(string xsltPath, string xmlPath, IEnumerable<Breakpoint> breakpoints) : IDisposable
 {
+    private const int DebugStackSize = 16 * 1024 * 1024;
+
     private readonly HashSet<Breakpoint> _breakpoints = [.. breakpoints];
     private readonly object _gate = new();
     private DebugCommand? _command;
@@ -11,8 +13,7 @@ public sealed class DebugSession(string xsltPath, string xmlPath, IEnumerable<Br
     // Raised on the debug thread; the run stays paused until a step, continue or stop command arrives.
     public event Action<PauseSnapshot>? Paused;
 
-    public Task<DebugResult> Start() =>
-        _run ??= Task.Factory.StartNew(Run, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+    public Task<DebugResult> Start() => _run ??= RunOnDebugThread();
 
     public void Continue() => Send(DebugCommand.Continue);
 
@@ -65,18 +66,31 @@ public sealed class DebugSession(string xsltPath, string xmlPath, IEnumerable<Br
         }
     }
 
+    private Task<DebugResult> RunOnDebugThread()
+    {
+        var run = new Task<DebugResult>(Run);
+        // Tracing defeats Saxon's tail calls, so recursive stylesheets need a deeper stack than the default 1 MB.
+        new Thread(run.RunSynchronously, DebugStackSize) { IsBackground = true }.Start();
+        return run;
+    }
+
     private DebugResult Run()
     {
         var listener = new DebugTraceListener(this, _breakpoints);
+        List<Diagnostic> diagnostics = [];
         try
         {
-            var result = new XsltRunner().Run(xsltPath, xmlPath, listener);
+            var result = new XsltRunner().Run(xsltPath, xmlPath, listener, diagnostics);
             var outcome = result.Output is null ? DebugOutcome.Failed : DebugOutcome.Completed;
             return new(outcome, result.Output, result.Diagnostics, listener.UnboundBreakpoints);
         }
         catch (DebugStoppedException)
         {
-            return new(DebugOutcome.Stopped, null, [], listener.UnboundBreakpoints);
+            return new(DebugOutcome.Stopped, null, diagnostics, listener.UnboundBreakpoints);
+        }
+        catch (StackExhaustedException e)
+        {
+            return new(DebugOutcome.Failed, null, [.. diagnostics, e.Diagnostic], listener.UnboundBreakpoints);
         }
     }
 
