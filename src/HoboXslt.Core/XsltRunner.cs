@@ -1,13 +1,14 @@
+using System.Text;
 using javax.xml.transform.stream;
 using net.sf.saxon.expr.parser;
 using net.sf.saxon.lib;
 using net.sf.saxon.s9api;
 using JavaFile = java.io.File;
-using JavaStringWriter = java.io.StringWriter;
 
 namespace HoboXslt.Core;
 
-public sealed class XsltRunner
+// reported and written are called on the transformation thread as Saxon reports a diagnostic or writes output.
+public sealed class XsltRunner(Action<Diagnostic>? reported = null, Action<string>? written = null)
 {
     private readonly Processor _processor = new(false);
 
@@ -16,8 +17,14 @@ public sealed class XsltRunner
 
     internal RunResult Run(string xsltPath, string xmlPath, TraceListener? traceListener, List<Diagnostic> diagnostics)
     {
+        void Add(Diagnostic diagnostic)
+        {
+            diagnostics.Add(diagnostic);
+            reported?.Invoke(diagnostic);
+        }
+
         var compiler = _processor.newXsltCompiler();
-        compiler.setErrorReporter(new CompileErrorReporter(diagnostics));
+        compiler.setErrorReporter(new CompileErrorReporter(Add));
         compiler.setCompileWithTracing(traceListener is not null);
         if (traceListener is not null)
         {
@@ -34,27 +41,27 @@ public sealed class XsltRunner
         catch (SaxonApiException e)
         {
             if (!diagnostics.Any(d => d.Kind == DiagnosticKind.CompileError))
-                diagnostics.Add(new(DiagnosticKind.CompileError, FileKey.FromSystemId(e.getSystemId()), ToLine(e.getLineNumber()), e.getMessage()));
+                Add(new(DiagnosticKind.CompileError, FileKey.FromSystemId(e.getSystemId()), ToLine(e.getLineNumber()), e.getMessage()));
             return new(null, diagnostics);
         }
 
         var transformer = executable.load30();
-        transformer.setMessageHandler(new MessageCollector(diagnostics));
+        transformer.setMessageHandler(new MessageCollector(Add));
         if (traceListener is not null)
             transformer.setTraceListener(traceListener);
 
-        var writer = new JavaStringWriter();
+        var writer = new OutputWriter(written);
         try
         {
             transformer.transform(new StreamSource(new JavaFile(xmlPath)), transformer.newSerializer(writer));
         }
         catch (SaxonApiException e)
         {
-            diagnostics.Add(new(DiagnosticKind.RuntimeError, FileKey.FromSystemId(e.getSystemId()), ToLine(e.getLineNumber()), e.getMessage()));
+            Add(new(DiagnosticKind.RuntimeError, FileKey.FromSystemId(e.getSystemId()), ToLine(e.getLineNumber()), e.getMessage()));
             return new(null, diagnostics);
         }
 
-        return new(writer.toString(), diagnostics);
+        return new(writer.Text, diagnostics);
     }
 
     private static int? ToLine(int line) => line > 0 ? line : null;
@@ -62,21 +69,39 @@ public sealed class XsltRunner
     private static Diagnostic ToDiagnostic(DiagnosticKind kind, Location? location, string text) =>
         new(kind, FileKey.FromSystemId(location?.getSystemId()), ToLine(location?.getLineNumber() ?? -1), text);
 
-    private sealed class CompileErrorReporter(List<Diagnostic> diagnostics) : ErrorReporter
+    private sealed class CompileErrorReporter(Action<Diagnostic> add) : ErrorReporter
     {
         public void report(XmlProcessingError error)
         {
             if (!error.isWarning())
-                diagnostics.Add(ToDiagnostic(DiagnosticKind.CompileError, error.getLocation(), error.getMessage()));
+                add(ToDiagnostic(DiagnosticKind.CompileError, error.getLocation(), error.getMessage()));
         }
     }
 
-    private sealed class MessageCollector(List<Diagnostic> diagnostics) : java.util.function.Consumer
+    private sealed class OutputWriter(Action<string>? written) : java.io.Writer
+    {
+        private readonly StringBuilder _text = new();
+
+        public string Text => _text.ToString();
+
+        public override void write(char[] buffer, int offset, int length)
+        {
+            var text = new string(buffer, offset, length);
+            _text.Append(text);
+            written?.Invoke(text);
+        }
+
+        public override void flush() { }
+
+        public override void close() { }
+    }
+
+    private sealed class MessageCollector(Action<Diagnostic> add) : java.util.function.Consumer
     {
         public void accept(object message)
         {
             var m = (Message)message;
-            diagnostics.Add(ToDiagnostic(DiagnosticKind.Message, m.getLocation(), m.getStringValue()));
+            add(ToDiagnostic(DiagnosticKind.Message, m.getLocation(), m.getStringValue()));
         }
 
         public java.util.function.Consumer andThen(java.util.function.Consumer after) =>

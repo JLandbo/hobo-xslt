@@ -11,12 +11,40 @@ public static class Worker
 
     internal static readonly UTF8Encoding Encoding = new(false);
 
+    private static readonly TimeSpan OutputInterval = TimeSpan.FromMilliseconds(100);
+
     public static void Serve()
     {
         var input = new StreamReader(Console.OpenStandardInput(), Encoding);
         var output = new StreamWriter(Console.OpenStandardOutput(), Encoding) { AutoFlush = true };
+        var gate = new object();
+        // Saxon writes output in many small pieces, so they are sent in batches to keep the UI responsive.
+        var pending = new StringBuilder();
+
+        void Write(WorkerMessage message)
+        {
+            lock (gate)
+                output.WriteLine(JsonSerializer.Serialize(message));
+        }
+
+        void Flush()
+        {
+            lock (gate)
+            {
+                if (pending.Length == 0)
+                    return;
+
+                Write(new(Output: pending.ToString()));
+                pending.Clear();
+            }
+        }
+
         // Warms Saxon up while the request is on its way.
-        var runner = new XsltRunner();
+        var runner = new XsltRunner(diagnostic => Write(new(Diagnostic: diagnostic)), text =>
+        {
+            lock (gate)
+                pending.Append(text);
+        });
         if (input.ReadLine() is not { } line)
             return;
 
@@ -24,14 +52,21 @@ public static class Worker
         DebugSession? session = null;
         if (request.Breakpoints is { } breakpoints)
         {
-            session = new DebugSession(request.XsltPath, request.XmlPath, breakpoints, new Translator(Translation.Find(request.Language)));
-            session.Paused += snapshot => Write(output, new(Paused: snapshot));
+            session = new DebugSession(request.XsltPath, request.XmlPath, breakpoints, new Translator(Translation.Find(request.Language)), runner);
+            session.Paused += snapshot =>
+            {
+                Flush();
+                Write(new(Paused: snapshot));
+            };
         }
 
         new Thread(() => ReadCommands(input, session)) { IsBackground = true }.Start();
 
+        using var timer = new Timer(_ => Flush(), null, OutputInterval, OutputInterval);
         var result = session?.Start().Result ?? ToDebugResult(runner.Run(request.XsltPath, request.XmlPath));
-        Write(output, new(Result: result));
+        Flush();
+        // The output has already been sent in pieces.
+        Write(new(Result: result with { Output = null }));
     }
 
     private static DebugResult ToDebugResult(RunResult result) =>
@@ -45,11 +80,9 @@ public static class Worker
 
         Environment.Exit(1);
     }
-
-    private static void Write(TextWriter output, WorkerMessage message) => output.WriteLine(JsonSerializer.Serialize(message));
 }
 
 // Breakpoints is null for a plain run.
 internal sealed record WorkerRequest(string XsltPath, string XmlPath, IReadOnlyList<Breakpoint>? Breakpoints, string Language);
 
-internal sealed record WorkerMessage(PauseSnapshot? Paused = null, DebugResult? Result = null);
+internal sealed record WorkerMessage(PauseSnapshot? Paused = null, DebugResult? Result = null, Diagnostic? Diagnostic = null, string? Output = null);

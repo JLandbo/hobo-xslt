@@ -2,7 +2,7 @@ using HoboXslt.Core.Languages;
 
 namespace HoboXslt.Core;
 
-public sealed class DebugSession(string xsltPath, string xmlPath, IEnumerable<Breakpoint> breakpoints, Translator translator) : IDisposable
+public sealed class DebugSession(string xsltPath, string xmlPath, IEnumerable<Breakpoint> breakpoints, Translator translator, XsltRunner? runner = null) : IDisposable
 {
     private const int DebugStackSize = 16 * 1024 * 1024;
 
@@ -82,7 +82,7 @@ public sealed class DebugSession(string xsltPath, string xmlPath, IEnumerable<Br
         List<Diagnostic> diagnostics = [];
         try
         {
-            var result = new XsltRunner().Run(xsltPath, xmlPath, listener, diagnostics);
+            var result = (runner ?? new XsltRunner()).Run(xsltPath, xmlPath, listener, diagnostics);
             var outcome = result.Output is null ? DebugOutcome.Failed : DebugOutcome.Completed;
             return new(outcome, result.Output, result.Diagnostics, listener.UnboundBreakpoints);
         }

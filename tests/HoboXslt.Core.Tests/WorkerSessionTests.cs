@@ -1,3 +1,4 @@
+using System.Text;
 using HoboXslt.Core.Languages;
 
 namespace HoboXslt.Core.Tests;
@@ -78,6 +79,92 @@ public sealed class WorkerSessionTests : IDisposable
         // Assert
         Assert.Equal((DebugOutcome.Stopped, null), (result.Outcome, result.Output));
         await AssertNextRunCompletes();
+    }
+
+    [Fact]
+    public async Task Run_WhenMessageEmittedBeforeEndlessLoop_ThenMessageArrivesBeforeStopAndIsKept()
+    {
+        // Arrange
+        var xslt = _files.Write("main.xsl", """
+            <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+              <xsl:template match="/">
+                <xsl:message>hello</xsl:message>
+                <r><xsl:value-of select="count(for $i in 1 to 2000000000, $j in 1 to 2000000000 return $j)"/></r>
+              </xsl:template>
+            </xsl:stylesheet>
+            """);
+        using var session = new WorkerSession(WorkerPath, _translator);
+        var reported = new TaskCompletionSource<Diagnostic>();
+        session.Reported += diagnostic => reported.TrySetResult(diagnostic);
+        var run = session.Run(xslt, _xml);
+        var message = await reported.Task.WaitAsync(Timeout);
+
+        // Act
+        var result = await Stop(session, run);
+
+        // Assert
+        Assert.Equal(new Diagnostic(DiagnosticKind.Message, xslt, 3, "hello"), message);
+        Assert.Equal(DebugOutcome.Stopped, result.Outcome);
+        Assert.Equal([message], result.Diagnostics);
+    }
+
+    [Fact]
+    public async Task Run_WhenOutputWrittenBeforeEndlessLoop_ThenOutputArrivesBeforeStop()
+    {
+        // Arrange
+        var xslt = _files.Write("main.xsl", """
+            <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+              <xsl:output omit-xml-declaration="yes"/>
+              <xsl:template match="/">
+                <r><before/><xsl:value-of select="count(for $i in 1 to 2000000000, $j in 1 to 2000000000 return $j)"/></r>
+              </xsl:template>
+            </xsl:stylesheet>
+            """);
+        using var session = new WorkerSession(WorkerPath, _translator);
+        var output = new StringBuilder();
+        var arrived = new TaskCompletionSource();
+        session.Written += text =>
+        {
+            output.Append(text);
+            if (output.ToString().Contains("<before/>"))
+                arrived.TrySetResult();
+        };
+        var run = session.Run(xslt, _xml);
+        await arrived.Task.WaitAsync(Timeout);
+
+        // Act
+        var result = await Stop(session, run);
+
+        // Assert
+        Assert.Equal(DebugOutcome.Stopped, result.Outcome);
+        Assert.Equal("<r><before/>", output.ToString());
+    }
+
+    [Fact]
+    public async Task Debug_WhenPausedAfterOutput_ThenOutputHasArrived()
+    {
+        // Arrange
+        var xslt = _files.Write("main.xsl", """
+            <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+              <xsl:output omit-xml-declaration="yes"/>
+              <xsl:template match="/">
+                <before/>
+                <after/>
+              </xsl:template>
+            </xsl:stylesheet>
+            """);
+        using var session = new WorkerSession(WorkerPath, _translator);
+        var output = new StringBuilder();
+        var paused = new TaskCompletionSource<string>();
+        session.Written += text => output.Append(text);
+        session.Paused += _ => paused.TrySetResult(output.ToString());
+
+        // Act
+        _ = session.Debug(xslt, _xml, [new Breakpoint(xslt, 5)]);
+        var outputAtPause = await paused.Task.WaitAsync(Timeout);
+
+        // Assert
+        Assert.Equal("<before/>", outputAtPause);
     }
 
     private static async Task<DebugResult> Stop(WorkerSession session, Task<DebugResult> run)

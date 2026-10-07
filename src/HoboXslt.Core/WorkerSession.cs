@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
 using HoboXslt.Core.Languages;
 
@@ -28,8 +29,17 @@ public sealed class WorkerSession : IDisposable
         _process = Process.Start(start)!;
     }
 
+    private readonly List<Diagnostic> _diagnostics = [];
+    private readonly StringBuilder _output = new();
+
     // Raised on a background thread; the debug run stays paused until a step, continue or stop command arrives.
     public event Action<PauseSnapshot>? Paused;
+
+    // Raised on a background thread as the run reports a diagnostic.
+    public event Action<Diagnostic>? Reported;
+
+    // Raised on a background thread with each piece of output the run writes.
+    public event Action<string>? Written;
 
     public Task<DebugResult> Run(string xsltPath, string xmlPath) => Start(new(xsltPath, xmlPath, null, _translator.Current.Name));
 
@@ -89,13 +99,23 @@ public sealed class WorkerSession : IDisposable
         {
             var message = JsonSerializer.Deserialize<WorkerMessage>(line)!;
             if (message.Result is { } result)
-                return result;
+                return result.Outcome == DebugOutcome.Completed ? result with { Output = _output.ToString() } : result;
             if (message.Paused is { } snapshot)
                 Paused?.Invoke(snapshot);
+            if (message.Diagnostic is { } diagnostic)
+            {
+                _diagnostics.Add(diagnostic);
+                Reported?.Invoke(diagnostic);
+            }
+            if (message.Output is { } text)
+            {
+                _output.Append(text);
+                Written?.Invoke(text);
+            }
         }
 
         return _stopRequested
-            ? new(DebugOutcome.Stopped, null, [], [])
-            : new(DebugOutcome.Failed, null, [new(DiagnosticKind.RuntimeError, null, null, _translator.Of("Run.WorkerEnded"))], []);
+            ? new(DebugOutcome.Stopped, null, _diagnostics, [])
+            : new(DebugOutcome.Failed, null, [.. _diagnostics, new(DiagnosticKind.RuntimeError, null, null, _translator.Of("Run.WorkerEnded"))], []);
     }
 }

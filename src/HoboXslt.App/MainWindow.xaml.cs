@@ -289,11 +289,12 @@ public partial class MainWindow : Window
             return;
 
         using var session = TakeWorker();
+        ShowLive(session);
         _run = session;
         SetIdle(false);
         StopButton.IsEnabled = true;
         SetText(StatusText, "Status.Running");
-        await ShowResult(null, []);
+        ClearResult();
 
         DebugResult result;
         try
@@ -308,13 +309,13 @@ public partial class MainWindow : Window
         _run = null;
         StopButton.IsEnabled = false;
         DiagnosticsTab.IsSelected = true;
-        await ShowResult(result.Output, result.Diagnostics);
-        SetText(StatusText, result.Outcome switch
+        await ShowResult(result);
+        SetEndStatus(result.Outcome switch
         {
             DebugOutcome.Completed => "Status.RunCompleted",
             DebugOutcome.Stopped => "Status.RunStopped",
             _ => "Status.RunFailed"
-        });
+        }, result.Outcome);
         SetIdle(true);
     }
 
@@ -327,6 +328,7 @@ public partial class MainWindow : Window
             margin.SaveLines();
 
         using var session = TakeWorker();
+        ShowLive(session);
         session.Paused += snapshot => Dispatcher.BeginInvoke(() => ShowPause(session, snapshot));
         _session = session;
         SetIdle(false);
@@ -334,7 +336,7 @@ public partial class MainWindow : Window
         OpenXmlButton.IsEnabled = OpenXsltButton.IsEnabled = false;
         StopButton.IsEnabled = true;
         SetText(StatusText, "Status.Debugging");
-        await ShowResult(null, []);
+        ClearResult();
         ShowUnbound([]);
 
         DebugResult result;
@@ -354,15 +356,15 @@ public partial class MainWindow : Window
         OpenXmlButton.IsEnabled = OpenXsltButton.IsEnabled = true;
         VariablesList.ItemsSource = null;
         DiagnosticsTab.IsSelected = true;
-        await ShowResult(result.Output, result.Diagnostics);
+        await ShowResult(result);
         // Breakpoints never reached by a stopped or failed run are not known to be unbound.
         ShowUnbound(result.Outcome == DebugOutcome.Completed ? result.UnboundBreakpoints : []);
-        SetText(StatusText, result.Outcome switch
+        SetEndStatus(result.Outcome switch
         {
             DebugOutcome.Completed => "Status.DebugCompleted",
             DebugOutcome.Stopped => "Status.DebugStopped",
             _ => "Status.DebugFailed"
-        });
+        }, result.Outcome);
         SetIdle(true);
     }
 
@@ -465,21 +467,37 @@ public partial class MainWindow : Window
         return !document.IsModified || document.Save();
     }
 
-    private async Task ShowResult(string? output, IReadOnlyList<Diagnostic> diagnostics)
+    private void ShowLive(WorkerSession session)
     {
-        // Checking a large output takes a while, so it runs in the background.
-        var isXml = output is not null && await Task.Run(() => IsWellFormedXml(output));
-        ShowOutput(output, isXml);
+        session.Reported += diagnostic => Dispatcher.BeginInvoke(() => DiagnosticsList.Items.Add(new DiagnosticRow(diagnostic)));
+        session.Written += text => Dispatcher.BeginInvoke(() => OutputEditor.AppendText(text));
+    }
+
+    private void ClearResult()
+    {
+        OutputEditor.Text = "";
+        OutputEditor.SyntaxHighlighting = null;
+        OutputMeta.Text = "";
         DiagnosticsList.Items.Clear();
-        foreach (var diagnostic in diagnostics)
+    }
+
+    // The live output is already in the editor; only how it is shown is decided when the run ends.
+    private async Task ShowResult(DebugResult result)
+    {
+        var output = OutputEditor.Text;
+        // Checking a large output takes a while, so it runs in the background.
+        var isXml = await Task.Run(() => IsWellFormedXml(output));
+        OutputEditor.SyntaxHighlighting = isXml ? HighlightingManager.Instance.GetDefinition("XML") : null;
+        OutputMeta.Text = result.Output is null ? "" : DateTime.Now.ToString("HH:mm");
+        DiagnosticsList.Items.Clear();
+        foreach (var diagnostic in result.Diagnostics)
             DiagnosticsList.Items.Add(new DiagnosticRow(diagnostic));
     }
 
-    private void ShowOutput(string? output, bool isXml)
+    private void SetEndStatus(string key, DebugOutcome outcome)
     {
-        OutputEditor.Text = output ?? "";
-        OutputMeta.Text = output is null ? "" : DateTime.Now.ToString("HH:mm");
-        OutputEditor.SyntaxHighlighting = isXml ? HighlightingManager.Instance.GetDefinition("XML") : null;
+        var incomplete = outcome != DebugOutcome.Completed && OutputEditor.Document.TextLength > 0;
+        SetText(StatusText, () => StatusText.Text = incomplete ? _translator.Format("Status.IncompleteOutput", _translator.Of(key)) : _translator.Of(key));
     }
 
     private static bool IsWellFormedXml(string text)

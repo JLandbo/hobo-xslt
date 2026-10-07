@@ -80,6 +80,7 @@
     "Status.DebugStopped": "Debug session stopped",
     "Status.DebugFailed": "Debug session failed",
     "Status.Stopping": "Stopping…",
+    "Status.IncompleteOutput": "{0} · output is incomplete",
     "Settings.SaveFailed": "The language choice could not be saved:\n{0}"
   }
 }

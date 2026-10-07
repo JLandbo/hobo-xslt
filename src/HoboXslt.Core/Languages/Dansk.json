@@ -80,6 +80,7 @@
     "Status.DebugStopped": "Debugsession stoppet",
     "Status.DebugFailed": "Debugsession fejlede",
     "Status.Stopping": "Stopper…",
+    "Status.IncompleteOutput": "{0} · output er ufuldstændigt",
     "Settings.SaveFailed": "Sprogvalget kunne ikke gemmes:\n{0}"
   }
 }

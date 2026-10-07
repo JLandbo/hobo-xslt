@@ -67,11 +67,11 @@ Mens Saxon starter, står der **Starter Saxon…** nederst, og **Kør** og **Deb
 1. **Åbn XML-input** med mappe-knappen i ruden **XML** eller **Filer → Åbn XML…**.
 2. **Åbn stylesheetet** med mappe-knappen i ruden **XSLT** eller **Filer → Åbn XSLT…**. Stien til den fil, der bliver kørt, står øverst til højre i vinduet.
 3. **Tryk Kør** (eller **Kør → Kør**).
-4. **Læs resultatet** i **Output**. Klokkeslættet for kørslen står i rudens overskrift. Er resultatet ikke gyldigt XML, vises det som almindelig tekst. `xsl:message` står under **Fejl og beskeder**.
+4. **Læs resultatet** i **Output**. Output og beskeder kommer frem, mens kørslen er i gang. Klokkeslættet for kørslen står i rudens overskrift. Er resultatet ikke gyldigt XML, vises det som almindelig tekst, når kørslen er færdig. `xsl:message` står under **Fejl og beskeder**.
 
-Fejler kørslen, er **Output** tom, og der står **Kørsel fejlede** nederst. Fejlen står under **Fejl og beskeder**.
+Fejler kørslen, bliver det output, der allerede er skrevet, stående i **Output**, og der står **Kørsel fejlede** nederst (med **output er ufuldstændigt**, hvis der er skrevet noget). Fejlen står under **Fejl og beskeder**.
 
-**Stop en kørsel** med stop-knappen (■) eller Shift+F5, fx hvis stylesheetet er gået i en uendelig løkke. Kørslen stopper med det samme, også midt i ét enkelt XPath-udtryk. **Output** er tom, der står **Kørsel stoppet** nederst, og du kan starte en ny kørsel med det samme.
+**Stop en kørsel** med stop-knappen (■) eller Shift+F5, fx hvis stylesheetet er gået i en uendelig løkke. Kørslen stopper med det samme, også midt i ét enkelt XPath-udtryk. Det output og de beskeder, der allerede er skrevet, bliver stående, der står **Kørsel stoppet** nederst (med **output er ufuldstændigt**, hvis der er skrevet noget), og du kan starte en ny kørsel med det samme.
 
 I rudernes overskrift står filnavnet, og et `*` efter navnet betyder, at filen er ændret og ikke gemt. **XML** viser antallet af linjer, og **XSLT** antallet af breakpoints i den valgte fane. Nederst står Saxons version, hvad programmet laver lige nu, markørens linje og kolonne, tegnsæt og linjeskift.
 
@@ -111,7 +111,7 @@ Den første fane i **XSLT** er altid den fil, der bliver kørt. Ekstra faner kom
 
    Den orange linje flytter med for hvert trin, så du kan se, hvor du er. Den forsvinder, når kørslen stopper, bliver færdig eller fejler.
 
-5. **Når kørslen er færdig**, står resultatet i **Output** og beskederne under **Fejl og beskeder**, og der står **Debugsession fuldført** nederst. Trykker du **Stop**, står der **Debugsession stoppet**, og der kommer intet resultat.
+5. **Når kørslen er færdig**, står resultatet i **Output** og beskederne under **Fejl og beskeder**, og der står **Debugsession fuldført** nederst. Output og beskeder kommer frem undervejs, også mens debuggeren holder pause. Trykker du **Stop**, bliver det, der allerede er skrevet, stående, og der står **Debugsession stoppet**.
 
 ![Debuggeren holder pause på linje 8 i den inkluderede moms.xsl: linjen er orange, og Variabler viser $beloeb og $moms som Lokal og $moms-sats og $valuta som Global](docs/images/debug.png)
 
