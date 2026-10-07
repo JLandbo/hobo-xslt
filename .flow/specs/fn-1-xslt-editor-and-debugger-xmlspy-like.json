@@ -1,7 +1,7 @@
 {
   "branch_name": "fn-1-xslt-editor-and-debugger-xmlspy-like",
-  "completion_review_status": "ship",
-  "completion_reviewed_at": "2026-10-07T17:25:47.546544Z",
+  "completion_review_status": "unknown",
+  "completion_reviewed_at": "2026-10-07T17:35:40.109862Z",
   "created_at": "2026-10-07T10:48:01.141210Z",
   "default_impl": null,
   "default_review": null,
@@ -478,5 +478,5 @@
     "mergeBaseTracker": null,
     "url": null
   },
-  "updated_at": "2026-10-07T17:25:47.557794Z"
+  "updated_at": "2026-10-07T17:35:40.109862Z"
 }

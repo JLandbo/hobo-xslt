@@ -31,6 +31,9 @@
 > user (turn 10): "Og at der er en detaljeret og godt beskrevet README fil med billeder."
 > user (turn 10): "\"globale variabler mangler i variabelpanelet\": Hvorfor? tilføj dem hvis muligt?"
 > user (turn 11): "Du har sikkert hardcoded alle tekster i kildekoden. Det skal det ikke være. Alle danske tekster skal komme fra en sprogfil, hvor dansk og engelsk er mulige valg."
+> user (turn 12): "1) Der skal ikon på, ligesom hoboman. 2) CTRL + S skal gemme den fil man står markeret på. XML eller XSLT."
+> user (turn 12): "En almindelig Kør kan ikke stoppes ... Hvorfor kan den ikke stoppes? Uendelig løkke skal IKKE bare fortsætte ? jeg skal sgu da ikke stoppe programmet ?"
+> user (turn 12): "Jeg skal kunne klikke "STOP" altså [] ikon."
 > user (turn 11): "Og så skal den linje debuggeren stopper på gerne markeres med orange baggrundsfarve, så man visuelt også kan se hvis man begynder at kalde next, step in, out, over etc."
 
 ## Goal & Context
@@ -68,7 +71,7 @@ flowchart LR
 - Saxon-HE has no streaming and no schema awareness; both are out of reach without a commercial edition. [inferred]
 - The UI stays responsive while Saxon/IKVM starts up (the first call through IKVM has a noticeable startup cost). [paraphrase]
 - Stylesheets using `xsl:include` / `xsl:import`: breakpoints and error locations resolve to the correct included file, not only the main stylesheet. [paraphrase]
-- A run that never terminates can be stopped from the UI without closing the program. [paraphrase] Stop works through the trace callback; a loop inside a single XPath expression never reaches it and cannot be stopped short of closing the program.
+- A run that never terminates can be stopped from the UI without closing the program. [paraphrase] This holds for Run and Debug alike, including a loop inside a single XPath expression (R22).
 - Run and Debug use the files on disk: dirty documents are saved first, and an unsaved (untitled) stylesheet cannot be run.
 - One run or debug session at a time; Run/Debug are disabled while a session is active, and editors are read-only during a debug session.
 - A failed run clears the output pane; partial output from a mid-run failure is discarded.
@@ -94,6 +97,9 @@ flowchart LR
 - **R17:** `README.md` describes the program in detail in Danish with screenshots: what it does, requirements, install via `install.ps1` and running from source, how to run, debug (breakpoints, stepping, variables), use the XPath evaluator and the error list, the project layout, and build/test commands. Errors: no error surface. [paraphrase]
 - **R18:** No user-facing text is hard-coded in the source: every text the user sees (menus, buttons, tooltips, headers, messages, status texts, dialog texts, the program's own diagnostic texts) comes from a language file, and Danish and English are both available. The language is chosen under Vis → Sprog, applies at once without restart, and is remembered between starts; Danish is the default. Language files follow the user's Hoboman app (one embedded JSON file per language, a missing key falls back to Danish). Saxon's own error messages are shown as Saxon writes them. Errors: an unreadable or missing settings file → Danish, no crash. [inferred: menu placement, persistence location, live switch]
 - **R19:** While a debug run is paused, the paused line has an orange background in the editor that shows it; the highlight moves with every step (into, over, out) and continue, and disappears when the run stops, completes or fails. Errors: no location for the paused instruction → no highlight, session continues. [paraphrase]
+- **R20:** The program has its own icon like the user's Hoboman app: the exe, the window/taskbar and the Start menu shortcut show it, and the README header shows it as an image. The icon uses the brand mark from the approved mockup (</> on the blue rounded square). Errors: no error surface. [paraphrase]
+- **R21:** Ctrl+S saves the file of the editor that has focus: the XML input, or the selected XSLT tab. With focus elsewhere it saves the editor that last had focus. An untitled document opens the save dialog. Errors: a failed save shows the existing save error message; nothing else changes. [paraphrase]
+- **R22:** The Stop button (■) and Shift+F5 stop any running transformation at once — a plain Run as well as a Debug session, running or paused, including an infinite loop inside a single XPath expression — without closing the program; the program stays responsive and a new Run or Debug can start right after. Errors: a stopped run shows no output and a status saying it was stopped; no partial output. [paraphrase]
 
 ## Early proof point
 
@@ -113,7 +119,7 @@ Task fn-1-xslt-editor-and-debugger-xmlspy-like.1 validates the core approach (Sa
 
 Saxon-HE via IKVM was chosen over SaxonCS because SaxonCS is only sold as Enterprise Edition with a license, while HE is free (MPL 2.0) and supports XSLT 3.0. The trade-off: IKVM-compiled Saxon is not officially supported by Saxonica on .NET. WPF was chosen over Avalonia; the program targets Windows only. The XPath evaluator was chosen as an addition. HTML preview was first chosen and then dropped because the transformation output is XML. [paraphrase]
 
-Stop relies on the trace callback rather than running Saxon in a child process; the child-process design would stop every loop but adds inter-process plumbing for output, diagnostics and the debugger.
+The first design stopped only through the trace callback, so a plain Run and a loop inside one XPath expression could not be stopped; the user rejected that limit (R22).
 
 ## Quick commands
 
@@ -142,3 +148,6 @@ dotnet test tests/HoboXslt.Core.Tests
 | R17 | `README.md` describes the program in detail in Danish with screenshots: what it does, requirements, install via `install.ps1` and running from source, how to run, debug (breakpoints, stepping, variables), use the XPath evaluator and the error list, the project layout, and build/test commands. Errors: no error surface. | fn-1-xslt-editor-and-debugger-xmlspy-like.9 | — |
 | R18 | No user-facing text is hard-coded in the source: every text the user sees (menus, buttons, tooltips, headers, messages, status texts, dialog texts, the program's own diagnostic texts) comes from a language file, and Danish and English are both available. The language is chosen under Vis → Sprog, applies at once without restart, and is remembered between starts; Danish is the default. Language files follow the user's Hoboman app (one embedded JSON file per language, a missing key falls back to Danish). Saxon's own error messages are shown as Saxon writes them. Errors: an unreadable or missing settings file → Danish, no crash. | fn-1-xslt-editor-and-debugger-xmlspy-like.11 | — |
 | R19 | While a debug run is paused, the paused line has an orange background in the editor that shows it; the highlight moves with every step (into, over, out) and continue, and disappears when the run stops, completes or fails. Errors: no location for the paused instruction → no highlight, session continues. | fn-1-xslt-editor-and-debugger-xmlspy-like.10 | — |
+| R20 | The program has its own icon like the user's Hoboman app: the exe, the window/taskbar and the Start menu shortcut show it, and the README header shows it as an image. The icon uses the brand mark from the approved mockup (</> on the blue rounded square). Errors: no error surface. | fn-1-xslt-editor-and-debugger-xmlspy-like.12 | — |
+| R21 | Ctrl+S saves the file of the editor that has focus: the XML input, or the selected XSLT tab. With focus elsewhere it saves the editor that last had focus. An untitled document opens the save dialog. Errors: a failed save shows the existing save error message; nothing else changes. | fn-1-xslt-editor-and-debugger-xmlspy-like.13 | — |
+| R22 | The Stop button (■) and Shift+F5 stop any running transformation at once — a plain Run as well as a Debug session, running or paused, including an infinite loop inside a single XPath expression — without closing the program; the program stays responsive and a new Run or Debug can start right after. Errors: a stopped run shows no output and a status saying it was stopped; no partial output. | fn-1-xslt-editor-and-debugger-xmlspy-like.14 | — |
