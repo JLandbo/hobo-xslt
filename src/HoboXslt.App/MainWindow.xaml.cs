@@ -23,7 +23,6 @@ public partial class MainWindow : Window
 {
     private const string XmlFilter = "Document.XmlFilter";
     private const string XsltFilter = "Document.XsltFilter";
-    private const double PaneMinWidth = 150;
 
     private readonly Translator _translator;
     private readonly EditorDocument _xml;
@@ -31,6 +30,7 @@ public partial class MainWindow : Window
     private readonly BreakpointStore _breakpoints = new();
     private readonly Size _defaultSize;
     private readonly PaneLayout _defaultPanes;
+    private readonly double _paneMinWidth;
     // Texts set from code keep their setters, so a language switch can set them again.
     private readonly Dictionary<object, Action> _texts = [];
     private XPathEvaluator? _xpath;
@@ -54,9 +54,10 @@ public partial class MainWindow : Window
         XsltWrapButton.IsChecked = settings.XsltWordWrap;
         OutputWrapButton.IsChecked = settings.OutputWordWrap;
         _defaultSize = new(Width, Height);
+        _paneMinWidth = XmlColumn.MinWidth;
         _defaultPanes = new(XmlColumn.Width.Value, XsltColumn.Width.Value, OutputColumn.Width.Value, BottomRow.Height.Value, false, false);
         // A layout saved on a bigger screen would not fit, so the default layout is used instead.
-        if (settings.Layout is { } layout && layout.Width <= SystemParameters.WorkArea.Width && layout.Height <= SystemParameters.WorkArea.Height)
+        if (settings.Layout is { } layout && layout.IsValid() && layout.Width <= SystemParameters.WorkArea.Width && layout.Height <= SystemParameters.WorkArea.Height)
         {
             (Width, Height) = (layout.Width, layout.Height);
             if (layout.Edit is { } edit)
@@ -251,17 +252,18 @@ public partial class MainWindow : Window
         UpdateLayout();
         // The XSLT pane holds the width of a hidden pane, so it is stored as if all panes were shown.
         var xslt = XsltColumn.ActualWidth - (_hiddenXmlWidth - XmlRail.Width ?? 0) - (_hiddenOutputWidth - OutputRail.Width ?? 0);
-        return new(_hiddenXmlWidth ?? XmlColumn.ActualWidth, Math.Max(xslt, PaneMinWidth), _hiddenOutputWidth ?? OutputColumn.ActualWidth,
+        return new(_hiddenXmlWidth ?? XmlColumn.ActualWidth, Math.Max(xslt, _paneMinWidth), _hiddenOutputWidth ?? OutputColumn.ActualWidth,
             BottomRow.ActualHeight, _hiddenXmlWidth is not null, _hiddenOutputWidth is not null);
     }
 
     private void ApplyPanes(PaneLayout panes)
     {
         var xslt = panes.XsltWidth + (panes.XmlHidden ? panes.XmlWidth - XmlRail.Width : 0) + (panes.OutputHidden ? panes.OutputWidth - OutputRail.Width : 0);
-        XsltColumn.Width = new(xslt, GridUnitType.Star);
+        XsltColumn.Width = new(Math.Max(xslt, 0), GridUnitType.Star);
         _hiddenXmlWidth = SetPane(XmlColumn, XmlCard, XmlRail, XmlSplitter, panes.XmlWidth, panes.XmlHidden);
         _hiddenOutputWidth = SetPane(OutputColumn, OutputCard, OutputRail, OutputSplitter, panes.OutputWidth, panes.OutputHidden);
-        BottomRow.Height = new(panes.BottomHeight);
+        // A bottom pane saved in a maximized window could push the editors out of a smaller one.
+        BottomRow.Height = new(Math.Min(panes.BottomHeight, Math.Max(ActualHeight, Height) / 2));
     }
 
     private void SwitchToDebugPanes()
@@ -292,14 +294,14 @@ public partial class MainWindow : Window
         var other = column == XmlColumn ? OutputColumn : XmlColumn;
         if (other.Width.IsStar)
             other.Width = new(other.ActualWidth, GridUnitType.Star);
-        XsltColumn.Width = new(Math.Max(XsltColumn.ActualWidth + (hide ? width - rail.Width : rail.Width - width), PaneMinWidth), GridUnitType.Star);
+        XsltColumn.Width = new(Math.Max(XsltColumn.ActualWidth + (hide ? width - rail.Width : rail.Width - width), _paneMinWidth), GridUnitType.Star);
         return SetPane(column, card, rail, splitter, width, hide);
     }
 
     // Returns the width a hidden pane comes back with, or null when the pane is shown.
-    private static double? SetPane(ColumnDefinition column, UIElement card, UIElement rail, UIElement splitter, double width, bool hidden)
+    private double? SetPane(ColumnDefinition column, UIElement card, UIElement rail, UIElement splitter, double width, bool hidden)
     {
-        (column.MinWidth, column.Width) = hidden ? (0, GridLength.Auto) : (PaneMinWidth, new GridLength(width, GridUnitType.Star));
+        (column.MinWidth, column.Width) = hidden ? (0, GridLength.Auto) : (_paneMinWidth, new GridLength(width, GridUnitType.Star));
         card.Visibility = splitter.Visibility = hidden ? Visibility.Collapsed : Visibility.Visible;
         rail.Visibility = hidden ? Visibility.Visible : Visibility.Collapsed;
         return hidden ? width : null;

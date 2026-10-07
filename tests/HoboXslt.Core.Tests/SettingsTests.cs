@@ -34,4 +34,17 @@ public sealed class SettingsTests : IDisposable
         // Assert
         Assert.Equal(layout, loaded);
     }
+
+    [Fact]
+    public void IsValid_WhenAPaneWidthIsNegative_ThenFalse()
+    {
+        // Arrange
+        var layout = new Layout(1400, 800, new PaneLayout(300, 520, 310, 240, false, false), new PaneLayout(-1, 520, 310, 240, false, false));
+
+        // Act
+        var valid = layout.IsValid();
+
+        // Assert
+        Assert.False(valid);
+    }
 }
