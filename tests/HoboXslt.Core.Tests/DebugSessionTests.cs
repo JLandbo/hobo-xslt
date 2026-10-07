@@ -23,6 +23,12 @@ public sealed class DebugSessionTests : IDisposable
         </xsl:stylesheet>
         """;
 
+    private const string OrderXml = """
+        <order>
+          <line qty="2">a</line>
+        </order>
+        """;
+
     private readonly TempFiles _files = new();
     private readonly BlockingCollection<PauseSnapshot> _pauses = [];
 
@@ -383,9 +389,64 @@ public sealed class DebugSessionTests : IDisposable
         Assert.Equal(DebugOutcome.Stopped, result.Outcome);
     }
 
-    private DebugSession CreateSession(string xslt, params Breakpoint[] breakpoints)
+    [Theory]
+    [InlineData("order/line")]
+    [InlineData("order/line/@qty")]
+    public void Paused_WhenInTemplateMatchingLine_ThenContextIsLineElement(string select)
     {
-        var session = new DebugSession(xslt, _files.Write("input.xml", "<root/>"), breakpoints, new Translator(Translation.Danish));
+        // Arrange
+        var xslt = _files.Write("main.xsl", $"""
+            <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+              <xsl:template match="/">
+                <xsl:apply-templates select="{select}"/>
+              </xsl:template>
+              <xsl:template match="line | @qty">
+                <n/>
+              </xsl:template>
+            </xsl:stylesheet>
+            """);
+        using var session = CreateSession(xslt, OrderXml, new Breakpoint(xslt, 6));
+
+        // Act
+        session.Start();
+        var pause = NextPause();
+
+        // Assert
+        Assert.Equal(new ContextLocation(2, 17), pause.Context);
+    }
+
+    [Theory]
+    [InlineData("1 to 2")]
+    [InlineData(".")]
+    [InlineData("doc('other.xml')/*")]
+    public void Paused_WhenContextIsNotAnElementOfTheInput_ThenNoContext(string select)
+    {
+        // Arrange
+        _files.Write("other.xml", "<other/>");
+        var xslt = _files.Write("main.xsl", $"""
+            <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+              <xsl:template match="/">
+                <xsl:for-each select="{select}">
+                  <n/>
+                </xsl:for-each>
+              </xsl:template>
+            </xsl:stylesheet>
+            """);
+        using var session = CreateSession(xslt, OrderXml, new Breakpoint(xslt, 4));
+
+        // Act
+        session.Start();
+        var pause = NextPause();
+
+        // Assert
+        Assert.Null(pause.Context);
+    }
+
+    private DebugSession CreateSession(string xslt, params Breakpoint[] breakpoints) => CreateSession(xslt, "<root/>", breakpoints);
+
+    private DebugSession CreateSession(string xslt, string xml, params Breakpoint[] breakpoints)
+    {
+        var session = new DebugSession(xslt, _files.Write("input.xml", xml), breakpoints, new Translator(Translation.Danish));
         session.Paused += _pauses.Add;
         return session;
     }

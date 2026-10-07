@@ -46,7 +46,8 @@ public partial class MainWindow : Window
         SetUpEditor(XsltEditor);
         SetUpEditor(OutputEditor);
         XsltEditor.TextArea.LeftMargins.Insert(0, NewBreakpointMargin(_xslt));
-        AddPausedLineRenderer(XsltEditor);
+        AddPausedLineRenderer(XsltEditor, "PausedLineBrush", fullWidth: true);
+        AddPausedLineRenderer(XmlEditor, "ContextNodeBrush", fullWidth: false);
         XmlEditor.TextChanged += (_, _) => UpdateXmlMeta();
         XsltTabs.SelectionChanged += (_, _) => UpdateXsltMeta();
         UpdateXmlMeta();
@@ -135,10 +136,10 @@ public partial class MainWindow : Window
         return margin;
     }
 
-    private void AddPausedLineRenderer(TextEditor editor)
+    private void AddPausedLineRenderer(TextEditor editor, string brushKey, bool fullWidth)
     {
         var view = editor.TextArea.TextView;
-        view.BackgroundRenderers.Add(new PausedLineRenderer(view, (Brush)FindResource("PausedLineBrush")));
+        view.BackgroundRenderers.Add(new PausedLineRenderer(view, (Brush)FindResource(brushKey), fullWidth));
     }
 
     private void UpdateEditorStatusFor(TextEditor editor)
@@ -390,8 +391,26 @@ public partial class MainWindow : Window
         SetText(StatusText, "Status.DebugPaused");
         VariablesList.ItemsSource = snapshot.Variables;
         VariablesTab.IsSelected = true;
-        if (ShowXsltLine(snapshot.File, snapshot.Line) is { Content: TextEditor editor })
-            PausedLineRendererOf(editor).Show(snapshot.Line);
+        if (ShowXsltLine(snapshot.File, snapshot.Line) is { Content: TextEditor editor } && snapshot.Line <= editor.Document.LineCount)
+            PausedLineRendererOf(editor).Show(editor.Document.GetLineByNumber(snapshot.Line));
+
+        if (snapshot.Context is { } context && StartTag(XmlEditor.Document, context) is { } tag)
+        {
+            PausedLineRendererOf(XmlEditor).Show(tag);
+            var start = XmlEditor.Document.GetLocation(tag.StartOffset);
+            XmlEditor.ScrollTo(start.Line, start.Column);
+        }
+    }
+
+    // Saxon reports the position just after the start tag, which may span several lines.
+    private static TextSegment? StartTag(TextDocument document, ContextLocation context)
+    {
+        if (context.Line > document.LineCount)
+            return null;
+
+        var end = document.GetOffset(context.Line, context.Column);
+        var start = document.LastIndexOf('<', 0, end);
+        return start < 0 ? null : new TextSegment { StartOffset = start, EndOffset = end };
     }
 
     private void Continue_Click(object sender, RoutedEventArgs e) => Resume(session => session.Continue());
@@ -431,7 +450,7 @@ public partial class MainWindow : Window
         PauseBadge.Visibility = paused ? Visibility.Visible : Visibility.Collapsed;
         if (!paused)
         {
-            foreach (var editor in XsltEditors)
+            foreach (var editor in XsltEditors.Append(XmlEditor))
                 PausedLineRendererOf(editor).Clear();
         }
     }
@@ -546,7 +565,7 @@ public partial class MainWindow : Window
         SetUpEditor(editor);
         var margin = NewBreakpointMargin(document);
         editor.TextArea.LeftMargins.Insert(0, margin);
-        AddPausedLineRenderer(editor);
+        AddPausedLineRenderer(editor, "PausedLineBrush", fullWidth: true);
         if (!document.Load(file))
             return null;
 

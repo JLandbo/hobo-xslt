@@ -1,36 +1,34 @@
 using System.Windows;
 using System.Windows.Media;
+using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Rendering;
 
 namespace HoboXslt.App;
 
-public sealed class PausedLineRenderer(TextView view, Brush brush) : IBackgroundRenderer
+public sealed class PausedLineRenderer(TextView view, Brush brush, bool fullWidth) : IBackgroundRenderer
 {
-    private int? _line;
+    private ISegment? _range;
 
     public KnownLayer Layer => KnownLayer.Background;
 
-    public void Show(int line)
+    public void Show(ISegment range)
     {
-        _line = line;
+        _range = range;
         view.InvalidateLayer(Layer);
     }
 
     public void Clear()
     {
-        _line = null;
+        _range = null;
         view.InvalidateLayer(Layer);
     }
 
     public void Draw(TextView textView, DrawingContext drawingContext)
     {
-        if (_line is not { } line || line < 1 || line > textView.Document.LineCount)
+        if (_range is not { } range || range.EndOffset > textView.Document.TextLength)
             return;
 
-        if (textView.GetVisualLine(line) is not { } visualLine)
-            return;
-
-        var top = visualLine.VisualTop - textView.ScrollOffset.Y;
-        drawingContext.DrawRectangle(brush, null, new Rect(0, top, textView.ActualWidth, visualLine.Height));
+        foreach (var rect in BackgroundGeometryBuilder.GetRectsForSegment(textView, range))
+            drawingContext.DrawRectangle(brush, null, fullWidth ? new Rect(0, rect.Top, textView.ActualWidth, rect.Height) : rect);
     }
 }

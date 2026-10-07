@@ -9,7 +9,7 @@ using net.sf.saxon.trace;
 
 namespace HoboXslt.Core;
 
-internal sealed class DebugTraceListener(DebugSession session, IReadOnlySet<Breakpoint> breakpoints, Translator translator) : TraceListener
+internal sealed class DebugTraceListener(DebugSession session, IReadOnlySet<Breakpoint> breakpoints, string xmlFile, Translator translator) : TraceListener
 {
     private readonly HashSet<Breakpoint> _bound = [];
     private DebugCommand _mode = DebugCommand.Continue;
@@ -59,7 +59,7 @@ internal sealed class DebugTraceListener(DebugSession session, IReadOnlySet<Brea
         if (!(hit && _pausedAt is null) && !IsStepTarget(depth))
             return;
 
-        _mode = session.WaitForCommand(new(file, line, ReadVariables(context)));
+        _mode = session.WaitForCommand(new(file, line, ReadVariables(context), ReadContext(context)));
         _modeDepth = depth;
         _pausedAt = position;
         _pausedDepth = _depth;
@@ -89,6 +89,21 @@ internal sealed class DebugTraceListener(DebugSession session, IReadOnlySet<Brea
         DebugCommand.StepOut => depth < _modeDepth,
         _ => false
     };
+
+    // An attribute or text node has no start tag of its own, so its parent element stands for it.
+    private ContextLocation? ReadContext(XPathContext context)
+    {
+        if (context.getContextItem() is not NodeInfo node)
+            return null;
+
+        var element = node.getNodeKind() == net.sf.saxon.type.Type.ELEMENT ? node : node.getParent();
+        if (element is null || element.getNodeKind() != net.sf.saxon.type.Type.ELEMENT || element.getLineNumber() <= 0)
+            return null;
+
+        return FileKey.Comparer.Equals(FileKey.FromSystemId(element.getSystemId()), xmlFile)
+            ? new(element.getLineNumber(), element.getColumnNumber())
+            : null;
+    }
 
     private List<Variable> ReadVariables(XPathContext context)
     {
