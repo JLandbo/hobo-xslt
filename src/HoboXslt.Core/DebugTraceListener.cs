@@ -3,6 +3,7 @@ using net.sf.saxon.expr;
 using net.sf.saxon.expr.instruct;
 using net.sf.saxon.lib;
 using net.sf.saxon.om;
+using net.sf.saxon.style;
 using net.sf.saxon.trace;
 
 namespace HoboXslt.Core;
@@ -97,7 +98,24 @@ internal sealed class DebugTraceListener(DebugSession session, IReadOnlySet<Brea
         for (var slot = 0; names is not null && slot < Math.Min(names.size(), values.Length); slot++)
         {
             if (names.get(slot) is StructuredQName name && values[slot] is { } value)
-                variables.Add(new(name.getDisplayName(), ReadValue(value)));
+                variables.Add(new(name.getDisplayName(), ReadValue(value), VariableScope.Local));
+        }
+
+        // Globals are evaluated lazily; reading the bindery directly never forces an evaluation, so one not yet evaluated has no value.
+        var controller = context.getController();
+        var package = (StylesheetPackage)controller.getExecutable().getTopLevelPackage();
+        var globals = package.getComponentIndex().values().toArray()
+            .Select(component => ((Component)component).getActor())
+            .OfType<GlobalVariable>()
+            .OrderBy(global => global.getVariableQName().getDisplayName(), StringComparer.Ordinal);
+        foreach (var global in globals)
+        {
+            // Saxon inlines references to a constant global variable, so it never reaches the bindery.
+            var value = controller.getBindery(global.getPackageData()).getGlobalVariableValue(global)
+                ?? (global is not GlobalParam && global.getBody() is ComponentTracer tracer && tracer.getChild() is Literal literal
+                    ? literal.getGroundedValue()
+                    : null);
+            variables.Add(new(global.getVariableQName().getDisplayName(), value is null ? null : ReadValue(value), VariableScope.Global));
         }
         return variables;
     }

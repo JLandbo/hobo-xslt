@@ -253,7 +253,7 @@ public sealed class DebugSessionTests : IDisposable
         var pause = NextPause();
 
         // Assert
-        Assert.Contains(new Variable("lit", "5"), pause.Variables);
+        Assert.Contains(new Variable("lit", "5", VariableScope.Local), pause.Variables);
     }
 
     [Fact]
@@ -268,8 +268,8 @@ public sealed class DebugSessionTests : IDisposable
         var pause = NextPause();
 
         // Assert
-        Assert.Contains(new Variable("p", "42"), pause.Variables);
-        Assert.Contains(new Variable("v", "84"), pause.Variables);
+        Assert.Contains(new Variable("p", "42", VariableScope.Local), pause.Variables);
+        Assert.Contains(new Variable("v", "84", VariableScope.Local), pause.Variables);
     }
 
     [Fact]
@@ -291,7 +291,59 @@ public sealed class DebugSessionTests : IDisposable
         var pause = NextPause();
 
         // Assert
-        Assert.Contains(new Variable("f", null), pause.Variables);
+        Assert.Contains(new Variable("f", null, VariableScope.Local), pause.Variables);
+    }
+
+    [Fact]
+    public void Paused_WhenGlobalsEvaluated_ThenSnapshotListsLocalsThenGlobals()
+    {
+        // Arrange
+        var xslt = _files.Write("main.xsl", """
+            <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+              <xsl:param name="gp" select="'pv'"/>
+              <xsl:variable name="gv" select="7"/>
+              <xsl:template match="/">
+                <xsl:variable name="lv" select="$gv + string-length($gp)"/>
+                <out><xsl:value-of select="$lv"/></out>
+              </xsl:template>
+            </xsl:stylesheet>
+            """);
+        using var session = CreateSession(xslt, new Breakpoint(xslt, 6));
+
+        // Act
+        session.Start();
+        var pause = NextPause();
+
+        // Assert
+        Assert.Equal(
+            [new("lv", "9", VariableScope.Local), new("gp", "pv", VariableScope.Global), new("gv", "7", VariableScope.Global)],
+            pause.Variables);
+    }
+
+    [Fact]
+    public async Task Paused_WhenGlobalNotYetEvaluated_ThenValueIsUnavailableAndRunCompletes()
+    {
+        // Arrange
+        var xslt = _files.Write("main.xsl", """
+            <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+              <xsl:variable name="later" select="name(/*)"/>
+              <xsl:template match="/">
+                <before/>
+                <out><xsl:value-of select="$later"/></out>
+              </xsl:template>
+            </xsl:stylesheet>
+            """);
+        using var session = CreateSession(xslt, new Breakpoint(xslt, 4));
+        var run = session.Start();
+        var pause = NextPause();
+
+        // Act
+        session.Continue();
+        var result = await run.WaitAsync(Timeout);
+
+        // Assert
+        Assert.Contains(new Variable("later", null, VariableScope.Global), pause.Variables);
+        Assert.Equal(DebugOutcome.Completed, result.Outcome);
     }
 
     [Fact]

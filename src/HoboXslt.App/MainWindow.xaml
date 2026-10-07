@@ -335,10 +335,28 @@
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="VÆRDI" Width="900">
+                                <GridViewColumn Header="VÆRDI" Width="780">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Style="{StaticResource CodeCell}" Text="{Binding Value, TargetNullValue=utilgængelig}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="SCOPE" Width="120">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock FontSize="12" Foreground="{StaticResource MutedBrush}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock" BasedOn="{StaticResource Cell}">
+                                                        <Setter Property="Text" Value="Lokal" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Scope}" Value="Global">
+                                                                <Setter Property="Text" Value="Global" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
