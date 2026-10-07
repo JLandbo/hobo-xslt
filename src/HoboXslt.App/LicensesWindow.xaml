@@ -1,0 +1,104 @@
+<Window x:Class="HoboXslt.App.LicensesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{DynamicResource Licenses.Title}" SizeToContent="WidthAndHeight" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        Background="{StaticResource ChromeBrush}" Foreground="{StaticResource InkBrush}"
+        FontFamily="{StaticResource UiFont}" FontSize="13">
+    <Window.Resources>
+        <Style x:Key="Header" TargetType="TextBlock">
+            <Setter Property="Margin" Value="12,6" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Foreground" Value="{StaticResource FaintBrush}" />
+        </Style>
+        <Style x:Key="RowLine" TargetType="Border">
+            <Setter Property="Grid.ColumnSpan" Value="4" />
+            <Setter Property="BorderBrush" Value="{StaticResource LineSoftBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
+        <Style TargetType="Hyperlink">
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+        </Style>
+    </Window.Resources>
+
+    <StackPanel Margin="12">
+        <Border Style="{StaticResource Card}">
+            <DockPanel>
+                <Border DockPanel.Dock="Top" Style="{StaticResource PaneHead}">
+                    <TextBlock Text="{DynamicResource Licenses.Components}" FontWeight="Medium" VerticalAlignment="Center" />
+                </Border>
+                <Grid Hyperlink.RequestNavigate="Link_RequestNavigate">
+                    <Grid.Resources>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Margin" Value="12,6" />
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Style="{StaticResource RowLine}" />
+                    <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource Header}" Text="{DynamicResource Licenses.Component}" />
+                    <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource Header}" Text="{DynamicResource Licenses.Version}" />
+                    <TextBlock Grid.Row="0" Grid.Column="2" Style="{StaticResource Header}" Text="{DynamicResource Licenses.License}" />
+                    <TextBlock Grid.Row="0" Grid.Column="3" Style="{StaticResource Header}" Text="{DynamicResource Licenses.Link}" />
+
+                    <Border Grid.Row="1" Style="{StaticResource RowLine}" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Saxon-HE" FontWeight="Medium" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="12.10" />
+                    <TextBlock Grid.Row="1" Grid.Column="2" Text="Mozilla Public License 2.0" />
+                    <TextBlock Grid.Row="1" Grid.Column="3"><Hyperlink NavigateUri="https://github.com/Saxonica/Saxon-HE">https://github.com/Saxonica/Saxon-HE</Hyperlink></TextBlock>
+
+                    <Border Grid.Row="2" Style="{StaticResource RowLine}" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="IKVM" FontWeight="Medium" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="8.15" />
+                    <TextBlock Grid.Row="2" Grid.Column="2">
+                        <Run Text="zlib License" /><LineBreak /><Run Text="{DynamicResource Licenses.OpenJdk}" /><Run Text=": GPL v2 with Classpath Exception" />
+                    </TextBlock>
+                    <TextBlock Grid.Row="2" Grid.Column="3"><Hyperlink NavigateUri="https://github.com/ikvmnet/ikvm">https://github.com/ikvmnet/ikvm</Hyperlink></TextBlock>
+
+                    <Border Grid.Row="3" Style="{StaticResource RowLine}" />
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="IKVM.ByteCode" FontWeight="Medium" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Text="9.3" />
+                    <TextBlock Grid.Row="3" Grid.Column="2" Text="MIT" />
+                    <TextBlock Grid.Row="3" Grid.Column="3"><Hyperlink NavigateUri="https://github.com/ikvmnet/ikvm-bytecode">https://github.com/ikvmnet/ikvm-bytecode</Hyperlink></TextBlock>
+
+                    <Border Grid.Row="4" Style="{StaticResource RowLine}" />
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="XML Resolver" FontWeight="Medium" />
+                    <TextBlock Grid.Row="4" Grid.Column="1" Text="5.3" />
+                    <TextBlock Grid.Row="4" Grid.Column="2" Text="Apache License 2.0" />
+                    <TextBlock Grid.Row="4" Grid.Column="3"><Hyperlink NavigateUri="https://codeberg.org/xmlresolver/xmlresolver">https://codeberg.org/xmlresolver/xmlresolver</Hyperlink></TextBlock>
+
+                    <Border Grid.Row="5" Style="{StaticResource RowLine}" />
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="AvalonEdit" FontWeight="Medium" />
+                    <TextBlock Grid.Row="5" Grid.Column="1" Text="6.3" />
+                    <TextBlock Grid.Row="5" Grid.Column="2" Text="MIT" />
+                    <TextBlock Grid.Row="5" Grid.Column="3"><Hyperlink NavigateUri="https://github.com/icsharpcode/AvalonEdit">https://github.com/icsharpcode/AvalonEdit</Hyperlink></TextBlock>
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text=".NET / WPF" FontWeight="Medium" />
+                    <TextBlock Grid.Row="6" Grid.Column="1" Text="10" />
+                    <TextBlock Grid.Row="6" Grid.Column="2" Text="MIT" />
+                    <TextBlock Grid.Row="6" Grid.Column="3">
+                        <Hyperlink NavigateUri="https://github.com/dotnet/runtime">https://github.com/dotnet/runtime</Hyperlink><LineBreak /><Hyperlink NavigateUri="https://github.com/dotnet/wpf">https://github.com/dotnet/wpf</Hyperlink>
+                    </TextBlock>
+                </Grid>
+            </DockPanel>
+        </Border>
+        <Button Content="{DynamicResource Licenses.Close}" Style="{StaticResource LabeledToolButton}" HorizontalAlignment="Right"
+                Margin="0,12,0,0" IsDefault="True" IsCancel="True" />
+    </StackPanel>
+</Window>

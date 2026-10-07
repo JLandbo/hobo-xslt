@@ -283,6 +283,8 @@ public partial class MainWindow : Window
         RunFileText.Text = _xslt.FilePath;
     }
 
+    private void Licenses_Click(object sender, RoutedEventArgs e) => new LicensesWindow(_translator) { Owner = this }.ShowDialog();
+
     private async void Run_Click(object sender, RoutedEventArgs e)
     {
         if (!ReadyToStart())

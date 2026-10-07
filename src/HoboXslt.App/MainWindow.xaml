@@ -148,7 +148,9 @@
                         <MenuItem Header="{DynamicResource Debug.StepOut}" InputGestureText="Shift+F11" IsEnabled="{Binding IsEnabled, ElementName=StepOutButton}" Click="StepOut_Click" />
                         <MenuItem Header="{DynamicResource Debug.Stop}" InputGestureText="Shift+F5" IsEnabled="{Binding IsEnabled, ElementName=StopButton}" Click="Stop_Click" />
                     </MenuItem>
-                    <MenuItem Header="{DynamicResource Menu.Help}" Style="{StaticResource MenuHeader}" />
+                    <MenuItem Header="{DynamicResource Menu.Help}" Style="{StaticResource MenuHeader}">
+                        <MenuItem Header="{DynamicResource Menu.Licenses}" Click="Licenses_Click" />
+                    </MenuItem>
                 </Menu>
                 <TextBlock x:Name="RunFileText" Grid.Column="2" Margin="16,0,0,0" FontSize="12" Foreground="{StaticResource FaintBrush}"
                            HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />

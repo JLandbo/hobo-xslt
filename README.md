@@ -21,6 +21,7 @@ hobo-xslt samler det, du skal bruge, når et XSLT-stylesheet ikke gør, som du f
 - **XPath** – prøv et XPath-udtryk af på dit XML og se resultatet med det samme.
 - **Dansk eller engelsk** – vælg sprog under **Vis → Sprog**.
 - **Én exe-fil** – `install.ps1` laver én exe og lægger en genvej i Start-menuen.
+- **Licenser** – **Hjælp → Licenser…** viser de komponenter, programmet bruger, med version, licens og link til projektet.
 
 ![Hovedvinduet efter en kørsel: ordrer.xml til venstre, ordrer.xsl i midten, fakturaer i Output og to xsl:message-beskeder nederst](docs/images/koersel.png)
 
@@ -172,7 +173,7 @@ Teksterne ligger i `src/HoboXslt.Core/Languages/Dansk.json` og `English.json` og
 - Ekstra resultater fra `xsl:result-document` vises ikke.
 - Der er intet sted at give stylesheetets parametre en værdi. De bruger deres standardværdi.
 - Kun én kørsel ad gangen.
-- Kun Windows og kun lyst tema. Menuerne **Rediger** og **Hjælp** er tomme.
+- Kun Windows og kun lyst tema. Menuen **Rediger** er tom.
 
 ## Projektet
 
