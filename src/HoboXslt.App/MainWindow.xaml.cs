@@ -118,6 +118,12 @@ public partial class MainWindow : Window
                 numbers.Margin = new(0, 0, 7, 0);
         }
 
+        if (editor != OutputEditor)
+        {
+            EditorFolding.Install(editor);
+            editor.TextArea.TextView.BackgroundRenderers.Add(new IndentGuideRenderer((Brush)FindResource("FaintBrush")));
+        }
+
         editor.TextArea.GotKeyboardFocus += (_, _) =>
         {
             _activeEditor = editor;
