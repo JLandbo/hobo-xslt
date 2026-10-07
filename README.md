@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="src/HoboXslt.App/HoboXslt.png" width="160" alt="Appikon for hobo-xslt">
+</p>
+
 <h1 align="center">hobo-xslt</h1>
 
 <p align="center">
