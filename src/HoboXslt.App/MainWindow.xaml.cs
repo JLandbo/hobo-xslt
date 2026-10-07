@@ -23,6 +23,7 @@ public partial class MainWindow : Window
 {
     private const string XmlFilter = "Document.XmlFilter";
     private const string XsltFilter = "Document.XsltFilter";
+    private const double PaneMinWidth = 150;
 
     private readonly Translator _translator;
     private readonly EditorDocument _xml;
@@ -37,6 +38,8 @@ public partial class MainWindow : Window
     private WorkerSession? _spareWorker;
     private TextEditor? _activeEditor;
     private Button? _saveButton;
+    private double? _hiddenXmlWidth;
+    private double? _hiddenOutputWidth;
 
     public MainWindow(Translator translator, Settings settings)
     {
@@ -241,8 +244,34 @@ public partial class MainWindow : Window
         BottomRow.Height = new(layout.BottomHeight);
     }
 
+    private void ToggleXml_Click(object sender, RoutedEventArgs e) =>
+        _hiddenXmlWidth = TogglePane(XmlColumn, XmlCard, XmlRail, XmlSplitter, _hiddenXmlWidth);
+
+    private void ToggleOutput_Click(object sender, RoutedEventArgs e) =>
+        _hiddenOutputWidth = TogglePane(OutputColumn, OutputCard, OutputRail, OutputSplitter, _hiddenOutputWidth);
+
+    // Returns the width the pane had before it was hidden, or null once it is shown again.
+    private double? TogglePane(ColumnDefinition column, UIElement card, FrameworkElement rail, UIElement splitter, double? hiddenWidth)
+    {
+        var hide = hiddenWidth is null;
+        var width = hiddenWidth ?? column.ActualWidth;
+        // The pane's width goes to the XSLT pane and back, so the other pane keeps its size.
+        var other = column == XmlColumn ? OutputColumn : XmlColumn;
+        if (other.Width.IsStar)
+            other.Width = new(other.ActualWidth, GridUnitType.Star);
+        XsltColumn.Width = new(Math.Max(XsltColumn.ActualWidth + (hide ? width - rail.Width : rail.Width - width), PaneMinWidth), GridUnitType.Star);
+        (column.MinWidth, column.Width) = hide ? (0, GridLength.Auto) : (PaneMinWidth, new GridLength(width, GridUnitType.Star));
+        card.Visibility = splitter.Visibility = hide ? Visibility.Collapsed : Visibility.Visible;
+        rail.Visibility = hide ? Visibility.Visible : Visibility.Collapsed;
+        return hide ? width : null;
+    }
+
     private void ResetLayout_Click(object sender, RoutedEventArgs e)
     {
+        if (_hiddenXmlWidth is not null)
+            ToggleXml_Click(sender, e);
+        if (_hiddenOutputWidth is not null)
+            ToggleOutput_Click(sender, e);
         WindowState = WindowState.Normal;
         ApplyLayout(_defaultLayout);
         var area = SystemParameters.WorkArea;
@@ -257,7 +286,8 @@ public partial class MainWindow : Window
         var bounds = RestoreBounds;
         App.SaveSettings(_translator, settings => settings with
         {
-            Layout = new(bounds.Width, bounds.Height, XmlColumn.ActualWidth, XsltColumn.ActualWidth, OutputColumn.ActualWidth, BottomRow.ActualHeight),
+            Layout = new(bounds.Width, bounds.Height, _hiddenXmlWidth ?? XmlColumn.ActualWidth, XsltColumn.ActualWidth,
+                _hiddenOutputWidth ?? OutputColumn.ActualWidth, BottomRow.ActualHeight),
         });
     }
 

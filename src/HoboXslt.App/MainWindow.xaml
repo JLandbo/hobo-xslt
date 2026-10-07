@@ -35,6 +35,38 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="PaneRail" TargetType="Button">
+            <Setter Property="Width" Value="28" />
+            <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+            <Setter Property="Background" Value="{StaticResource PanelBrush}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Top" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource LineSoftBrush}" />
+                    <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="RailText" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource CodeFont}" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,4,0,0" />
+            <Setter Property="LayoutTransform">
+                <Setter.Value>
+                    <RotateTransform Angle="90" />
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style x:Key="CloseCaptionButton" TargetType="Button" BasedOn="{StaticResource CaptionButton}">
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
@@ -68,6 +100,16 @@
                         <RectangleGeometry Rect="8,13,8,6" RadiusX="1" RadiusY="1" />
                     </Path.Data>
                 </Path>
+            </Canvas>
+        </Viewbox>
+        <Viewbox x:Key="LeftArrowIcon" x:Shared="False" Style="{StaticResource Icon}">
+            <Canvas Width="24" Height="24">
+                <Path Style="{StaticResource IconFill}" Data="M15.5,6 V18 L8.5,12 Z" />
+            </Canvas>
+        </Viewbox>
+        <Viewbox x:Key="RightArrowIcon" x:Shared="False" Style="{StaticResource Icon}">
+            <Canvas Width="24" Height="24">
+                <Path Style="{StaticResource IconFill}" Data="M8.5,6 V18 L15.5,12 Z" />
             </Canvas>
         </Viewbox>
         <Viewbox x:Key="LayoutIcon" x:Shared="False" Style="{StaticResource Icon}">
@@ -296,10 +338,19 @@
                 <ColumnDefinition x:Name="OutputColumn" Width="*" MinWidth="150" />
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Style="{StaticResource Card}">
+            <Button x:Name="XmlRail" Grid.Column="0" Style="{StaticResource PaneRail}" Visibility="Collapsed" Click="ToggleXml_Click"
+                    ToolTip="{DynamicResource Pane.ShowXml}" AutomationProperties.Name="{DynamicResource Pane.ShowXml}">
+                <StackPanel>
+                    <ContentControl Height="33" Content="{StaticResource RightArrowIcon}" Focusable="False" />
+                    <TextBlock Text="XML" Style="{StaticResource RailText}" />
+                </StackPanel>
+            </Button>
+            <Border x:Name="XmlCard" Grid.Column="0" Style="{StaticResource Card}">
                 <DockPanel>
                     <Border DockPanel.Dock="Top" Style="{StaticResource PaneHead}">
                         <DockPanel>
+                            <Button DockPanel.Dock="Left" Style="{StaticResource PaneButton}" Margin="-4,0,6,0" Click="ToggleXml_Click"
+                                    ToolTip="{DynamicResource Pane.HideXml}" AutomationProperties.Name="{DynamicResource Pane.HideXml}" Content="{StaticResource LeftArrowIcon}" />
                             <Button x:Name="SaveXmlButton" DockPanel.Dock="Right" Style="{StaticResource PaneButton}" ToolTip="{DynamicResource Pane.Save}" AutomationProperties.Name="{DynamicResource Pane.Save}"
                                     Click="SaveXml_Click" Content="{StaticResource SaveIcon}" />
                             <Button x:Name="OpenXmlButton" DockPanel.Dock="Right" Style="{StaticResource PaneButton}" ToolTip="{DynamicResource Pane.Open}" AutomationProperties.Name="{DynamicResource Pane.Open}"
@@ -316,7 +367,7 @@
                 </DockPanel>
             </Border>
 
-            <GridSplitter Grid.Column="1" Style="{StaticResource ColumnSplitter}" />
+            <GridSplitter x:Name="XmlSplitter" Grid.Column="1" Style="{StaticResource ColumnSplitter}" />
 
             <Border Grid.Column="2" Style="{StaticResource Card}">
                 <Grid>
@@ -356,12 +407,21 @@
                 </Grid>
             </Border>
 
-            <GridSplitter Grid.Column="3" Style="{StaticResource ColumnSplitter}" />
+            <GridSplitter x:Name="OutputSplitter" Grid.Column="3" Style="{StaticResource ColumnSplitter}" />
 
-            <Border Grid.Column="4" Style="{StaticResource Card}">
+            <Button x:Name="OutputRail" Grid.Column="4" Style="{StaticResource PaneRail}" Visibility="Collapsed" Click="ToggleOutput_Click"
+                    ToolTip="{DynamicResource Pane.ShowOutput}" AutomationProperties.Name="{DynamicResource Pane.ShowOutput}">
+                <StackPanel>
+                    <ContentControl Height="33" Content="{StaticResource LeftArrowIcon}" Focusable="False" />
+                    <TextBlock Text="Output" Style="{StaticResource RailText}" />
+                </StackPanel>
+            </Button>
+            <Border x:Name="OutputCard" Grid.Column="4" Style="{StaticResource Card}">
                 <DockPanel>
                     <Border DockPanel.Dock="Top" Style="{StaticResource PaneHead}">
                         <DockPanel>
+                            <Button DockPanel.Dock="Right" Style="{StaticResource PaneButton}" Margin="4,0,-4,0" Click="ToggleOutput_Click"
+                                    ToolTip="{DynamicResource Pane.HideOutput}" AutomationProperties.Name="{DynamicResource Pane.HideOutput}" Content="{StaticResource RightArrowIcon}" />
                             <ToggleButton x:Name="OutputWrapButton" DockPanel.Dock="Right" Style="{StaticResource PaneToggle}" ToolTip="{DynamicResource Pane.WordWrap}" AutomationProperties.Name="{DynamicResource Pane.WordWrap}"
                                           Click="WordWrap_Click" Content="{StaticResource WrapIcon}" />
                             <TextBlock x:Name="OutputMeta" DockPanel.Dock="Right" Style="{StaticResource Meta}" />
