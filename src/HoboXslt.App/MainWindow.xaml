@@ -58,9 +58,16 @@
                 <DockPanel DockPanel.Dock="Top" Margin="6,4">
                     <Button DockPanel.Dock="Right" Content="Gem" Style="{StaticResource PaneButton}" Click="SaveXslt_Click" />
                     <Button DockPanel.Dock="Right" Content="Åbn…" Style="{StaticResource PaneButton}" Click="OpenXslt_Click" />
-                    <TextBlock x:Name="XsltTitle" Style="{StaticResource PaneTitle}" />
+                    <TextBlock Text="XSLT" Style="{StaticResource PaneTitle}" />
                 </DockPanel>
-                <avalonEdit:TextEditor x:Name="XsltEditor" SyntaxHighlighting="XML" />
+                <TabControl x:Name="XsltTabs">
+                    <TabItem x:Name="XsltMainTab">
+                        <TabItem.Header>
+                            <TextBlock x:Name="XsltTitle" />
+                        </TabItem.Header>
+                        <avalonEdit:TextEditor x:Name="XsltEditor" SyntaxHighlighting="XML" />
+                    </TabItem>
+                </TabControl>
             </DockPanel>
 
             <GridSplitter Grid.Column="3" HorizontalAlignment="Stretch" ResizeBehavior="PreviousAndNext" />

@@ -11,10 +11,10 @@ public sealed class EditorDocument
 {
     private readonly TextEditor _editor;
     private readonly TextBlock _title;
-    private readonly string _label;
+    private readonly string? _label;
     private readonly string _filter;
 
-    public EditorDocument(TextEditor editor, TextBlock title, string label, string filter)
+    public EditorDocument(TextEditor editor, TextBlock title, string? label, string filter)
     {
         _editor = editor;
         _title = title;
@@ -34,6 +34,9 @@ public sealed class EditorDocument
 
     public void Open()
     {
+        if (IsModified && !SaveBeforeReplace())
+            return;
+
         var dialog = new OpenFileDialog { Filter = _filter };
         if (dialog.ShowDialog() == true)
             Load(dialog.FileName);
@@ -89,10 +92,14 @@ public sealed class EditorDocument
         _editor.Focus();
     }
 
+    private bool SaveBeforeReplace() =>
+        MessageBox.Show("Dokumentet er ændret og skal gemmes, før en anden fil åbnes.\nGem nu?", "hobo-xslt",
+            MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK && Save();
+
     private void UpdateTitle()
     {
         var name = FilePath is null ? "ikke gemt" : Path.GetFileName(FilePath);
-        _title.Text = $"{_label} · {name}{(_editor.IsModified ? " *" : "")}";
+        _title.Text = $"{(_label is null ? "" : $"{_label} · ")}{name}{(_editor.IsModified ? " *" : "")}";
         _title.ToolTip = FilePath;
     }
 

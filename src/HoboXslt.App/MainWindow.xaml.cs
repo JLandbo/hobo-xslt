@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using System.Xml;
 using HoboXslt.Core;
+using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Highlighting;
 
 namespace HoboXslt.App;
@@ -22,8 +23,11 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         _xml = new(XmlEditor, XmlTitle, "XML-input", XmlFilter);
-        _xslt = new(XsltEditor, XsltTitle, "XSLT", XsltFilter);
+        _xslt = new(XsltEditor, XsltTitle, null, XsltFilter);
+        XsltMainTab.Tag = _xslt;
     }
+
+    private IEnumerable<EditorDocument> XsltDocuments => XsltTabs.Items.Cast<TabItem>().Select(Document);
 
     private async void Window_Loaded(object sender, RoutedEventArgs e)
     {
@@ -45,13 +49,17 @@ public partial class MainWindow : Window
 
     private void SaveXml_Click(object sender, RoutedEventArgs e) => _xml.Save();
 
-    private void OpenXslt_Click(object sender, RoutedEventArgs e) => _xslt.Open();
+    private void OpenXslt_Click(object sender, RoutedEventArgs e)
+    {
+        XsltTabs.SelectedItem = XsltMainTab;
+        _xslt.Open();
+    }
 
-    private void SaveXslt_Click(object sender, RoutedEventArgs e) => _xslt.Save();
+    private void SaveXslt_Click(object sender, RoutedEventArgs e) => Document((TabItem)XsltTabs.SelectedItem).Save();
 
     private async void Run_Click(object sender, RoutedEventArgs e)
     {
-        if (_runner is not { } runner || !ReadyForRun(_xslt, "XSLT-stylesheetet") || !ReadyForRun(_xml, "XML-input"))
+        if (_runner is not { } runner || !XsltDocuments.All(d => ReadyForRun(d, "XSLT-stylesheetet")) || !ReadyForRun(_xml, "XML-input"))
             return;
 
         var (xsltPath, xmlPath) = (_xslt.FilePath!, _xml.FilePath!);
@@ -116,11 +124,38 @@ public partial class MainWindow : Window
         if (((ListViewItem)sender).Content is not DiagnosticRow { Diagnostic: { File: { } file, Line: { } line } })
             return;
 
-        var document = _xml.IsAt(file) ? _xml : _xslt;
-        if (!document.IsAt(file) && !document.Load(file))
+        if (_xml.IsAt(file))
+            GoTo(_xml, line);
+        else
+            ShowXsltLine(file, line);
+    }
+
+    public void ShowXsltLine(string file, int line)
+    {
+        var tab = XsltTabs.Items.Cast<TabItem>().FirstOrDefault(t => Document(t).IsAt(file)) ?? OpenXsltTab(file);
+        if (tab is null)
             return;
 
-        // Deferred: the ListView takes focus back after the double-click handler returns.
-        Dispatcher.BeginInvoke(() => document.GoTo(line), DispatcherPriority.Input);
+        XsltTabs.SelectedItem = tab;
+        GoTo(Document(tab), line);
     }
+
+    private TabItem? OpenXsltTab(string file)
+    {
+        var editor = new TextEditor { SyntaxHighlighting = HighlightingManager.Instance.GetDefinition("XML") };
+        var title = new TextBlock();
+        var document = new EditorDocument(editor, title, null, XsltFilter);
+        if (!document.Load(file))
+            return null;
+
+        var tab = new TabItem { Header = title, Content = editor, Tag = document };
+        XsltTabs.Items.Add(tab);
+        return tab;
+    }
+
+    // Deferred: the ListView takes focus back after the double-click handler returns.
+    private void GoTo(EditorDocument document, int line) =>
+        Dispatcher.BeginInvoke(() => document.GoTo(line), DispatcherPriority.Input);
+
+    private static EditorDocument Document(TabItem tab) => (EditorDocument)tab.Tag;
 }
