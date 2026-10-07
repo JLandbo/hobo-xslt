@@ -3,8 +3,8 @@
 <SyntaxDefinition name="XSLT" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
   <Color name="Punctuation" foreground="#8A92A2" />
   <Color name="Comment" foreground="#8A92A2" />
-  <Color name="XslElement" foreground="#1D5CBD" />
-  <Color name="Element" foreground="#0E7490" />
+  <Color name="XslElement" foreground="#9B1C1C" />
+  <Color name="Element" foreground="#1D5CBD" />
   <Color name="AttributeName" foreground="#8645AD" />
   <Color name="AttributeValue" foreground="#2B7A4B" />
   <Color name="Entity" foreground="#B0520C" />
