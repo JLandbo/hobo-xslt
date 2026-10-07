@@ -39,6 +39,7 @@ public partial class MainWindow : Window
         SetUpEditor(XsltEditor);
         SetUpEditor(OutputEditor);
         XsltEditor.TextArea.LeftMargins.Insert(0, NewBreakpointMargin(_xslt));
+        AddPausedLineRenderer(XsltEditor);
         XmlEditor.TextChanged += (_, _) => UpdateXmlMeta();
         XsltTabs.SelectionChanged += (_, _) => UpdateXsltMeta();
         UpdateXmlMeta();
@@ -90,6 +91,12 @@ public partial class MainWindow : Window
         var margin = new BreakpointMargin(document, _breakpoints) { IsEnabled = _session is null };
         margin.Changed += (_, _) => UpdateXsltMeta();
         return margin;
+    }
+
+    private void AddPausedLineRenderer(TextEditor editor)
+    {
+        var view = editor.TextArea.TextView;
+        view.BackgroundRenderers.Add(new PausedLineRenderer(view, (Brush)FindResource("PausedLineBrush")));
     }
 
     private void UpdateEditorStatusFor(TextEditor editor)
@@ -311,7 +318,8 @@ public partial class MainWindow : Window
         StatusText.Text = "Debugsession aktiv · editorer er skrivebeskyttede";
         VariablesList.ItemsSource = snapshot.Variables;
         VariablesTab.IsSelected = true;
-        ShowXsltLine(snapshot.File, snapshot.Line);
+        if (ShowXsltLine(snapshot.File, snapshot.Line) is { Content: TextEditor editor })
+            PausedLineRendererOf(editor).Show(snapshot.Line);
     }
 
     private void Continue_Click(object sender, RoutedEventArgs e) => Resume(session => session.Continue());
@@ -349,6 +357,11 @@ public partial class MainWindow : Window
     {
         ContinueButton.IsEnabled = StepIntoButton.IsEnabled = StepOverButton.IsEnabled = StepOutButton.IsEnabled = paused;
         PauseBadge.Visibility = paused ? Visibility.Visible : Visibility.Collapsed;
+        if (!paused)
+        {
+            foreach (var editor in XsltEditors)
+                PausedLineRendererOf(editor).Clear();
+        }
     }
 
     private void SetEditorsReadOnly(bool readOnly)
@@ -426,14 +439,15 @@ public partial class MainWindow : Window
             ShowXsltLine(file, line);
     }
 
-    public void ShowXsltLine(string file, int line)
+    public TabItem? ShowXsltLine(string file, int line)
     {
         var tab = XsltTabs.Items.Cast<TabItem>().FirstOrDefault(t => Document(t).IsAt(file)) ?? OpenXsltTab(file);
         if (tab is null)
-            return;
+            return null;
 
         XsltTabs.SelectedItem = tab;
         GoTo(Document(tab), line);
+        return tab;
     }
 
     private TabItem? OpenXsltTab(string file)
@@ -444,6 +458,7 @@ public partial class MainWindow : Window
         SetUpEditor(editor);
         var margin = NewBreakpointMargin(document);
         editor.TextArea.LeftMargins.Insert(0, margin);
+        AddPausedLineRenderer(editor);
         if (!document.Load(file))
             return null;
 
@@ -460,4 +475,7 @@ public partial class MainWindow : Window
     private static EditorDocument Document(TabItem tab) => (EditorDocument)tab.Tag;
 
     private static BreakpointMargin BreakpointMarginOf(TextEditor editor) => editor.TextArea.LeftMargins.OfType<BreakpointMargin>().Single();
+
+    private static PausedLineRenderer PausedLineRendererOf(TextEditor editor) =>
+        editor.TextArea.TextView.BackgroundRenderers.OfType<PausedLineRenderer>().Single();
 }

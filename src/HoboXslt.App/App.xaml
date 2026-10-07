@@ -16,6 +16,7 @@
         <SolidColorBrush x:Key="BreakpointBrush" Color="#D33B3B" />
         <SolidColorBrush x:Key="PauseBackgroundBrush" Color="#FBEFD4" />
         <SolidColorBrush x:Key="PauseInkBrush" Color="#7F5200" />
+        <SolidColorBrush x:Key="PausedLineBrush" Color="#FCD9A5" />
         <SolidColorBrush x:Key="OkBrush" Color="#2B7A4B" />
         <SolidColorBrush x:Key="TagBrush" Color="#1D5CBD" />
         <SolidColorBrush x:Key="AttributeBrush" Color="#8645AD" />
