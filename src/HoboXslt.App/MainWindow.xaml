@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
         Title="hobo-xslt" Height="800" Width="1400"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded" Closed="Window_Closed" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
         <Style TargetType="avalonEdit:TextEditor">
             <Setter Property="FontFamily" Value="Consolas" />
@@ -33,6 +33,13 @@
         <StackPanel Grid.Row="0">
             <ToolBar>
                 <Button x:Name="RunButton" Content="Kør" IsEnabled="False" Click="Run_Click" />
+                <Button x:Name="DebugButton" Content="Debug" ToolTip="Start debugging (F5)" IsEnabled="False" Click="Debug_Click" />
+                <Separator />
+                <Button x:Name="ContinueButton" Content="Fortsæt" ToolTip="Fortsæt (F5)" IsEnabled="False" Click="Continue_Click" />
+                <Button x:Name="StepIntoButton" Content="Step into" ToolTip="Step into (F11)" IsEnabled="False" Click="StepInto_Click" />
+                <Button x:Name="StepOverButton" Content="Step over" ToolTip="Step over (F10)" IsEnabled="False" Click="StepOver_Click" />
+                <Button x:Name="StepOutButton" Content="Step out" ToolTip="Step out (Shift+F11)" IsEnabled="False" Click="StepOut_Click" />
+                <Button x:Name="StopButton" Content="Stop" ToolTip="Stop (Shift+F5)" IsEnabled="False" Click="Stop_Click" />
             </ToolBar>
 
             <Grid Margin="6,4">
@@ -97,7 +104,7 @@
         <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" />
 
         <TabControl Grid.Row="3">
-            <TabItem Header="Fejl og beskeder">
+            <TabItem x:Name="DiagnosticsTab" Header="Fejl og beskeder">
                 <ListView x:Name="DiagnosticsList">
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
@@ -109,6 +116,16 @@
                             <GridViewColumn Header="Placering" Width="160" DisplayMemberBinding="{Binding Location}" />
                             <GridViewColumn Header="Type" Width="120" DisplayMemberBinding="{Binding Kind}" />
                             <GridViewColumn Header="Besked" Width="900" DisplayMemberBinding="{Binding Text}" />
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </TabItem>
+            <TabItem x:Name="VariablesTab" Header="Variabler">
+                <ListView x:Name="VariablesList">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Navn" Width="200" DisplayMemberBinding="{Binding Name, StringFormat='${0}'}" />
+                            <GridViewColumn Header="Værdi" Width="900" DisplayMemberBinding="{Binding Value, TargetNullValue=utilgængelig}" />
                         </GridView>
                     </ListView.View>
                 </ListView>

@@ -32,14 +32,13 @@ public sealed class EditorDocument
     public bool IsAt(string file) =>
         FilePath is not null && string.Equals(FilePath, Path.GetFullPath(file), StringComparison.OrdinalIgnoreCase);
 
-    public void Open()
+    public bool Open()
     {
         if (IsModified && !SaveBeforeReplace())
-            return;
+            return false;
 
         var dialog = new OpenFileDialog { Filter = _filter };
-        if (dialog.ShowDialog() == true)
-            Load(dialog.FileName);
+        return dialog.ShowDialog() == true && Load(dialog.FileName);
     }
 
     public bool Load(string path)
