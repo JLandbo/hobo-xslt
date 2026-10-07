@@ -1,0 +1,99 @@
+<Window x:Class="HoboXslt.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+        Title="hobo-xslt" Height="800" Width="1400"
+        Loaded="Window_Loaded">
+    <Window.Resources>
+        <Style TargetType="avalonEdit:TextEditor">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="ShowLineNumbers" Value="True" />
+        </Style>
+        <Style x:Key="PaneTitle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+        <Style x:Key="PaneButton" TargetType="Button">
+            <Setter Property="Padding" Value="8,1" />
+            <Setter Property="Margin" Value="4,0,0,0" />
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" MinHeight="100" />
+            <RowDefinition Height="6" />
+            <RowDefinition Height="180" MinHeight="60" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ToolBar Grid.Row="0">
+            <Button x:Name="RunButton" Content="Kør" IsEnabled="False" Click="Run_Click" />
+        </ToolBar>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="150" />
+                <ColumnDefinition Width="6" />
+                <ColumnDefinition Width="1.3*" MinWidth="150" />
+                <ColumnDefinition Width="6" />
+                <ColumnDefinition Width="*" MinWidth="150" />
+            </Grid.ColumnDefinitions>
+
+            <DockPanel Grid.Column="0">
+                <DockPanel DockPanel.Dock="Top" Margin="6,4">
+                    <Button DockPanel.Dock="Right" Content="Gem" Style="{StaticResource PaneButton}" Click="SaveXml_Click" />
+                    <Button DockPanel.Dock="Right" Content="Åbn…" Style="{StaticResource PaneButton}" Click="OpenXml_Click" />
+                    <TextBlock x:Name="XmlTitle" Style="{StaticResource PaneTitle}" />
+                </DockPanel>
+                <avalonEdit:TextEditor x:Name="XmlEditor" SyntaxHighlighting="XML" />
+            </DockPanel>
+
+            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" ResizeBehavior="PreviousAndNext" />
+
+            <DockPanel Grid.Column="2">
+                <DockPanel DockPanel.Dock="Top" Margin="6,4">
+                    <Button DockPanel.Dock="Right" Content="Gem" Style="{StaticResource PaneButton}" Click="SaveXslt_Click" />
+                    <Button DockPanel.Dock="Right" Content="Åbn…" Style="{StaticResource PaneButton}" Click="OpenXslt_Click" />
+                    <TextBlock x:Name="XsltTitle" Style="{StaticResource PaneTitle}" />
+                </DockPanel>
+                <avalonEdit:TextEditor x:Name="XsltEditor" SyntaxHighlighting="XML" />
+            </DockPanel>
+
+            <GridSplitter Grid.Column="3" HorizontalAlignment="Stretch" ResizeBehavior="PreviousAndNext" />
+
+            <DockPanel Grid.Column="4">
+                <TextBlock DockPanel.Dock="Top" Margin="6,4" Padding="0,2" Text="Output" Style="{StaticResource PaneTitle}" />
+                <avalonEdit:TextEditor x:Name="OutputEditor" IsReadOnly="True" />
+            </DockPanel>
+        </Grid>
+
+        <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" />
+
+        <TabControl Grid.Row="3">
+            <TabItem Header="Fejl og beskeder">
+                <ListView x:Name="DiagnosticsList">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <EventSetter Event="MouseDoubleClick" Handler="Diagnostic_DoubleClick" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Placering" Width="160" DisplayMemberBinding="{Binding Location}" />
+                            <GridViewColumn Header="Type" Width="120" DisplayMemberBinding="{Binding Kind}" />
+                            <GridViewColumn Header="Besked" Width="900" DisplayMemberBinding="{Binding Text}" />
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </TabItem>
+        </TabControl>
+
+        <StatusBar Grid.Row="4">
+            <TextBlock x:Name="StatusText" Text="Starter Saxon…" />
+        </StatusBar>
+    </Grid>
+</Window>

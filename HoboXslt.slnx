@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/HoboXslt.App/HoboXslt.App.csproj" />
     <Project Path="src/HoboXslt.Core/HoboXslt.Core.csproj" />
   </Folder>
   <Folder Name="/tests/">
