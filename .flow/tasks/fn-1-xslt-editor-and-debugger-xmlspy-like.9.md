@@ -25,8 +25,8 @@ Write `README.md` in Danish with real screenshots of the running app, in the sty
 - [ ] TBD
 
 ## Done summary
-TBD
-
+Blocked:
+Paused by the user's new requests: README screenshots and texts wait for tasks .10 (orange paused line) and .11 (language files). Partial handover in .flow/tmp/handover; old screenshots saved in the session scratchpad.
 ## Evidence
 - Commits:
 - Tests:
