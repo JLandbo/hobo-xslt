@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-10-07T13:05:59.326184Z",
+  "depends_on": [
+    "fn-1-xslt-editor-and-debugger-xmlspy-like.1"
+  ],
+  "id": "fn-1-xslt-editor-and-debugger-xmlspy-like.2",
+  "priority": null,
+  "spec": "fn-1-xslt-editor-and-debugger-xmlspy-like",
+  "spec_path": ".flow/tasks/fn-1-xslt-editor-and-debugger-xmlspy-like.2.md",
+  "status": "todo",
+  "title": "Debug engine: breakpoints, stepping, stop, variables",
+  "updated_at": "2026-10-07T13:05:59.326184Z"
+}

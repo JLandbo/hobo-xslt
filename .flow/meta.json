@@ -1,0 +1,22 @@
+{
+    "next_spec":  1,
+    "schema_version":  3,
+    "setup":  {
+                  "block_hashes":  {
+                                       "AGENTS.md":  {
+                                                         "FLOW-NEXT":  "e65659e58713966cd8a91e7a13a246a08d641169f0205ee3f8c9e41a91b5452f"
+                                                     },
+                                       "CLAUDE.md":  {
+                                                         "FLOW-NEXT":  "e65659e58713966cd8a91e7a13a246a08d641169f0205ee3f8c9e41a91b5452f"
+                                                     }
+                                   },
+                  "optional_answers":  {
+                                           "spec":  "Skip",
+                                           "docs":  "Both",
+                                           "criteria":  "Scaffold",
+                                           "star":  "No thanks"
+                                       }
+              },
+    "setup_version":  "8.1.0",
+    "setup_date":  "2026-10-07T10:45:56Z"
+}

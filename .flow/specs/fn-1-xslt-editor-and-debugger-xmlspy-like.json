@@ -1,0 +1,24 @@
+{
+  "branch_name": "fn-1-xslt-editor-and-debugger-xmlspy-like",
+  "created_at": "2026-10-07T10:48:01.141210Z",
+  "depends_on_epics": [],
+  "id": "fn-1-xslt-editor-and-debugger-xmlspy-like",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-1-xslt-editor-and-debugger-xmlspy-like.md",
+  "status": "open",
+  "title": "XSLT editor and debugger (XmlSpy-like)",
+  "tracker": {
+    "baseHashFlow": null,
+    "baseHashTracker": null,
+    "depRelations": [],
+    "id": null,
+    "identifier": null,
+    "lastSyncedAt": null,
+    "mergeBaseFlow": null,
+    "mergeBaseTracker": null,
+    "url": null
+  },
+  "updated_at": "2026-10-07T13:06:11.166862Z"
+}
