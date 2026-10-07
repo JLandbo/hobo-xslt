@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-10-07T22:25:03.612242Z",
+  "depends_on": [
+    "fn-1-xslt-editor-and-debugger-xmlspy-like.26"
+  ],
+  "id": "fn-1-xslt-editor-and-debugger-xmlspy-like.27",
+  "priority": null,
+  "spec": "fn-1-xslt-editor-and-debugger-xmlspy-like",
+  "spec_path": ".flow/tasks/fn-1-xslt-editor-and-debugger-xmlspy-like.27.md",
+  "status": "todo",
+  "title": "Reset layout button",
+  "updated_at": "2026-10-07T22:25:03.612242Z"
+}
