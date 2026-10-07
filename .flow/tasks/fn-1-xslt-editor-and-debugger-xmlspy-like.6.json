@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-10-07T15:04:28.667466Z",
+  "depends_on": [
+    "fn-1-xslt-editor-and-debugger-xmlspy-like.5"
+  ],
+  "id": "fn-1-xslt-editor-and-debugger-xmlspy-like.6",
+  "priority": null,
+  "spec": "fn-1-xslt-editor-and-debugger-xmlspy-like",
+  "spec_path": ".flow/tasks/fn-1-xslt-editor-and-debugger-xmlspy-like.6.md",
+  "status": "todo",
+  "title": "Apply the approved mockup design to the main window",
+  "updated_at": "2026-10-07T15:04:28.667466Z"
+}

@@ -24,6 +24,9 @@
 > user (turn 7): "Det går an på hvad du mener med anden fil. Anden XSLT? Så skal den kræve man gemmer. Anden XML? Så skal den kræve man gemmer HVIS der er rettet i den. Output behøver man ikke gemme."
 > user (turn 8): "Den skal ikke skifte til at vise moms.xsl."
 > user (turn 8, selected): "Faner i XSLT-ruden (Recommended)"
+> user (turn 9): "Vi er enige i at programmet ikke ligner det design du viste mig? Det skal den."
+> user (turn 9, selected): "Kun lyst"
+> user (turn 9, selected): "Alle seks menuer"
 
 ## Goal & Context
 
@@ -79,6 +82,7 @@ flowchart LR
 - **R9:** The user can evaluate an XPath expression against the input XML and see the result. Errors: invalid XPath or missing input → error message, no crash. [paraphrase]
 - **R11:** The output pane shows the transformation result as XML with XML syntax highlighting. Errors: output that is not well-formed XML is shown as plain text, no crash. [paraphrase]
 - **R12:** When a debug run pauses (breakpoint or step), the editor opens the file holding the paused instruction, including an included/imported stylesheet, and moves the caret to the paused line. Errors: no location for the paused instruction → caret unchanged, session continues. [paraphrase]
+- **R13:** The main window looks like the approved mockup (`docs/design/main-window-mockup.html`), light theme only: title bar with brand mark, six menus (Filer, Rediger, Vis, Kør, Debug, Hjælp) holding the app's existing commands (a menu with no existing command stays empty) and the run file's path; toolbar with icon buttons, labeled Kør and Debug, debug step buttons and a pause badge naming file and line while paused; XPath bar below the toolbar; the three panes (XML input, XSLT, Output) as bordered cards with a type badge, file name and meta text in the header; draggable splitters between the panes and above the bottom panel; bottom panel with the tabs Variabler and Fejl og beskeder; status bar with engine (Saxon-HE 12 · XSLT 3.0), session state, caret position, encoding and line endings; the mockup's light colors, syntax colors and spacing, with Segoe UI as UI font and Cascadia Mono as code font. Errors: no error surface beyond R1-R12. [paraphrase]
 
 ## Early proof point
 
@@ -92,6 +96,7 @@ Task fn-1-xslt-editor-and-debugger-xmlspy-like.1 validates the core approach (Sa
 - No stylesheet parameters UI. [paraphrase]
 - Secondary results from `xsl:result-document` are not shown.
 - Breakpoints are not persisted across program restarts.
+- No dark theme. [paraphrase]
 
 ## Decision Context
 

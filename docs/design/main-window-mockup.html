@@ -1,0 +1,385 @@
+<title>hobo-xslt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one desktop window filling the viewport — menu, toolbar, XPath bar, three resizable panes, resizable variables panel, status bar */
+:root {
+  --ground: #e6e9ee; --chrome: #f4f5f8; --panel: #ffffff; --line: #d5dae2; --line-soft: #e7eaf0;
+  --ink: #1c2230; --muted: #5a6475; --faint: #8a92a2;
+  --accent: #2a58c4; --accent-soft: #e2e9fb; --on-accent: #ffffff;
+  --bp: #d33b3b; --pause-bg: #fbefd4; --pause-ink: #7f5200; --ok: #2b7a4b;
+  --tag: #1d5cbd; --attr: #8645ad; --val: #2b7a4b; --pi: #8a92a2; --expr: #b0520c;
+  --font-ui: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-code: "JetBrains Mono", Consolas, "Cascadia Mono", monospace;
+  --bottom-h: 180px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --ground: #0f1217; --chrome: #181c23; --panel: #13161c; --line: #2a303a; --line-soft: #20252d;
+  --ink: #e2e6ed; --muted: #9ba3b1; --faint: #677083;
+  --accent: #7ea3ff; --accent-soft: #1d2840; --on-accent: #0f1217;
+  --bp: #ff6767; --pause-bg: #3a2d10; --pause-ink: #f2c46a; --ok: #86cf9a;
+  --tag: #7fb0ff; --attr: #d1a5f2; --val: #8fd19e; --pi: #677083; --expr: #f0a866;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --ground: #0f1217; --chrome: #181c23; --panel: #13161c; --line: #2a303a; --line-soft: #20252d;
+  --ink: #e2e6ed; --muted: #9ba3b1; --faint: #677083;
+  --accent: #7ea3ff; --accent-soft: #1d2840; --on-accent: #0f1217;
+  --bp: #ff6767; --pause-bg: #3a2d10; --pause-ink: #f2c46a; --ok: #86cf9a;
+  --tag: #7fb0ff; --attr: #d1a5f2; --val: #8fd19e; --pi: #677083; --expr: #f0a866;
+  color-scheme: dark }
+
+html, body { height: 100%; }
+body { background: var(--ground); color: var(--ink); font-family: var(--font-ui); font-size: 13px; padding: 16px; box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; }
+button { font: inherit; color: inherit; }
+
+.app { height: 100%; display: grid; grid-template-rows: auto auto auto minmax(0, 1fr) 6px var(--bottom-h) auto;
+  background: var(--chrome); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+
+.titlebar { display: flex; align-items: center; gap: 16px; padding: 0 12px; height: 34px; border-bottom: 1px solid var(--line-soft); }
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 600; letter-spacing: .01em; }
+.brand-mark { width: 18px; height: 18px; border-radius: 4px; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; font: 600 10px var(--font-code); }
+.menu { display: flex; gap: 2px; }
+.menu button { background: none; border: 0; padding: 4px 8px; border-radius: 5px; color: var(--muted); cursor: default; }
+.menu button:hover { background: var(--line-soft); color: var(--ink); }
+.title-file { margin-left: auto; color: var(--faint); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+
+.toolbar { display: flex; align-items: center; gap: 4px; padding: 6px 10px; border-bottom: 1px solid var(--line-soft); flex-wrap: wrap; }
+.sep { width: 1px; height: 20px; background: var(--line); margin: 0 6px; }
+.tbtn { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 8px; border-radius: 6px; border: 1px solid transparent; background: none; color: var(--muted); cursor: pointer; }
+.tbtn:hover { background: var(--line-soft); color: var(--ink); }
+.tbtn:focus-visible, .splitter:focus-visible, .tab:focus-visible, .gut:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.tbtn svg { width: 16px; height: 16px; flex: none; }
+.tbtn.run { color: var(--ok); }
+.tbtn.stop { color: var(--bp); }
+.tbtn.cont { color: var(--accent); }
+.tbtn.labeled { border-color: var(--line); background: var(--panel); color: var(--ink); }
+.pause-pill { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--pause-bg); color: var(--pause-ink); font-size: 12px; font-weight: 500; white-space: nowrap; }
+.pause-pill i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+.xpathbar { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.xpathbar label { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); font-weight: 500; }
+.xpathbar input { flex: 1 1 280px; min-width: 0; height: 28px; padding: 0 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--ink); font: 12px var(--font-code); }
+.xpathbar input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.xpath-result { display: flex; align-items: center; gap: 8px; font: 12px var(--font-code); color: var(--val); min-width: 0; }
+.xpath-result span.count { font-family: var(--font-ui); color: var(--faint); font-size: 11px; }
+
+.workspace { display: grid; grid-template-columns: 1fr 6px 1.3fr 6px 1fr; min-height: 0; padding: 8px 8px 0; }
+.pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.pane-head { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 10px; border-bottom: 1px solid var(--line-soft); flex: none; }
+.kind { font: 500 10px var(--font-code); letter-spacing: .04em; padding: 2px 6px; border-radius: 4px; background: var(--accent-soft); color: var(--accent); }
+.fname { font-weight: 500; white-space: nowrap; }
+.fpath { color: var(--faint); font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.pane-meta { margin-left: auto; color: var(--faint); font-size: 11.5px; white-space: nowrap; }
+.code { flex: 1; overflow: auto; font: 12.5px/1.7 var(--font-code); padding: 6px 0 12px; font-variant-ligatures: none; }
+.row { display: flex; white-space: pre; min-width: max-content; }
+.gut { width: 18px; flex: none; display: grid; place-items: center; cursor: pointer; }
+.gut::after { content: ""; width: 9px; height: 9px; border-radius: 50%; }
+.gut:hover::after { background: color-mix(in srgb, var(--bp) 30%, transparent); }
+.gut.bp::after { background: var(--bp); }
+.ln { width: 30px; flex: none; text-align: right; padding-right: 12px; color: var(--faint); user-select: none; font-variant-numeric: tabular-nums; }
+.row.caret-row .ln { color: var(--ink); }
+.nogut .ln { width: 40px; }
+.t { color: var(--tag); } .a { color: var(--attr); } .v { color: var(--val); } .p { color: var(--faint); } .pi { color: var(--pi); } .x { color: var(--expr); } .e { color: var(--expr); }
+.caret { display: inline-block; width: 2px; height: 1.25em; background: var(--ink); vertical-align: -0.25em; margin: 0 -1px; animation: blink 1.06s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .caret { animation: none; } }
+
+.splitter { cursor: col-resize; position: relative; touch-action: none; }
+.splitter::after { content: ""; position: absolute; inset: 30% 2px; border-radius: 2px; background: transparent; transition: background .15s; }
+.splitter:hover::after, .splitter.drag::after { background: var(--accent); }
+.hsplit { cursor: row-resize; position: relative; touch-action: none; margin: 0 8px; }
+.hsplit::after { content: ""; position: absolute; inset: 2px 40%; border-radius: 2px; background: var(--line); transition: background .15s; }
+.hsplit:hover::after, .hsplit.drag::after { background: var(--accent); }
+
+.bottom { display: flex; flex-direction: column; min-height: 0; margin: 0 8px 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.tabs { display: flex; align-items: center; gap: 2px; padding: 0 6px; height: 34px; border-bottom: 1px solid var(--line-soft); flex: none; }
+.tab { background: none; border: 0; height: 34px; padding: 0 10px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; display: inline-flex; align-items: center; gap: 6px; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); font-weight: 500; }
+.badge { font-size: 10.5px; padding: 0 6px; border-radius: 999px; background: var(--line-soft); color: var(--muted); font-variant-numeric: tabular-nums; }
+.tab-ctx { margin-left: auto; color: var(--faint); font-size: 11.5px; padding-right: 6px; white-space: nowrap; }
+.tabpanel { flex: 1; overflow: auto; min-height: 0; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th { text-align: left; font-weight: 500; color: var(--faint); font-size: 11px; letter-spacing: .05em; text-transform: uppercase; padding: 6px 12px; border-bottom: 1px solid var(--line-soft); position: sticky; top: 0; background: var(--panel); }
+td { padding: 5px 12px; border-bottom: 1px solid var(--line-soft); white-space: nowrap; }
+td.n { font-family: var(--font-code); color: var(--attr); }
+td.val { font-family: var(--font-code); color: var(--ink); }
+td.ty { font-family: var(--font-code); color: var(--faint); font-size: 12px; }
+td.sc { color: var(--muted); font-size: 12px; }
+.msg-loc { font-family: var(--font-code); color: var(--accent); font-size: 12px; }
+.msg-kind { font-size: 11px; padding: 1px 6px; border-radius: 4px; background: var(--accent-soft); color: var(--accent); }
+
+.status { display: flex; align-items: center; gap: 16px; height: 26px; padding: 0 12px; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; }
+.status .right { margin-left: auto; display: flex; gap: 16px; }
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); margin-right: 6px; }
+
+@media (max-width: 760px) {
+  html, body { height: auto; }
+  .app { height: auto; grid-template-rows: auto auto auto auto 0 auto auto; }
+  .menu, .title-file { display: none; }
+  .workspace { grid-template-columns: minmax(0, 1fr) !important; gap: 8px; }
+  .splitter, .hsplit { display: none; }
+  .pane { height: 320px; }
+  .bottom { height: 240px; margin-top: 8px; }
+  .pause-pill { margin-left: 0; }
+}
+</style>
+
+<div class="app" id="app">
+  <header class="titlebar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">&lt;/&gt;</span>hobo-xslt</div>
+    <nav class="menu" aria-label="Menu">
+      <button>Filer</button><button>Rediger</button><button>Vis</button><button>Kør</button><button>Debug</button><button>Hjælp</button>
+    </nav>
+    <div class="title-file">C:\Projekter\fakturering\orders.xsl</div>
+  </header>
+
+  <div class="toolbar" role="toolbar" aria-label="Værktøjer">
+    <button class="tbtn" title="Åbn (Ctrl+O)" aria-label="Åbn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H7.5a2 2 0 0 0-1.9 1.4L3 19z"/><path d="M3 19l2.6-7.6A2 2 0 0 1 7.5 10H22l-2.7 7.6A2 2 0 0 1 17.4 19z"/></svg></button>
+    <button class="tbtn" title="Gem alle (Ctrl+Shift+S)" aria-label="Gem alle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M8 3v5h7V3"/><rect x="8" y="13" width="8" height="6" rx="1"/></svg></button>
+    <span class="sep" aria-hidden="true"></span>
+    <button class="tbtn labeled run" title="Kør (Ctrl+F5)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.9l12-7.5a1 1 0 0 0 0-1.8l-12-7.5A1 1 0 0 0 7 4.5z"/></svg>Kør</button>
+    <button class="tbtn labeled" title="Start debugging (F5)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="13" rx="5"/><path d="M9 7.5V6a3 3 0 0 1 6 0v1.5M3 13h4M17 13h4M4 8l3 2M20 8l-3 2M4 19l3-2M20 19l-3-2M12 11v8"/></svg>Debug</button>
+    <span class="sep" aria-hidden="true"></span>
+    <button class="tbtn cont" title="Fortsæt (F5)" aria-label="Fortsæt"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 4.5v15a1 1 0 0 0 1.5.9l10-7.5a1 1 0 0 0 0-1.8l-10-7.5A1 1 0 0 0 5 4.5z"/><rect x="17.5" y="4" width="2.5" height="16" rx="1"/></svg></button>
+    <button class="tbtn" title="Step into (F11)" aria-label="Step into"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11M7.5 9.5 12 14l4.5-4.5"/><circle cx="12" cy="19.5" r="1.8"/></svg></button>
+    <button class="tbtn" title="Step over (F10)" aria-label="Step over"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a8 8 0 0 1 15.5-3"/><path d="M20 5v6h-6"/><circle cx="12" cy="19.5" r="1.8"/></svg></button>
+    <button class="tbtn" title="Step out (Shift+F11)" aria-label="Step out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><circle cx="12" cy="19.5" r="1.8"/></svg></button>
+    <button class="tbtn stop" title="Stop (Shift+F5)" aria-label="Stop"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg></button>
+    <span class="pause-pill"><i aria-hidden="true"></i>Pauset ved breakpoint · orders.xsl:20</span>
+  </div>
+
+  <div class="xpathbar">
+    <label for="xpath">XPath</label>
+    <input id="xpath" value="//order[sum(line/(@qty * @price)) &gt; 500]/customer" spellcheck="false" aria-describedby="xpath-res">
+    <div class="xpath-result" id="xpath-res"><span>Jensen &amp; Co</span><span class="count">1 resultat · mod orders.xml</span></div>
+  </div>
+
+  <main class="workspace" id="ws">
+    <section class="pane" aria-label="XML-input">
+      <div class="pane-head"><span class="kind">XML</span><span class="fname">orders.xml</span><span class="fpath">Input</span><span class="pane-meta">13 linjer</span></div>
+      <div class="code nogut" id="code-xml"></div>
+    </section>
+    <div class="splitter" role="separator" aria-orientation="vertical" aria-label="Juster bredde mellem input og XSLT" tabindex="0" data-i="0"></div>
+    <section class="pane" aria-label="XSLT">
+      <div class="pane-head"><span class="kind">XSLT</span><span class="fname">orders.xsl</span><span class="fpath">version 3.0</span><span class="pane-meta">2 breakpoints</span></div>
+      <div class="code" id="code-xsl"></div>
+    </section>
+    <div class="splitter" role="separator" aria-orientation="vertical" aria-label="Juster bredde mellem XSLT og output" tabindex="0" data-i="1"></div>
+    <section class="pane" aria-label="Output">
+      <div class="pane-head"><span class="kind">XML</span><span class="fname">Output</span><span class="fpath">Seneste kørsel</span><span class="pane-meta">14:02</span></div>
+      <div class="code nogut" id="code-out"></div>
+    </section>
+  </main>
+
+  <div class="hsplit" id="hsplit" role="separator" aria-orientation="horizontal" aria-label="Juster højde på variabelpanelet" tabindex="0"></div>
+
+  <section class="bottom" aria-label="Debugpanel">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tab-vars" aria-selected="true" aria-controls="panel-vars">Variabler <span class="badge">5</span></button>
+      <button class="tab" role="tab" id="tab-msgs" aria-selected="false" aria-controls="panel-msgs">Fejl og beskeder <span class="badge">1</span></button>
+      <span class="tab-ctx">Template match="order" · kontekst 1 af 2</span>
+    </div>
+    <div class="tabpanel" id="panel-vars" role="tabpanel" aria-labelledby="tab-vars">
+      <table>
+        <thead><tr><th style="width:22%">Navn</th><th style="width:34%">Værdi</th><th style="width:22%">Type</th><th>Scope</th></tr></thead>
+        <tbody>
+          <tr><td class="n">$vat</td><td class="val">62.25</td><td class="ty">xs:decimal</td><td class="sc">Lokal</td></tr>
+          <tr><td class="n">$total</td><td class="val">249</td><td class="ty">xs:decimal</td><td class="sc">Lokal</td></tr>
+          <tr><td class="n">$rate</td><td class="val">0.25</td><td class="ty">xs:decimal</td><td class="sc">Global</td></tr>
+          <tr><td class="n">.</td><td class="val">&lt;order id="1001"&gt;</td><td class="ty">element(order)</td><td class="sc">Kontekst</td></tr>
+          <tr><td class="n">position()</td><td class="val">1</td><td class="ty">xs:integer</td><td class="sc">Kontekst</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tabpanel" id="panel-msgs" role="tabpanel" aria-labelledby="tab-msgs" hidden>
+      <table>
+        <thead><tr><th style="width:18%">Placering</th><th style="width:16%">Type</th><th>Besked</th></tr></thead>
+        <tbody>
+          <tr><td class="msg-loc">orders.xsl:11</td><td><span class="msg-kind">xsl:message</span></td><td>2 ordrer fundet</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="status">
+    <span><span class="dot" aria-hidden="true"></span>Saxon-HE 12 · XSLT 3.0</span>
+    <span>Debugsession aktiv · editorer er skrivebeskyttede</span>
+    <span class="right"><span>Ln 20, Col 5</span><span>UTF-8</span><span>CRLF</span></span>
+  </footer>
+</div>
+
+<script>
+const XML = `<?xml version="1.0" encoding="UTF-8"?>
+<orders>
+  <order id="1001">
+    <customer>Hansen ApS</customer>
+    <line sku="A-100" qty="2" price="99.50"/>
+    <line sku="B-220" qty="1" price="50.00"/>
+  </order>
+  <order id="1002">
+    <customer>Jensen &amp; Co</customer>
+    <line sku="A-100" qty="10" price="99.50"/>
+    <line sku="C-310" qty="3" price="41.50"/>
+  </order>
+</orders>`;
+
+const XSL = `<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="3.0"
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    exclude-result-prefixes="xs" expand-text="yes">
+
+  <xsl:output method="xml" indent="yes"/>
+  <xsl:variable name="rate" as="xs:decimal" select="0.25"/>
+
+  <xsl:template match="/orders">
+    <xsl:message select="count(order) || ' ordrer fundet'"/>
+    <summary count="{count(order)}">
+      <xsl:apply-templates select="order"/>
+    </summary>
+  </xsl:template>
+
+  <xsl:template match="order">
+    <xsl:variable name="total" as="xs:decimal" select="sum(line/(@qty * @price))"/>
+    <xsl:variable name="vat" as="xs:decimal" select="$total * $rate"/>
+    <invoice id="{@id}" customer="{customer}">
+      <total>{$total}</total>
+      <vat>{$vat}</vat>
+    </invoice>
+  </xsl:template>
+
+</xsl:stylesheet>`;
+
+const OUT = `<?xml version="1.0" encoding="UTF-8"?>
+<summary count="2">
+  <invoice id="1001" customer="Hansen ApS">
+    <total>249</total>
+    <vat>62.25</vat>
+  </invoice>
+  <invoice id="1002" customer="Jensen &amp; Co">
+    <total>1119.5</total>
+    <vat>279.875</vat>
+  </invoice>
+</summary>`;
+
+const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const avt = s => esc(s).replace(/\{[^}]*\}/g, m => `<span class="x">${m}</span>`);
+const TOKEN = /<\?.*?\?>|<\/?[\w:.-]+|\/?>|[\w:.-]+="[^"]*"|&\w+;|\{[^}]*\}|\s+|[^<&\/>="\s{]+|[\s\S]/g;
+
+function highlight(line) {
+  return (line.match(TOKEN) || []).map(tok => {
+    if (tok.startsWith("<?")) return `<span class="pi">${esc(tok)}</span>`;
+    if (tok.startsWith("<")) {
+      const m = tok.match(/^(<\/?)(.*)$/);
+      return `<span class="p">${esc(m[1])}</span><span class="t">${esc(m[2])}</span>`;
+    }
+    if (tok === ">" || tok === "/>") return `<span class="p">${esc(tok)}</span>`;
+    const attr = tok.match(/^([\w:.-]+)=("[^"]*")$/);
+    if (attr) return `<span class="a">${esc(attr[1])}</span><span class="p">=</span><span class="v">${avt(attr[2])}</span>`;
+    if (/^&\w+;$/.test(tok)) return `<span class="e">${esc(tok)}</span>`;
+    if (tok.startsWith("{")) return `<span class="x">${esc(tok)}</span>`;
+    return esc(tok);
+  }).join("");
+}
+
+function render(el, src, opts = {}) {
+  const bps = opts.breakpoints;
+  el.innerHTML = src.split("\n").map((line, i) => {
+    const n = i + 1;
+    const isCaret = opts.caret && opts.caret.line === n;
+    let body = highlight(line);
+    if (isCaret) {
+      const col = opts.caret.col - 1;
+      body = esc(line.slice(0, col)) + '<span class="caret" aria-hidden="true"></span>' + highlight(line.slice(col));
+    }
+    const gut = bps ? `<span class="gut${bps.has(n) ? " bp" : ""}" data-line="${n}" role="button" tabindex="-1" aria-label="Breakpoint på linje ${n}" aria-pressed="${bps.has(n)}"></span>` : "";
+    return `<div class="row${isCaret ? " caret-row" : ""}">${gut}<span class="ln">${n}</span><span>${body || " "}</span></div>`;
+  }).join("");
+}
+
+const breakpoints = new Set([12, 20]);
+const xslEl = document.getElementById("code-xsl");
+render(document.getElementById("code-xml"), XML);
+render(xslEl, XSL, { breakpoints, caret: { line: 20, col: 5 } });
+render(document.getElementById("code-out"), OUT);
+
+xslEl.addEventListener("click", e => {
+  const g = e.target.closest(".gut");
+  if (!g) return;
+  const n = +g.dataset.line;
+  breakpoints.has(n) ? breakpoints.delete(n) : breakpoints.add(n);
+  g.classList.toggle("bp", breakpoints.has(n));
+  g.setAttribute("aria-pressed", breakpoints.has(n));
+  xslEl.closest(".pane").querySelector(".pane-meta").textContent =
+    breakpoints.size === 1 ? "1 breakpoint" : `${breakpoints.size} breakpoints`;
+});
+
+document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => {
+  document.querySelectorAll(".tab").forEach(t => {
+    const on = t === tab;
+    t.setAttribute("aria-selected", on);
+    document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+  });
+}));
+
+const ws = document.getElementById("ws");
+const app = document.getElementById("app");
+const MIN_PANE = 180, MIN_BOTTOM = 90;
+let fr = [1, 1.3, 1];
+try { const s = JSON.parse(localStorage.getItem("hx-cols")); if (Array.isArray(s) && s.length === 3) fr = s; } catch {}
+try { const h = parseInt(localStorage.getItem("hx-bottom"), 10); if (h > 0) app.style.setProperty("--bottom-h", h + "px"); } catch {}
+
+const applyCols = () => { ws.style.gridTemplateColumns = `${fr[0]}fr 6px ${fr[1]}fr 6px ${fr[2]}fr`; };
+applyCols();
+
+function resizeCols(i, dx) {
+  const panes = ws.querySelectorAll(".pane");
+  const w = [...panes].map(p => p.getBoundingClientRect().width);
+  const pair = w[i] + w[i + 1];
+  const left = Math.min(Math.max(w[i] + dx, MIN_PANE), pair - MIN_PANE);
+  w[i] = left; w[i + 1] = pair - left;
+  const total = w.reduce((a, b) => a + b, 0);
+  fr = w.map(x => +(x / total * 3).toFixed(4));
+  applyCols();
+  try { localStorage.setItem("hx-cols", JSON.stringify(fr)); } catch {}
+}
+
+function resizeBottom(dy) {
+  const cur = document.querySelector(".bottom").getBoundingClientRect().height;
+  const max = app.getBoundingClientRect().height * 0.6;
+  const h = Math.round(Math.min(Math.max(cur - dy, MIN_BOTTOM), max));
+  app.style.setProperty("--bottom-h", h + "px");
+  try { localStorage.setItem("hx-bottom", h); } catch {}
+}
+
+function drag(handle, onMove) {
+  handle.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    handle.setPointerCapture(e.pointerId);
+    handle.classList.add("drag");
+    let last = { x: e.clientX, y: e.clientY };
+    const move = ev => { onMove(ev.clientX - last.x, ev.clientY - last.y); last = { x: ev.clientX, y: ev.clientY }; };
+    const up = () => { handle.classList.remove("drag"); handle.removeEventListener("pointermove", move); handle.removeEventListener("pointerup", up); };
+    handle.addEventListener("pointermove", move);
+    handle.addEventListener("pointerup", up);
+  });
+}
+
+document.querySelectorAll(".splitter").forEach(s => {
+  const i = +s.dataset.i;
+  drag(s, dx => resizeCols(i, dx));
+  s.addEventListener("keydown", e => {
+    if (e.key === "ArrowLeft") { resizeCols(i, -24); e.preventDefault(); }
+    if (e.key === "ArrowRight") { resizeCols(i, 24); e.preventDefault(); }
+  });
+});
+
+const hs = document.getElementById("hsplit");
+drag(hs, (dx, dy) => resizeBottom(dy));
+hs.addEventListener("keydown", e => {
+  if (e.key === "ArrowUp") { resizeBottom(-24); e.preventDefault(); }
+  if (e.key === "ArrowDown") { resizeBottom(24); e.preventDefault(); }
+});
+</script>
