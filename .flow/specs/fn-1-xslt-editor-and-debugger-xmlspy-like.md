@@ -36,6 +36,7 @@
 > user (turn 12): "Jeg skal kunne klikke "STOP" altså [] ikon."
 > user (turn 13): "Beskeder ved stop: Det skal være løbende! Det skal variable vel også og output?"
 > user (turn 13, selected): "Løbende, behold ved Stop/fejl"
+> user (turn 14): "Hvorfor sendes det ikke så snart der kommer noget, og så synkroniseres ud i UI hver 100 ms... når man så stopper eller pauser tager man lige det sidste fra pipelinen?"
 > user (turn 13): "Extra proces: Så længe der kun kører én UI."
 > user (turn 11): "Og så skal den linje debuggeren stopper på gerne markeres med orange baggrundsfarve, så man visuelt også kan se hvis man begynder at kalde next, step in, out, over etc."
 
@@ -77,7 +78,7 @@ flowchart LR
 - A run that never terminates can be stopped from the UI without closing the program. [paraphrase] This holds for Run and Debug alike, including a loop inside a single XPath expression (R22).
 - Run and Debug use the files on disk: dirty documents are saved first, and an unsaved (untitled) stylesheet cannot be run.
 - One run or debug session at a time; Run/Debug are disabled while a session is active, and editors are read-only during a debug session.
-- Output written before a failure or Stop stays in the output pane, and the status says the run failed or was stopped (R24).
+- Output written before a failure or Stop stays in the output pane, and the status says the run failed or was stopped (R24). Stop first asks the worker to send what it still holds and end itself; only a worker that has not ended shortly after is killed, so nothing written before Stop is lost.
 - Closing the program during a paused or running session stops it; the process does not hang.
 - The XSLT pane has tabs. The first tab holds the XSLT file that Run and Debug execute, and navigation never replaces it. A diagnostic or a debug pause in an included/imported file opens that file in an extra tab, or switches to its tab when already open. [paraphrase]
 - A modified XSLT or XML document must be saved before another file is opened in its place (save or cancel; no discard). The output pane never asks to save. [paraphrase]
