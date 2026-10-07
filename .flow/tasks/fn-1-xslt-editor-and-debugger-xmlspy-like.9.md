@@ -25,9 +25,31 @@ Write `README.md` in Danish with real screenshots of the running app, in the sty
 - [ ] TBD
 
 ## Done summary
-Blocked:
-Paused by the user's new requests: README screenshots and texts wait for tasks .10 (orange paused line) and .11 (language files). Partial handover in .flow/tmp/handover; old screenshots saved in the session scratchpad.
+README.md written in Danish (Hoboman structure) with four new screenshots in docs/images (koersel, fejl, debug, xpath), taken from the published single-file exe of this branch. Covers run and output, save rules, error list and navigation into included files, debugging (breakpoints, unbound ring, keys, orange paused line, Variabler with Lokal/Global), XPath incl. default namespace, Vis -> Sprog, keys, limits, install.ps1, first-start extraction to %TEMP%, project layout and build/test.
+
+Measured (UI Automation on the app's own window, driver scratchpad\t9r\drive.ps1, logs main.log / fejl.log there; exe = publish\HoboXslt.App.exe built with install.ps1's publish command):
+- Run: 'Kørsel fuldført', fakturaer output, two xsl:message rows at ordrer.xsl:15.
+- Debug: breakpoint ordrer.xsl:18 -> 'Pauset ved ordrer.xsl:18'; Step into -> moms.xsl in a second tab, line 5; breakpoint moms.xsl:8 -> $beloeb 738 / $moms 184.5 Lokal, $moms-sats 0.25 / $valuta DKK Global, orange line visible in debug.png; Continue -> 397.5 / 99.375; Stop -> 'Debugsession stoppet'.
+- Error list: 'moms.xsl:7 | Kompileringsfejl | Variable $rabat has not been declared ...'; double-click opened the moms.xsl tab at Ln 7.
+- XPath: sum(...) -> 1135.5; invalid -> 'Unexpected token "<eof>" ...'; default namespace: //ordre -> 'Tom sekvens', //*:ordre/@kunde -> 2 results, count(//Q{urn:eksempel:ordrer}ordre) -> 2.
+- First start of the new exe created %TEMP%\.net\HoboXslt.App\G17MHd5rbzZc (540 files, ~247 MB); older build folders stay beside it. Exe 257,643,468 bytes plus three pdbs.
+- dotnet run --project .\src\HoboXslt.App: window 'hobo-xslt' opened, closed cleanly, rc 0.
+- settings.json is {"languageName": "Dansk"} (unchanged).
+
+From code / earlier tasks (inferred, not re-measured here): save rules, Stop only in debug, keys, Vis -> Sprog behaviour (task .11 measured it), install.ps1 wait/shortcut/failure message (task .8 measured it).
+Not run: .\install.ps1 (forbidden by HOST_NOTE: it would put a shortcut to the temporary worktree in the Start menu).
+
+baseline: green via handoff (verified at d720b0e5 by .11; only .flow/ changed since)
+Gates: flowctl gate classify -> TIER_B docs-only. dotnet build HoboXslt.slnx rc=0 (0 warnings); dotnet test tests/HoboXslt.Core.Tests rc=0 (36 passed) - run as README command checks.
+
+
+
+Tier: session (jev-unavailable(no_key))
+stage: impl-review - skipped(policy: risk - docs-only change (README + screenshots); covered by the spec completion review)
+Conductor check: README self-contained claim verified (msbuild publish properties: SelfContained=true, RuntimeIdentifier=win-x64).
+
+stage: plan-sync - skipped(config: planSync.enabled != true)
 ## Evidence
-- Commits:
-- Tests:
+- Commits: cfc4311ec23415eda3ee42e6f80f5b6fbfed8874
+- Tests: dotnet build HoboXslt.slnx, dotnet test tests/HoboXslt.Core.Tests, dotnet run --project .\src\HoboXslt.App, dotnet publish .\src\HoboXslt.App -c Release -o .\publish
 - PRs:
