@@ -36,6 +36,21 @@ public sealed class SettingsTests : IDisposable
     }
 
     [Fact]
+    public void Load_WhenLayoutHasTheOldFlatShape_ThenSizeIsKeptWithoutPanes()
+    {
+        // Arrange
+        var path = _files.Write("settings.json", """
+            { "layout": { "width": 1300, "height": 760, "xmlWidth": 400, "xsltWidth": 500, "outputWidth": 400, "bottomHeight": 180 } }
+            """);
+
+        // Act
+        var layout = Settings.Load(path).Layout;
+
+        // Assert
+        Assert.Equal(new Layout(1300, 760, null, null), layout);
+    }
+
+    [Fact]
     public void IsValid_WhenAPaneWidthIsNegative_ThenFalse()
     {
         // Arrange
