@@ -26,6 +26,7 @@ hobo-xslt samler det, du skal bruge, når et XSLT-stylesheet ikke gør, som du f
 - **Dansk eller engelsk** – vælg sprog under **Vis → Sprog**.
 - **Én exe-fil** – `install.ps1` laver én exe og lægger en genvej i Start-menuen.
 - **Licenser** – **Hjælp → Licenser…** viser de komponenter, programmet bruger, med version, licens og link til projektet.
+- **Egen titellinje** – den øverste linje med logo, menuer og filsti er vinduets titellinje med knapper til minimer, maksimer og luk. Træk i den for at flytte vinduet, og dobbeltklik for at maksimere.
 
 ![Hovedvinduet efter en kørsel: ordrer.xml til venstre, ordrer.xsl i midten, fakturaer i Output og to xsl:message-beskeder nederst](docs/images/koersel.png)
 
@@ -103,7 +104,7 @@ Den første fane i **XSLT** er altid den fil, der bliver kørt. Ekstra faner kom
 
 1. **Sæt et breakpoint** ved at klikke i den smalle kant til venstre for linjenumrene. Der kommer en rød prik, og et nyt klik fjerner den. Det virker i alle faner, også i inkluderede filer.
 2. **Start debuggeren** med **Debug** eller F5.
-3. **Debuggeren holder pause** før den første instruktion på linjen. Filen åbnes, også hvis den er inkluderet, markøren står på linjen, linjen bliver orange, og øverst til højre står fx **Pauset ved moms.xsl:8**.
+3. **Debuggeren holder pause** før den første instruktion på linjen. Filen åbnes, også hvis den er inkluderet, markøren står på linjen, linjen bliver orange, og øverst til højre står fx **Pauset ved moms.xsl:8**. Er linjen foldet sammen, foldes den ud.
 4. **Gå videre** med knapperne i værktøjslinjen eller tasterne:
 
    | Knap | Tast | Hvad sker der |
@@ -116,7 +117,7 @@ Den første fane i **XSLT** er altid den fil, der bliver kørt. Ekstra faner kom
 
    Den orange linje flytter med for hvert trin, så du kan se, hvor du er. Den forsvinder, når kørslen stopper, bliver færdig eller fejler.
 
-   I ruden **XML** er starttagget for den node, kørslen arbejder på lige nu, lyseblåt (for en attribut eller tekst er det elementet, den ligger i). Er der ingen node, fx når en løkke går over tal, er der ingen markering.
+   I ruden **XML** er starttagget for den node, kørslen arbejder på lige nu, lyseblåt (for en attribut eller tekst er det elementet, den ligger i), og er det foldet sammen, foldes det ud. Er der ingen node, fx når en løkke går over tal, er der ingen markering.
 
 5. **Når kørslen er færdig**, står resultatet i **Output** og beskederne under **Fejl og beskeder**, og der står **Debugsession fuldført** nederst. Output og beskeder kommer frem undervejs, også mens debuggeren holder pause. Trykker du **Stop**, bliver det, der allerede er skrevet, stående, og der står **Debugsession stoppet** (med **output er ufuldstændigt**, hvis der er skrevet noget).
 
@@ -203,4 +204,4 @@ dotnet build HoboXslt.slnx
 dotnet test tests/HoboXslt.Core.Tests
 ```
 
-Testene dækker kørsel, fejl med fil og linje, debuggeren (breakpoints, trin, stop og variabler), XPath, sprogfilerne og at **Stop** stopper en uendelig løkke i både **Kør** og **Debug**. WPF-delen har ingen automatiske tests.
+Testene dækker kørsel, fejl med fil og linje, debuggeren (breakpoints, trin, stop og variabler), XPath, sprogfilerne, indstillingerne og at **Stop** stopper en uendelig løkke i både **Kør** og **Debug**. WPF-delen har ingen automatiske tests.
