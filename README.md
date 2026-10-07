@@ -13,7 +13,7 @@ hobo-xslt samler det, du skal bruge, når et XSLT-stylesheet ikke gør, som du f
 ## Det får du
 
 - **Tre ruder side om side** – XML-input til venstre, XSLT i midten og resultatet til højre. Alle tre har farver på XML, linjenumre og trækbare skillelinjer.
-- **XSLT-farver** – i **XSLT** har `xsl:`-elementer og dine egne elementer hver deres farve, og XPath i `select`, `test`, `match` og `{…}` er farvet efter variabler, tekststrenge, tal, funktioner, akser og operatorer.
+- **XSLT-farver** – i **XSLT** er `xsl:`-elementer mørkerøde, så de skiller sig ud fra dine egne elementer, og `$variabler` i `select`, `test`, `match` og `{…}` er orange.
 - **Foldning** – klik på `−` eller `+` i den smalle kant til højre for linjenumrene i **XML** og **XSLT** for at folde et element sammen eller ud igen.
 - **Indrykningslinjer** – svage, prikkede lodrette linjer i **XML** og **XSLT** viser, hvilke linjer der hører under hvilket element.
 - **Kør med ét klik** – **Kør** transformerer dit XML med dit XSLT og viser resultatet som XML i **Output**.
