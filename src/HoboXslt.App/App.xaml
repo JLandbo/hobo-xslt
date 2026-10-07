@@ -403,11 +403,63 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <Setter Property="ItemContainerStyle">
+        </Style>
+        <!-- Every menu item below the top level, at any depth. -->
+        <Style TargetType="MenuItem">
+            <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+            <Setter Property="Template">
                 <Setter.Value>
-                    <Style TargetType="MenuItem">
-                        <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
-                    </Style>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Grid>
+                            <Border x:Name="Bd" Background="Transparent" CornerRadius="4" Padding="6,5" MinWidth="160">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="18" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="MenuItemGesture" />
+                                        <ColumnDefinition Width="16" />
+                                    </Grid.ColumnDefinitions>
+                                    <Path x:Name="Check" Visibility="Collapsed" Data="M1,5 L4.5,8.5 L11,1.5" Stroke="{StaticResource AccentBrush}" StrokeThickness="1.8"
+                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" VerticalAlignment="Center" />
+                                    <ContentPresenter Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{TemplateBinding InputGestureText}" Foreground="{StaticResource FaintBrush}" Margin="24,0,0,0"
+                                               VerticalAlignment="Center" />
+                                    <Path x:Name="Arrow" Grid.Column="3" Visibility="Collapsed" Data="M0,0 L4,4 L0,8" Stroke="{StaticResource MutedBrush}" StrokeThickness="1.5"
+                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+                            <Popup x:Name="PART_Popup" IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}" Placement="Right"
+                                   HorizontalOffset="4" VerticalOffset="-5" AllowsTransparency="True" Focusable="False" PopupAnimation="None">
+                                <Border Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1"
+                                        CornerRadius="6" Padding="4">
+                                    <ItemsPresenter Grid.IsSharedSizeScope="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Check" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="Role" Value="SubmenuHeader">
+                                <Setter TargetName="Arrow" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource LineSoftBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="Separator">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Separator">
+                        <Border Height="1" Margin="6,4" Background="{StaticResource LineSoftBrush}" />
+                    </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
