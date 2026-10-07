@@ -13,7 +13,7 @@
   <Color name="XPathString" foreground="#2B7A4B" />
   <Color name="XPathFunction" foreground="#1D5CBD" />
   <Color name="XPathNumber" foreground="#B42346" />
-  <Color name="XPathOperator" foreground="#1C2230" fontWeight="bold" />
+  <Color name="XPathOperator" foreground="#5A6475" />
 
   <RuleSet>
     <Span color="Comment" multiline="true"><Begin>&lt;!--</Begin><End>--&gt;</End></Span>
