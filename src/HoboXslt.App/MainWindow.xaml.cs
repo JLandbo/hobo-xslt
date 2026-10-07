@@ -121,7 +121,7 @@ public partial class MainWindow : Window
         if (editor != OutputEditor)
         {
             EditorFolding.Install(editor);
-            editor.TextArea.TextView.BackgroundRenderers.Add(new IndentGuideRenderer((Brush)FindResource("FaintBrush")));
+            editor.TextArea.TextView.BackgroundRenderers.Add(new IndentGuideRenderer((Brush)FindResource("LineBrush")));
         }
 
         editor.TextArea.GotKeyboardFocus += (_, _) =>

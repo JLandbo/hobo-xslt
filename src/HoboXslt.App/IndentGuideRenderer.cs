@@ -50,7 +50,7 @@ public sealed class IndentGuideRenderer : IBackgroundRenderer
     {
         // Starting on the document's dot grid keeps the dots still while scrolling.
         var top = Math.Floor(guide.top / DotPeriod) * DotPeriod;
-        var x = Math.Round((guide.column + 0.5) * textView.WideSpaceWidth - textView.ScrollOffset.X) + 0.5;
+        var x = Math.Round(guide.column * textView.WideSpaceWidth - textView.ScrollOffset.X) + 0.5;
         if (bottom <= top || x < 0)
             return;
 
