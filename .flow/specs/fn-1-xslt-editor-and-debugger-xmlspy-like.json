@@ -1,11 +1,58 @@
 {
   "branch_name": "fn-1-xslt-editor-and-debugger-xmlspy-like",
+  "completion_review_status": "unknown",
+  "completion_reviewed_at": null,
   "created_at": "2026-10-07T10:48:01.141210Z",
+  "default_impl": null,
+  "default_review": null,
+  "default_sync": null,
   "depends_on_epics": [],
   "id": "fn-1-xslt-editor-and-debugger-xmlspy-like",
+  "impl_review_rounds": {
+    "fn-1-xslt-editor-and-debugger-xmlspy-like.1": 0
+  },
   "next_task": 1,
+  "plan_review_rounds": 0,
   "plan_review_status": "unknown",
   "plan_reviewed_at": null,
+  "review_attempts": [
+    {
+      "artifact_sha256": "3918d7f2d9bf6670a63092ef12cf92d1b6497a5c5ff5a28ad68ee258d2d9c83e",
+      "backend": "host",
+      "base_sha": "c5d1aa9d42d20d19f03fcd8e6630c392b9a310cf",
+      "counter_kind": "impl",
+      "failure_class": null,
+      "finalized": {
+        "digest": "complete",
+        "receipt": "complete",
+        "status": "not_applicable"
+      },
+      "forced": false,
+      "hash_epoch": 0,
+      "head_sha": "fd213dbcca734e95765a00f221c8458804812fac",
+      "head_sha_observed": true,
+      "kind": "impl",
+      "model": "fable",
+      "outcome": "verdict",
+      "output_bytes": 1450,
+      "output_sha256": "e6f07c1be66a198dd63cf5f76da3ddd05a6cca974853dde244b1350cf7500459",
+      "reservation_id": "e7707c13d9f545f3b7947b64ecb3bec2",
+      "round_consumed": true,
+      "scope": "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.1",
+      "superseded_by": null,
+      "task": "fn-1-xslt-editor-and-debugger-xmlspy-like.1",
+      "timestamp": "2026-10-07T13:37:50.443793Z",
+      "verdict": "SHIP"
+    }
+  ],
+  "review_hash_epoch": {
+    "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.1": 1
+  },
+  "review_pending_rounds": {},
+  "review_reservations": {},
+  "review_transport_failures": {
+    "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.1": 0
+  },
   "spec_path": ".flow/specs/fn-1-xslt-editor-and-debugger-xmlspy-like.md",
   "status": "open",
   "title": "XSLT editor and debugger (XmlSpy-like)",
@@ -20,5 +67,5 @@
     "mergeBaseTracker": null,
     "url": null
   },
-  "updated_at": "2026-10-07T13:06:11.166862Z"
+  "updated_at": "2026-10-07T13:37:50.506986Z"
 }

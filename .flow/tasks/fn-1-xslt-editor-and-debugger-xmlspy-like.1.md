@@ -39,9 +39,18 @@ Creates the solution and the UI-free run engine, and proves the debugger's found
 - [ ] TBD
 
 ## Done summary
-TBD
+Created HoboXslt.slnx with a net10.0 Core library (Saxon-HE 12.10 via IKVM.Maven.Sdk 1.12.2, no WPF) and an xunit test project. XsltRunner.Run(xsltPath, xmlPath, TraceListener? = null) compiles from the file path, transforms, and returns RunResult(Output, Diagnostics) with compile errors, runtime errors and xsl:message entries (file via FileKey.FromSystemId, line); 7 tests prove the ACs, including that Saxon-HE trace `enter` fires with file+line in main and included stylesheets and can be blocked and released from another thread (Early proof point holds).
 
+baseline: none (greenfield - no solution existed pre-edit)
+Gates: `dotnet build HoboXslt.slnx` rc=0; `dotnet test tests/HoboXslt.Core.Tests` rc=0, 7 passed / 0 failed (measured).
+Notes for later tasks: FileKey returns Path.GetFullPath (original case) - key comparisons must use OrdinalIgnoreCase. IKVM requires implementing Java default methods (TraceListener: checkpoint/recover/startRuleSearch/endRuleSearch(object, Mode, Item); Consumer.andThen via Consumer.__DefaultMethods). IKVM build warns IKVM0117 NoSuchMethodError in net.sf.saxon.value.AnyURIValue.decode (ByteBuffer.clear/flip covariant returns, Java 9+); paths with spaces/non-ASCII and include resolution were probed and work, so impact appears limited to that decode path.
+Tier: session (jev-unavailable(no_key))
+
+stage: impl-review - ran (host, 3 draws, SHIP; receipt /tmp/impl-review-receipt-22e37af6a82b-fn-1-xslt-editor-and-debugger-xmlspy-like.1.json) (model: fable)
+Follow-up (P2, from review): FileKey is not case-normalized although the spec pins a case-insensitive key; task 2 owns the fix.
+
+stage: plan-sync - skipped(config: planSync.enabled != true)
 ## Evidence
-- Commits:
-- Tests:
+- Commits: fd213dbcca734e95765a00f221c8458804812fac
+- Tests: dotnet build HoboXslt.slnx, dotnet test tests/HoboXslt.Core.Tests
 - PRs:
