@@ -51,6 +51,7 @@
     "Window.Maximize": "Maximize",
     "Window.Restore": "Restore",
     "Window.Close": "Close",
+    "Window.ResetLayout": "Reset layout",
     "Pane.Input": "Input",
     "Pane.Output": "Output",
     "Pane.LastRun": "Last run",

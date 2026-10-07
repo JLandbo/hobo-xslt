@@ -28,6 +28,7 @@ public partial class MainWindow : Window
     private readonly EditorDocument _xml;
     private readonly EditorDocument _xslt;
     private readonly BreakpointStore _breakpoints = new();
+    private readonly Layout _defaultLayout;
     // Texts set from code keep their setters, so a language switch can set them again.
     private readonly Dictionary<object, Action> _texts = [];
     private XPathEvaluator? _xpath;
@@ -45,6 +46,7 @@ public partial class MainWindow : Window
         XmlWrapButton.IsChecked = settings.XmlWordWrap;
         XsltWrapButton.IsChecked = settings.XsltWordWrap;
         OutputWrapButton.IsChecked = settings.OutputWordWrap;
+        _defaultLayout = new(Width, Height, XmlColumn.Width.Value, XsltColumn.Width.Value, OutputColumn.Width.Value, BottomRow.Height.Value);
         // A layout saved on a bigger screen would not fit, so the default layout is used instead.
         if (settings.Layout is { } layout && layout.Width <= SystemParameters.WorkArea.Width && layout.Height <= SystemParameters.WorkArea.Height)
             ApplyLayout(layout);
@@ -237,6 +239,15 @@ public partial class MainWindow : Window
         XsltColumn.Width = new(layout.XsltWidth, GridUnitType.Star);
         OutputColumn.Width = new(layout.OutputWidth, GridUnitType.Star);
         BottomRow.Height = new(layout.BottomHeight);
+    }
+
+    private void ResetLayout_Click(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState.Normal;
+        ApplyLayout(_defaultLayout);
+        var area = SystemParameters.WorkArea;
+        (Left, Top) = (area.Left + (area.Width - Width) / 2, area.Top + (area.Height - Height) / 2);
+        App.SaveSettings(_translator, settings => settings with { Layout = null });
     }
 
     protected override void OnClosing(CancelEventArgs e)

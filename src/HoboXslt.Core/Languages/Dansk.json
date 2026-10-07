@@ -51,6 +51,7 @@
     "Window.Maximize": "Maksimer",
     "Window.Restore": "Gendan",
     "Window.Close": "Luk",
+    "Window.ResetLayout": "Nulstil layout",
     "Pane.Input": "Input",
     "Pane.Output": "Output",
     "Pane.LastRun": "Seneste kørsel",
