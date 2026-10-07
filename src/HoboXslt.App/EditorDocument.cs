@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using HoboXslt.Core.Languages;
 using ICSharpCode.AvalonEdit;
 using Microsoft.Win32;
 
@@ -11,13 +12,15 @@ public sealed class EditorDocument
 {
     private readonly TextEditor _editor;
     private readonly TextBlock _title;
-    private readonly string _filter;
+    private readonly string _filterKey;
+    private readonly Translator _translator;
 
-    public EditorDocument(TextEditor editor, TextBlock title, string filter)
+    public EditorDocument(TextEditor editor, TextBlock title, string filterKey, Translator translator)
     {
         _editor = editor;
         _title = title;
-        _filter = filter;
+        _filterKey = filterKey;
+        _translator = translator;
         DependencyPropertyDescriptor.FromProperty(TextEditor.IsModifiedProperty, typeof(TextEditor))
             .AddValueChanged(editor, (_, _) => UpdateTitle());
         UpdateTitle();
@@ -35,7 +38,7 @@ public sealed class EditorDocument
         if (IsModified && !SaveBeforeReplace())
             return false;
 
-        var dialog = new OpenFileDialog { Filter = _filter };
+        var dialog = new OpenFileDialog { Filter = _translator.Of(_filterKey), Title = _translator.Of("Document.OpenTitle") };
         return dialog.ShowDialog() == true && Load(dialog.FileName);
     }
 
@@ -47,7 +50,7 @@ public sealed class EditorDocument
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
-            ShowError($"Kunne ikke åbne {path}", e);
+            ShowError("Document.OpenFailed", path, e);
             return false;
         }
 
@@ -61,7 +64,7 @@ public sealed class EditorDocument
         var path = FilePath;
         if (path is null)
         {
-            var dialog = new SaveFileDialog { Filter = _filter };
+            var dialog = new SaveFileDialog { Filter = _translator.Of(_filterKey), Title = _translator.Of("Document.SaveTitle") };
             if (dialog.ShowDialog() != true)
                 return false;
             path = dialog.FileName;
@@ -73,7 +76,7 @@ public sealed class EditorDocument
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
-            ShowError($"Kunne ikke gemme {path}", e);
+            ShowError("Document.SaveFailed", path, e);
             return false;
         }
 
@@ -90,16 +93,16 @@ public sealed class EditorDocument
     }
 
     private bool SaveBeforeReplace() =>
-        MessageBox.Show("Dokumentet er ændret og skal gemmes, før en anden fil åbnes.\nGem nu?", "hobo-xslt",
+        MessageBox.Show(_translator.Of("Document.SaveBeforeReplace"), "hobo-xslt",
             MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK && Save();
 
-    private void UpdateTitle()
+    public void UpdateTitle()
     {
-        var name = FilePath is null ? "ikke gemt" : Path.GetFileName(FilePath);
+        var name = FilePath is null ? _translator.Of("Document.Unsaved") : Path.GetFileName(FilePath);
         _title.Text = $"{name}{(_editor.IsModified ? " *" : "")}";
         _title.ToolTip = FilePath;
     }
 
-    private static void ShowError(string message, Exception e) =>
-        MessageBox.Show($"{message}:\n{e.Message}", "hobo-xslt", MessageBoxButton.OK, MessageBoxImage.Error);
+    private void ShowError(string key, string path, Exception e) =>
+        MessageBox.Show(_translator.Format(key, path, e.Message), "hobo-xslt", MessageBoxButton.OK, MessageBoxImage.Error);
 }

@@ -12,12 +12,5 @@ public sealed record DiagnosticRow(Diagnostic Diagnostic)
         _ => $"{Path.GetFileName(Diagnostic.File)}:{Diagnostic.Line}"
     };
 
-    public string Kind => Diagnostic.Kind switch
-    {
-        DiagnosticKind.CompileError => "Kompileringsfejl",
-        DiagnosticKind.RuntimeError => "Kørselsfejl",
-        _ => "xsl:message"
-    };
-
     public string Text => Diagnostic.Text;
 }

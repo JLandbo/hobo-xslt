@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml;
 using HoboXslt.Core;
+using HoboXslt.Core.Languages;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
@@ -17,23 +18,27 @@ namespace HoboXslt.App;
 
 public partial class MainWindow : Window
 {
-    private const string XmlFilter = "XML-filer (*.xml)|*.xml|Alle filer (*.*)|*.*";
-    private const string XsltFilter = "XSLT-filer (*.xsl;*.xslt)|*.xsl;*.xslt|Alle filer (*.*)|*.*";
+    private const string XmlFilter = "Document.XmlFilter";
+    private const string XsltFilter = "Document.XsltFilter";
 
+    private readonly Translator _translator;
     private readonly EditorDocument _xml;
     private readonly EditorDocument _xslt;
     private readonly BreakpointStore _breakpoints = new();
+    // Texts set from code keep their setters, so a language switch can set them again.
+    private readonly Dictionary<object, Action> _texts = [];
     private XsltRunner? _runner;
     private XPathEvaluator? _xpath;
     private DebugSession? _session;
     private TextEditor? _activeEditor;
 
-    public MainWindow()
+    public MainWindow(Translator translator)
     {
+        _translator = translator;
         InitializeComponent();
         ApplySyntaxColors();
-        _xml = new(XmlEditor, XmlTitle, XmlFilter);
-        _xslt = new(XsltEditor, XsltTitle, XsltFilter);
+        _xml = new(XmlEditor, XmlTitle, XmlFilter, translator);
+        _xslt = new(XsltEditor, XsltTitle, XsltFilter, translator);
         XsltMainTab.Tag = _xslt;
         SetUpEditor(XmlEditor);
         SetUpEditor(XsltEditor);
@@ -44,7 +49,40 @@ public partial class MainWindow : Window
         XsltTabs.SelectionChanged += (_, _) => UpdateXsltMeta();
         UpdateXmlMeta();
         UpdateXsltMeta();
+        SetText(CaretText, "Status.Caret", 1, 1);
+        SetText(StatusText, "Status.Starting");
+        AddLanguageItems();
+        translator.Changed += UpdateLanguage;
     }
+
+    private void AddLanguageItems()
+    {
+        foreach (var translation in Translation.All)
+        {
+            var item = new MenuItem { Header = translation.Name, Tag = translation, IsChecked = translation == _translator.Current };
+            item.Click += (_, _) => _translator.Use(translation);
+            LanguageMenu.Items.Add(item);
+        }
+    }
+
+    private void UpdateLanguage()
+    {
+        foreach (var set in _texts.Values)
+            set();
+        foreach (var document in XsltDocuments.Append(_xml))
+            document.UpdateTitle();
+        foreach (var item in LanguageMenu.Items.Cast<MenuItem>())
+            item.IsChecked = (Translation)item.Tag == _translator.Current;
+    }
+
+    private void SetText(object target, Action set)
+    {
+        _texts[target] = set;
+        set();
+    }
+
+    private void SetText(TextBlock block, string key, params object?[] values) =>
+        SetText(block, () => block.Text = _translator.Format(key, values));
 
     private void ApplySyntaxColors()
     {
@@ -111,7 +149,7 @@ public partial class MainWindow : Window
             return;
 
         var caret = editor.TextArea.Caret;
-        CaretText.Text = $"Ln {caret.Line}, Col {caret.Column}";
+        SetText(CaretText, "Status.Caret", caret.Line, caret.Column);
         EncodingText.Text = (editor.Encoding ?? Encoding.UTF8).WebName.ToUpperInvariant();
         LineEndingText.Text = LineEnding(editor.Document);
     }
@@ -127,7 +165,7 @@ public partial class MainWindow : Window
         };
     }
 
-    private void UpdateXmlMeta() => XmlMeta.Text = XmlEditor.LineCount == 1 ? "1 linje" : $"{XmlEditor.LineCount} linjer";
+    private void UpdateXmlMeta() => SetText(XmlMeta, XmlEditor.LineCount == 1 ? "Pane.OneLine" : "Pane.Lines", XmlEditor.LineCount);
 
     private void UpdateXsltMeta()
     {
@@ -135,7 +173,7 @@ public partial class MainWindow : Window
             return;
 
         var count = BreakpointMarginOf(editor).Count;
-        XsltMeta.Text = count == 1 ? "1 breakpoint" : $"{count} breakpoints";
+        SetText(XsltMeta, count == 1 ? "Pane.OneBreakpoint" : "Pane.Breakpoints", count);
     }
 
     private IEnumerable<EditorDocument> XsltDocuments => XsltTabs.Items.Cast<TabItem>().Select(Document);
@@ -152,11 +190,11 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            StatusText.Text = $"Saxon kunne ikke starte: {ex.Message}";
+            SetText(StatusText, "Status.StartFailed", ex.Message);
             return;
         }
 
-        StatusText.Text = "Klar";
+        SetText(StatusText, "Status.Ready");
         SetIdle(true);
         XPathButton.IsEnabled = true;
     }
@@ -209,7 +247,8 @@ public partial class MainWindow : Window
             result = new([], ex.Message);
         }
 
-        XPathResultBox.Text = result.Error ?? (result.Items.Count == 0 ? "Tom sekvens" : string.Join(Environment.NewLine, result.Items));
+        SetText(XPathResultBox, () => XPathResultBox.Text =
+            result.Error ?? (result.Items.Count == 0 ? _translator.Of("XPath.EmptySequence") : string.Join(Environment.NewLine, result.Items)));
         XPathResultBox.Foreground = (Brush)FindResource(result.Error is null ? "ValueBrush" : "BreakpointBrush");
         XPathButton.IsEnabled = true;
     }
@@ -241,7 +280,7 @@ public partial class MainWindow : Window
 
         var (xsltPath, xmlPath) = (_xslt.FilePath!, _xml.FilePath!);
         SetIdle(false);
-        StatusText.Text = "Kører…";
+        SetText(StatusText, "Status.Running");
         ShowResult(null, []);
 
         RunResult result;
@@ -256,7 +295,7 @@ public partial class MainWindow : Window
 
         DiagnosticsTab.IsSelected = true;
         ShowResult(result.Output, result.Diagnostics);
-        StatusText.Text = result.Output is null ? "Kørsel fejlede" : "Kørsel fuldført";
+        SetText(StatusText, result.Output is null ? "Status.RunFailed" : "Status.RunCompleted");
         SetIdle(true);
     }
 
@@ -268,14 +307,14 @@ public partial class MainWindow : Window
         foreach (var margin in BreakpointMargins)
             margin.SaveLines();
 
-        var session = new DebugSession(_xslt.FilePath!, _xml.FilePath!, _breakpoints.All);
+        var session = new DebugSession(_xslt.FilePath!, _xml.FilePath!, _breakpoints.All, _translator);
         session.Paused += snapshot => Dispatcher.BeginInvoke(() => ShowPause(session, snapshot));
         _session = session;
         SetIdle(false);
         SetEditorsReadOnly(true);
         OpenXmlButton.IsEnabled = OpenXsltButton.IsEnabled = false;
         StopButton.IsEnabled = true;
-        StatusText.Text = "Debugger kører…";
+        SetText(StatusText, "Status.Debugging");
         ShowResult(null, []);
         ShowUnbound([]);
 
@@ -299,12 +338,12 @@ public partial class MainWindow : Window
         ShowResult(result.Output, result.Diagnostics);
         // Breakpoints never reached by a stopped or failed run are not known to be unbound.
         ShowUnbound(result.Outcome == DebugOutcome.Completed ? result.UnboundBreakpoints : []);
-        StatusText.Text = result.Outcome switch
+        SetText(StatusText, result.Outcome switch
         {
-            DebugOutcome.Completed => "Debugsession fuldført",
-            DebugOutcome.Stopped => "Debugsession stoppet",
-            _ => "Debugsession fejlede"
-        };
+            DebugOutcome.Completed => "Status.DebugCompleted",
+            DebugOutcome.Stopped => "Status.DebugStopped",
+            _ => "Status.DebugFailed"
+        });
         SetIdle(true);
     }
 
@@ -314,8 +353,8 @@ public partial class MainWindow : Window
             return;
 
         SetPaused(true);
-        PauseText.Text = $"Pauset ved {Path.GetFileName(snapshot.File)}:{snapshot.Line}";
-        StatusText.Text = "Debugsession aktiv · editorer er skrivebeskyttede";
+        SetText(PauseText, "Debug.PausedAt", Path.GetFileName(snapshot.File), snapshot.Line);
+        SetText(StatusText, "Status.DebugPaused");
         VariablesList.ItemsSource = snapshot.Variables;
         VariablesTab.IsSelected = true;
         if (ShowXsltLine(snapshot.File, snapshot.Line) is { Content: TextEditor editor })
@@ -336,7 +375,7 @@ public partial class MainWindow : Window
             return;
 
         SetPaused(false);
-        StatusText.Text = "Debugger kører…";
+        SetText(StatusText, "Status.Debugging");
         command(session);
     }
 
@@ -347,7 +386,7 @@ public partial class MainWindow : Window
 
         SetPaused(false);
         StopButton.IsEnabled = false;
-        StatusText.Text = "Stopper…";
+        SetText(StatusText, "Status.Stopping");
         session.Stop();
     }
 
@@ -384,13 +423,13 @@ public partial class MainWindow : Window
     }
 
     private bool ReadyToStart() =>
-        XsltDocuments.All(d => ReadyForRun(d, "XSLT-stylesheetet")) && ReadyForRun(_xml, "XML-input");
+        XsltDocuments.All(d => ReadyForRun(d, "Run.XsltNotSaved")) && ReadyForRun(_xml, "Run.XmlNotSaved");
 
-    private static bool ReadyForRun(EditorDocument document, string name)
+    private bool ReadyForRun(EditorDocument document, string notSavedKey)
     {
         if (document.FilePath is null)
         {
-            MessageBox.Show($"{name} er ikke gemt. Gem filen før kørsel.", "hobo-xslt", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(_translator.Of(notSavedKey), "hobo-xslt", MessageBoxButton.OK, MessageBoxImage.Information);
             return false;
         }
 
@@ -454,7 +493,7 @@ public partial class MainWindow : Window
     {
         var editor = new TextEditor { SyntaxHighlighting = HighlightingManager.Instance.GetDefinition("XML"), IsReadOnly = _session is not null };
         var title = new TextBlock();
-        var document = new EditorDocument(editor, title, XsltFilter);
+        var document = new EditorDocument(editor, title, XsltFilter, _translator);
         SetUpEditor(editor);
         var margin = NewBreakpointMargin(document);
         editor.TextArea.LeftMargins.Insert(0, margin);

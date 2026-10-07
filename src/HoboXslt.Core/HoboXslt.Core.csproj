@@ -12,4 +12,8 @@
     <MavenReference Include="net.sf.saxon:Saxon-HE" Version="12.10" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Languages\*.json" LogicalName="Languages/%(Filename)%(Extension)" />
+  </ItemGroup>
+
 </Project>

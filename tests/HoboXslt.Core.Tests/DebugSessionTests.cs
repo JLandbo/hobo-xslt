@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using HoboXslt.Core.Languages;
 
 namespace HoboXslt.Core.Tests;
 
@@ -384,7 +385,7 @@ public sealed class DebugSessionTests : IDisposable
 
     private DebugSession CreateSession(string xslt, params Breakpoint[] breakpoints)
     {
-        var session = new DebugSession(xslt, _files.Write("input.xml", "<root/>"), breakpoints);
+        var session = new DebugSession(xslt, _files.Write("input.xml", "<root/>"), breakpoints, new Translator(Translation.Danish));
         session.Paused += _pauses.Add;
         return session;
     }

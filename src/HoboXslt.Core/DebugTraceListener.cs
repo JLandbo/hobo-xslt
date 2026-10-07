@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using HoboXslt.Core.Languages;
 using net.sf.saxon.expr;
 using net.sf.saxon.expr.instruct;
 using net.sf.saxon.lib;
@@ -8,7 +9,7 @@ using net.sf.saxon.trace;
 
 namespace HoboXslt.Core;
 
-internal sealed class DebugTraceListener(DebugSession session, IReadOnlySet<Breakpoint> breakpoints) : TraceListener
+internal sealed class DebugTraceListener(DebugSession session, IReadOnlySet<Breakpoint> breakpoints, Translator translator) : TraceListener
 {
     private readonly HashSet<Breakpoint> _bound = [];
     private DebugCommand _mode = DebugCommand.Continue;
@@ -34,7 +35,7 @@ internal sealed class DebugTraceListener(DebugSession session, IReadOnlySet<Brea
         // Aborting before the stack runs out turns infinite recursion into a failed run instead of a process crash.
         if (!RuntimeHelpers.TryEnsureSufficientExecutionStack())
             throw new StackExhaustedException(new(DiagnosticKind.RuntimeError, file, line > 0 ? line : null,
-                "Too many nested template or function calls to continue debugging; possibly infinite recursion."));
+                translator.Of("Debug.TooDeep")));
 
         if (instruction is Block)
             return;

@@ -125,28 +125,30 @@
                     <TextBlock Text="hobo-xslt" FontWeight="SemiBold" Margin="8,0,0,0" VerticalAlignment="Center" />
                 </StackPanel>
                 <Menu Grid.Column="1" Margin="16,0,0,0" Background="Transparent" VerticalAlignment="Center">
-                    <MenuItem Header="Filer" Style="{StaticResource MenuHeader}">
-                        <MenuItem Header="Åbn XML…" IsEnabled="{Binding IsEnabled, ElementName=OpenXmlButton}" Click="OpenXml_Click" />
-                        <MenuItem Header="Gem XML" Click="SaveXml_Click" />
+                    <MenuItem Header="{DynamicResource Menu.File}" Style="{StaticResource MenuHeader}">
+                        <MenuItem Header="{DynamicResource Menu.OpenXml}" IsEnabled="{Binding IsEnabled, ElementName=OpenXmlButton}" Click="OpenXml_Click" />
+                        <MenuItem Header="{DynamicResource Menu.SaveXml}" Click="SaveXml_Click" />
                         <Separator />
-                        <MenuItem Header="Åbn XSLT…" IsEnabled="{Binding IsEnabled, ElementName=OpenXsltButton}" Click="OpenXslt_Click" />
-                        <MenuItem Header="Gem XSLT" Click="SaveXslt_Click" />
+                        <MenuItem Header="{DynamicResource Menu.OpenXslt}" IsEnabled="{Binding IsEnabled, ElementName=OpenXsltButton}" Click="OpenXslt_Click" />
+                        <MenuItem Header="{DynamicResource Menu.SaveXslt}" Click="SaveXslt_Click" />
                     </MenuItem>
-                    <MenuItem Header="Rediger" Style="{StaticResource MenuHeader}" />
-                    <MenuItem Header="Vis" Style="{StaticResource MenuHeader}" />
-                    <MenuItem Header="Kør" Style="{StaticResource MenuHeader}">
-                        <MenuItem Header="Kør" IsEnabled="{Binding IsEnabled, ElementName=RunButton}" Click="Run_Click" />
-                        <MenuItem Header="Evaluér XPath" IsEnabled="{Binding IsEnabled, ElementName=XPathButton}" Click="EvaluateXPath_Click" />
+                    <MenuItem Header="{DynamicResource Menu.Edit}" Style="{StaticResource MenuHeader}" />
+                    <MenuItem Header="{DynamicResource Menu.View}" Style="{StaticResource MenuHeader}">
+                        <MenuItem x:Name="LanguageMenu" Header="{DynamicResource Menu.Language}" />
                     </MenuItem>
-                    <MenuItem Header="Debug" Style="{StaticResource MenuHeader}">
-                        <MenuItem Header="Start debugging" InputGestureText="F5" IsEnabled="{Binding IsEnabled, ElementName=DebugButton}" Click="Debug_Click" />
-                        <MenuItem Header="Fortsæt" InputGestureText="F5" IsEnabled="{Binding IsEnabled, ElementName=ContinueButton}" Click="Continue_Click" />
-                        <MenuItem Header="Step into" InputGestureText="F11" IsEnabled="{Binding IsEnabled, ElementName=StepIntoButton}" Click="StepInto_Click" />
-                        <MenuItem Header="Step over" InputGestureText="F10" IsEnabled="{Binding IsEnabled, ElementName=StepOverButton}" Click="StepOver_Click" />
-                        <MenuItem Header="Step out" InputGestureText="Shift+F11" IsEnabled="{Binding IsEnabled, ElementName=StepOutButton}" Click="StepOut_Click" />
-                        <MenuItem Header="Stop" InputGestureText="Shift+F5" IsEnabled="{Binding IsEnabled, ElementName=StopButton}" Click="Stop_Click" />
+                    <MenuItem Header="{DynamicResource Menu.Run}" Style="{StaticResource MenuHeader}">
+                        <MenuItem Header="{DynamicResource Run.Run}" IsEnabled="{Binding IsEnabled, ElementName=RunButton}" Click="Run_Click" />
+                        <MenuItem Header="{DynamicResource Menu.EvaluateXPath}" IsEnabled="{Binding IsEnabled, ElementName=XPathButton}" Click="EvaluateXPath_Click" />
                     </MenuItem>
-                    <MenuItem Header="Hjælp" Style="{StaticResource MenuHeader}" />
+                    <MenuItem Header="{DynamicResource Menu.Debug}" Style="{StaticResource MenuHeader}">
+                        <MenuItem Header="{DynamicResource Debug.Start}" InputGestureText="F5" IsEnabled="{Binding IsEnabled, ElementName=DebugButton}" Click="Debug_Click" />
+                        <MenuItem Header="{DynamicResource Debug.Continue}" InputGestureText="F5" IsEnabled="{Binding IsEnabled, ElementName=ContinueButton}" Click="Continue_Click" />
+                        <MenuItem Header="{DynamicResource Debug.StepInto}" InputGestureText="F11" IsEnabled="{Binding IsEnabled, ElementName=StepIntoButton}" Click="StepInto_Click" />
+                        <MenuItem Header="{DynamicResource Debug.StepOver}" InputGestureText="F10" IsEnabled="{Binding IsEnabled, ElementName=StepOverButton}" Click="StepOver_Click" />
+                        <MenuItem Header="{DynamicResource Debug.StepOut}" InputGestureText="Shift+F11" IsEnabled="{Binding IsEnabled, ElementName=StepOutButton}" Click="StepOut_Click" />
+                        <MenuItem Header="{DynamicResource Debug.Stop}" InputGestureText="Shift+F5" IsEnabled="{Binding IsEnabled, ElementName=StopButton}" Click="Stop_Click" />
+                    </MenuItem>
+                    <MenuItem Header="{DynamicResource Menu.Help}" Style="{StaticResource MenuHeader}" />
                 </Menu>
                 <TextBlock x:Name="RunFileText" Grid.Column="2" Margin="16,0,0,0" FontSize="12" Foreground="{StaticResource FaintBrush}"
                            HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
@@ -163,29 +165,30 @@
                     </StackPanel>
                 </Border>
                 <StackPanel Orientation="Horizontal">
-                    <Button x:Name="RunButton" Style="{StaticResource LabeledToolButton}" AutomationProperties.Name="Kør" IsEnabled="False" Click="Run_Click">
+                    <Button x:Name="RunButton" Style="{StaticResource LabeledToolButton}" AutomationProperties.Name="{DynamicResource Run.Run}" IsEnabled="False" Click="Run_Click">
                         <StackPanel Orientation="Horizontal">
                             <StaticResource ResourceKey="RunIcon" />
-                            <TextBlock Text="Kør" Margin="6,0,0,0" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Run.Run}" Margin="6,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="DebugButton" Style="{StaticResource LabeledToolButton}" AutomationProperties.Name="Debug" ToolTip="Start debugging (F5)" IsEnabled="False" Click="Debug_Click">
+                    <Button x:Name="DebugButton" Style="{StaticResource LabeledToolButton}" AutomationProperties.Name="{DynamicResource Debug.Debug}"
+                            ToolTip="{DynamicResource Debug.StartTip}" IsEnabled="False" Click="Debug_Click">
                         <StackPanel Orientation="Horizontal">
                             <StaticResource ResourceKey="DebugIcon" />
-                            <TextBlock Text="Debug" Margin="6,0,0,0" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Debug.Debug}" Margin="6,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
                     <Border Style="{StaticResource ToolSeparator}" />
-                    <Button x:Name="ContinueButton" Style="{StaticResource ToolButton}" Foreground="{StaticResource AccentBrush}" AutomationProperties.Name="Fortsæt"
-                            ToolTip="Fortsæt (F5)" IsEnabled="False" Click="Continue_Click" Content="{StaticResource ContinueIcon}" />
-                    <Button x:Name="StepIntoButton" Style="{StaticResource ToolButton}" AutomationProperties.Name="Step into"
-                            ToolTip="Step into (F11)" IsEnabled="False" Click="StepInto_Click" Content="{StaticResource StepIntoIcon}" />
-                    <Button x:Name="StepOverButton" Style="{StaticResource ToolButton}" AutomationProperties.Name="Step over"
-                            ToolTip="Step over (F10)" IsEnabled="False" Click="StepOver_Click" Content="{StaticResource StepOverIcon}" />
-                    <Button x:Name="StepOutButton" Style="{StaticResource ToolButton}" AutomationProperties.Name="Step out"
-                            ToolTip="Step out (Shift+F11)" IsEnabled="False" Click="StepOut_Click" Content="{StaticResource StepOutIcon}" />
-                    <Button x:Name="StopButton" Style="{StaticResource ToolButton}" Foreground="{StaticResource BreakpointBrush}" AutomationProperties.Name="Stop"
-                            ToolTip="Stop (Shift+F5)" IsEnabled="False" Click="Stop_Click" Content="{StaticResource StopIcon}" />
+                    <Button x:Name="ContinueButton" Style="{StaticResource ToolButton}" Foreground="{StaticResource AccentBrush}" AutomationProperties.Name="{DynamicResource Debug.Continue}"
+                            ToolTip="{DynamicResource Debug.ContinueTip}" IsEnabled="False" Click="Continue_Click" Content="{StaticResource ContinueIcon}" />
+                    <Button x:Name="StepIntoButton" Style="{StaticResource ToolButton}" AutomationProperties.Name="{DynamicResource Debug.StepInto}"
+                            ToolTip="{DynamicResource Debug.StepIntoTip}" IsEnabled="False" Click="StepInto_Click" Content="{StaticResource StepIntoIcon}" />
+                    <Button x:Name="StepOverButton" Style="{StaticResource ToolButton}" AutomationProperties.Name="{DynamicResource Debug.StepOver}"
+                            ToolTip="{DynamicResource Debug.StepOverTip}" IsEnabled="False" Click="StepOver_Click" Content="{StaticResource StepOverIcon}" />
+                    <Button x:Name="StepOutButton" Style="{StaticResource ToolButton}" AutomationProperties.Name="{DynamicResource Debug.StepOut}"
+                            ToolTip="{DynamicResource Debug.StepOutTip}" IsEnabled="False" Click="StepOut_Click" Content="{StaticResource StepOutIcon}" />
+                    <Button x:Name="StopButton" Style="{StaticResource ToolButton}" Foreground="{StaticResource BreakpointBrush}" AutomationProperties.Name="{DynamicResource Debug.Stop}"
+                            ToolTip="{DynamicResource Debug.StopTip}" IsEnabled="False" Click="Stop_Click" Content="{StaticResource StopIcon}" />
                 </StackPanel>
             </DockPanel>
         </Border>
@@ -198,8 +201,8 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="XPATH" Margin="0,0,10,0" VerticalAlignment="Center" FontSize="11" FontWeight="Medium" Foreground="{StaticResource FaintBrush}" />
-                <TextBox x:Name="XPathBox" Grid.Column="1" VerticalAlignment="Top" KeyDown="XPathBox_KeyDown" AutomationProperties.Name="XPath"
+                <TextBlock Text="{DynamicResource XPath.Label}" Margin="0,0,10,0" VerticalAlignment="Center" FontSize="11" FontWeight="Medium" Foreground="{StaticResource FaintBrush}" />
+                <TextBox x:Name="XPathBox" Grid.Column="1" VerticalAlignment="Top" KeyDown="XPathBox_KeyDown" AutomationProperties.Name="{DynamicResource XPath.Name}"
                          Height="28" Padding="6,0" VerticalContentAlignment="Center" FontFamily="{StaticResource CodeFont}" FontSize="12"
                          Background="{StaticResource PanelBrush}" Foreground="{StaticResource InkBrush}">
                     <TextBox.Template>
@@ -215,7 +218,7 @@
                         </ControlTemplate>
                     </TextBox.Template>
                 </TextBox>
-                <Button x:Name="XPathButton" Grid.Column="2" Margin="8,0,0,0" VerticalAlignment="Top" Content="Evaluér" IsEnabled="False"
+                <Button x:Name="XPathButton" Grid.Column="2" Margin="8,0,0,0" VerticalAlignment="Top" Content="{DynamicResource XPath.Evaluate}" IsEnabled="False"
                         Style="{StaticResource LabeledToolButton}" Click="EvaluateXPath_Click" />
                 <TextBox x:Name="XPathResultBox" Grid.Column="3" Margin="10,0,0,0" MaxHeight="120" IsReadOnly="True" VerticalContentAlignment="Center"
                          MinHeight="28" BorderThickness="0" Background="Transparent" FontFamily="{StaticResource CodeFont}" FontSize="12"
@@ -236,14 +239,14 @@
                 <DockPanel>
                     <Border DockPanel.Dock="Top" Style="{StaticResource PaneHead}">
                         <DockPanel>
-                            <Button DockPanel.Dock="Right" Style="{StaticResource PaneButton}" ToolTip="Gem" AutomationProperties.Name="Gem"
+                            <Button DockPanel.Dock="Right" Style="{StaticResource PaneButton}" ToolTip="{DynamicResource Pane.Save}" AutomationProperties.Name="{DynamicResource Pane.Save}"
                                     Click="SaveXml_Click" Content="{StaticResource SaveIcon}" />
-                            <Button x:Name="OpenXmlButton" DockPanel.Dock="Right" Style="{StaticResource PaneButton}" ToolTip="Åbn…" AutomationProperties.Name="Åbn…"
+                            <Button x:Name="OpenXmlButton" DockPanel.Dock="Right" Style="{StaticResource PaneButton}" ToolTip="{DynamicResource Pane.Open}" AutomationProperties.Name="{DynamicResource Pane.Open}"
                                     Click="OpenXml_Click" Content="{StaticResource OpenIcon}" />
                             <TextBlock x:Name="XmlMeta" DockPanel.Dock="Right" Style="{StaticResource Meta}" />
                             <Label Content="XML" Style="{StaticResource Kind}" />
                             <TextBlock x:Name="XmlTitle" Style="{StaticResource FileName}" />
-                            <TextBlock Text="Input" Style="{StaticResource Meta}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{DynamicResource Pane.Input}" Style="{StaticResource Meta}" TextTrimming="CharacterEllipsis" />
                         </DockPanel>
                     </Border>
                     <avalonEdit:TextEditor x:Name="XmlEditor" SyntaxHighlighting="XML" />
@@ -279,9 +282,9 @@
                     <StackPanel Orientation="Horizontal" Height="33" Margin="0,0,10,0" VerticalAlignment="Top" HorizontalAlignment="Right"
                                 Background="{StaticResource PanelBrush}">
                         <TextBlock x:Name="XsltMeta" Style="{StaticResource Meta}" />
-                        <Button x:Name="OpenXsltButton" Style="{StaticResource PaneButton}" ToolTip="Åbn…" AutomationProperties.Name="Åbn…"
+                        <Button x:Name="OpenXsltButton" Style="{StaticResource PaneButton}" ToolTip="{DynamicResource Pane.Open}" AutomationProperties.Name="{DynamicResource Pane.Open}"
                                 Click="OpenXslt_Click" Content="{StaticResource OpenIcon}" />
-                        <Button Style="{StaticResource PaneButton}" ToolTip="Gem" AutomationProperties.Name="Gem"
+                        <Button Style="{StaticResource PaneButton}" ToolTip="{DynamicResource Pane.Save}" AutomationProperties.Name="{DynamicResource Pane.Save}"
                                 Click="SaveXslt_Click" Content="{StaticResource SaveIcon}" />
                     </StackPanel>
                 </Grid>
@@ -295,8 +298,8 @@
                         <DockPanel>
                             <TextBlock x:Name="OutputMeta" DockPanel.Dock="Right" Style="{StaticResource Meta}" />
                             <Label Content="XML" Style="{StaticResource Kind}" />
-                            <TextBlock Text="Output" Style="{StaticResource FileName}" />
-                            <TextBlock Text="Seneste kørsel" Style="{StaticResource Meta}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{DynamicResource Pane.Output}" Style="{StaticResource FileName}" />
+                            <TextBlock Text="{DynamicResource Pane.LastRun}" Style="{StaticResource Meta}" TextTrimming="CharacterEllipsis" />
                         </DockPanel>
                     </Border>
                     <avalonEdit:TextEditor x:Name="OutputEditor" IsReadOnly="True" />
@@ -321,37 +324,48 @@
                 <TabItem x:Name="VariablesTab">
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Variabler" />
+                            <TextBlock Text="{DynamicResource Variables.Title}" />
                             <Label Style="{StaticResource Count}" Content="{Binding Items.Count, ElementName=VariablesList}" />
                         </StackPanel>
                     </TabItem.Header>
                     <ListView x:Name="VariablesList" Style="{StaticResource Table}" ItemContainerStyle="{StaticResource TableRow}">
                         <ListView.View>
                             <GridView ColumnHeaderContainerStyle="{StaticResource TableHeader}">
-                                <GridViewColumn Header="NAVN" Width="300">
+                                <GridViewColumn Header="{DynamicResource Variables.Name}" Width="300">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Style="{StaticResource CodeCell}" Foreground="{StaticResource AttributeBrush}" Text="{Binding Name, StringFormat='${0}'}" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="VÆRDI" Width="780">
+                                <GridViewColumn Header="{DynamicResource Variables.Value}" Width="780">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Style="{StaticResource CodeCell}" Text="{Binding Value, TargetNullValue=utilgængelig}" />
+                                            <TextBlock>
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock" BasedOn="{StaticResource CodeCell}">
+                                                        <Setter Property="Text" Value="{Binding Value}" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Value}" Value="{x:Null}">
+                                                                <Setter Property="Text" Value="{DynamicResource Variables.Unavailable}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="SCOPE" Width="120">
+                                <GridViewColumn Header="{DynamicResource Variables.Scope}" Width="120">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock FontSize="12" Foreground="{StaticResource MutedBrush}">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock" BasedOn="{StaticResource Cell}">
-                                                        <Setter Property="Text" Value="Lokal" />
+                                                        <Setter Property="Text" Value="{DynamicResource Variables.Local}" />
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding Scope}" Value="Global">
-                                                                <Setter Property="Text" Value="Global" />
+                                                                <Setter Property="Text" Value="{DynamicResource Variables.Global}" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -367,7 +381,7 @@
                 <TabItem x:Name="DiagnosticsTab">
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Fejl og beskeder" />
+                            <TextBlock Text="{DynamicResource Diagnostics.Title}" />
                             <Label Style="{StaticResource Count}" Content="{Binding Items.Count, ElementName=DiagnosticsList}" />
                         </StackPanel>
                     </TabItem.Header>
@@ -379,22 +393,35 @@
                         </ListView.ItemContainerStyle>
                         <ListView.View>
                             <GridView ColumnHeaderContainerStyle="{StaticResource TableHeader}">
-                                <GridViewColumn Header="PLACERING" Width="220">
+                                <GridViewColumn Header="{DynamicResource Diagnostics.Location}" Width="220">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Style="{StaticResource CodeCell}" FontSize="12" Foreground="{StaticResource AccentBrush}" Text="{Binding Location}" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="TYPE" Width="160">
+                                <GridViewColumn Header="{DynamicResource Diagnostics.Kind}" Width="160">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <Label Style="{StaticResource Kind}" Margin="6,0" FontFamily="{StaticResource UiFont}" FontSize="11" FontWeight="Normal"
-                                                   Padding="6,1" HorizontalAlignment="Left" Content="{Binding Kind}" />
+                                            <Label Margin="6,0" FontFamily="{StaticResource UiFont}" FontSize="11" FontWeight="Normal" Padding="6,1" HorizontalAlignment="Left">
+                                                <Label.Style>
+                                                    <Style TargetType="Label" BasedOn="{StaticResource Kind}">
+                                                        <Setter Property="Content" Value="{DynamicResource Diagnostics.Message}" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Diagnostic.Kind}" Value="CompileError">
+                                                                <Setter Property="Content" Value="{DynamicResource Diagnostics.CompileError}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Diagnostic.Kind}" Value="RuntimeError">
+                                                                <Setter Property="Content" Value="{DynamicResource Diagnostics.RuntimeError}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Label.Style>
+                                            </Label>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="BESKED" Width="900">
+                                <GridViewColumn Header="{DynamicResource Diagnostics.Text}" Width="900">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Style="{StaticResource Cell}" Text="{Binding Text}" />
@@ -411,14 +438,14 @@
         <Border Grid.Row="6" Height="26" Padding="12,0" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0">
             <DockPanel TextElement.FontSize="11.5" TextElement.Foreground="{StaticResource MutedBrush}">
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock x:Name="CaretText" Text="Ln 1, Col 1" />
+                    <TextBlock x:Name="CaretText" />
                     <TextBlock x:Name="EncodingText" Text="UTF-8" Margin="16,0,0,0" />
                     <TextBlock x:Name="LineEndingText" Text="CRLF" Margin="16,0,0,0" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Ellipse Width="7" Height="7" Fill="{StaticResource OkBrush}" Margin="0,0,6,0" VerticalAlignment="Center" />
                     <TextBlock Text="Saxon-HE 12 · XSLT 3.0" />
-                    <TextBlock x:Name="StatusText" Text="Starter Saxon…" Margin="16,0,0,0" TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="StatusText" Margin="16,0,0,0" TextTrimming="CharacterEllipsis" />
                 </StackPanel>
             </DockPanel>
         </Border>

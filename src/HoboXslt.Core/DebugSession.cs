@@ -1,6 +1,8 @@
+using HoboXslt.Core.Languages;
+
 namespace HoboXslt.Core;
 
-public sealed class DebugSession(string xsltPath, string xmlPath, IEnumerable<Breakpoint> breakpoints) : IDisposable
+public sealed class DebugSession(string xsltPath, string xmlPath, IEnumerable<Breakpoint> breakpoints, Translator translator) : IDisposable
 {
     private const int DebugStackSize = 16 * 1024 * 1024;
 
@@ -76,7 +78,7 @@ public sealed class DebugSession(string xsltPath, string xmlPath, IEnumerable<Br
 
     private DebugResult Run()
     {
-        var listener = new DebugTraceListener(this, _breakpoints);
+        var listener = new DebugTraceListener(this, _breakpoints, translator);
         List<Diagnostic> diagnostics = [];
         try
         {
