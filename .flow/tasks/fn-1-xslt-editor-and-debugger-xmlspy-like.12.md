@@ -25,9 +25,21 @@ Give the program its own icon, wired the way the user's Hoboman app does it, and
 - [ ] TBD
 
 ## Done summary
-TBD
+Added the app icon: the mockup's </> brand mark on the #2a58c4 rounded square, rendered locally (WPF script, no downloads) to src/HoboXslt.App/HoboXslt.ico (16, 24, 32, 48, 64, 128, 256 px) and a 256 px HoboXslt.png. The app project sets `<ApplicationIcon>HoboXslt.ico</ApplicationIcon>` as Hoboman does; the README header shows the PNG at width 160 above the centered h1, like Hoboman's.
 
+- Measured: `dotnet build HoboXslt.slnx` green (0 warnings), `dotnet test tests/HoboXslt.Core.Tests` 36/36 passed; baseline: green via handoff (48276a5, only .flow/ changed since).
+- Measured: `dotnet publish src\HoboXslt.App -c Release` to a scratch folder; the exe's shell icon is the new icon. The published exe was started: its title bar and taskbar button show the icon (screenshots in .flow/tmp/handover/: exe-icon.png, window-titlebar.png, taskbar-button.png). MainWindow.xaml needed no change: WPF uses the exe icon when the window sets none.
+- Inferred, not run: the Start menu shortcut from install.ps1 points at the exe, so it shows the same icon (install.ps1 not run per host note).
+- Follow-up (not part of this task): the taskbar button's accessible name reads "HoboXslt.App" (assembly name), not "hobo-xslt".
+- Note: the worktree started at 6bb72a2, one commit behind the declared base; it was fast-forwarded to 3356b3d (task files) before work began.
+
+
+Tier: session (jev-unavailable(no_key))
+stage: impl-review - skipped(policy: risk - icon asset and one csproj line, display only; covered by the spec completion review)
+Integrated verify at f12ad64: dotnet build rc=0; dotnet test green.
+
+stage: plan-sync - skipped(config: planSync.enabled != true)
 ## Evidence
-- Commits:
-- Tests:
+- Commits: f12ad64776dd25f6b2a1af58d6c116771b11f972
+- Tests: dotnet build HoboXslt.slnx, dotnet test tests/HoboXslt.Core.Tests
 - PRs:
