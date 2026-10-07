@@ -4,7 +4,7 @@ using HoboXslt.Core.Languages;
 
 namespace HoboXslt.Core;
 
-// Saxon-HE cannot be interrupted from another thread, so each transformation runs in its own worker process that Stop kills.
+// Saxon-HE cannot be interrupted from another thread, so each transformation runs in its own worker process that Stop ends.
 public static class Worker
 {
     public const string Argument = "--worker";

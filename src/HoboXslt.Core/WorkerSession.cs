@@ -9,7 +9,7 @@ namespace HoboXslt.Core;
 // One run or debug session in a worker process; Stop ends the process, which stops any transformation at once.
 public sealed class WorkerSession : IDisposable
 {
-    private static readonly TimeSpan StopGrace = TimeSpan.FromMilliseconds(200);
+    private static readonly TimeSpan StopGrace = TimeSpan.FromMilliseconds(500);
 
     private readonly Process _process;
     private readonly Translator _translator;
