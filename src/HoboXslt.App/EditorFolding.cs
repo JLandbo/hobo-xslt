@@ -35,4 +35,13 @@ public static class EditorFolding
             timer.Start();
         };
     }
+
+    public static void Reveal(TextEditor editor, int offset)
+    {
+        if (editor.TextArea.TextView.GetService(typeof(FoldingManager)) is not FoldingManager manager)
+            return;
+
+        foreach (var folding in manager.GetFoldingsContaining(offset))
+            folding.IsFolded = false;
+    }
 }

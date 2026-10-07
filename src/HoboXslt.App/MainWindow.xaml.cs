@@ -145,7 +145,8 @@ public partial class MainWindow : Window
     private void AddPausedLineRenderer(TextEditor editor, string brushKey, bool fullWidth)
     {
         var view = editor.TextArea.TextView;
-        view.BackgroundRenderers.Add(new PausedLineRenderer(view, (Brush)FindResource(brushKey), fullWidth));
+        // First, so the indentation guides are drawn on top of the highlight.
+        view.BackgroundRenderers.Insert(0, new PausedLineRenderer(view, (Brush)FindResource(brushKey), fullWidth));
     }
 
     private void UpdateEditorStatusFor(TextEditor editor)
@@ -398,10 +399,15 @@ public partial class MainWindow : Window
         VariablesList.ItemsSource = snapshot.Variables;
         VariablesTab.IsSelected = true;
         if (ShowXsltLine(snapshot.File, snapshot.Line) is { Content: TextEditor editor } && snapshot.Line <= editor.Document.LineCount)
-            PausedLineRendererOf(editor).Show(editor.Document.GetLineByNumber(snapshot.Line));
+        {
+            var line = editor.Document.GetLineByNumber(snapshot.Line);
+            EditorFolding.Reveal(editor, line.Offset);
+            PausedLineRendererOf(editor).Show(line);
+        }
 
         if (snapshot.Context is { } context && StartTag(XmlEditor.Document, context) is { } tag)
         {
+            EditorFolding.Reveal(XmlEditor, tag.StartOffset);
             PausedLineRendererOf(XmlEditor).Show(tag);
             var start = XmlEditor.Document.GetLocation(tag.StartOffset);
             XmlEditor.ScrollTo(start.Line, start.Column);
