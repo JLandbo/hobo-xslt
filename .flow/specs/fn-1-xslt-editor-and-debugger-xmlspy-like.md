@@ -34,6 +34,9 @@
 > user (turn 12): "1) Der skal ikon på, ligesom hoboman. 2) CTRL + S skal gemme den fil man står markeret på. XML eller XSLT."
 > user (turn 12): "En almindelig Kør kan ikke stoppes ... Hvorfor kan den ikke stoppes? Uendelig løkke skal IKKE bare fortsætte ? jeg skal sgu da ikke stoppe programmet ?"
 > user (turn 12): "Jeg skal kunne klikke "STOP" altså [] ikon."
+> user (turn 13): "Beskeder ved stop: Det skal være løbende! Det skal variable vel også og output?"
+> user (turn 13, selected): "Løbende, behold ved Stop/fejl"
+> user (turn 13): "Extra proces: Så længe der kun kører én UI."
 > user (turn 11): "Og så skal den linje debuggeren stopper på gerne markeres med orange baggrundsfarve, så man visuelt også kan se hvis man begynder at kalde next, step in, out, over etc."
 
 ## Goal & Context
@@ -74,7 +77,7 @@ flowchart LR
 - A run that never terminates can be stopped from the UI without closing the program. [paraphrase] This holds for Run and Debug alike, including a loop inside a single XPath expression (R22).
 - Run and Debug use the files on disk: dirty documents are saved first, and an unsaved (untitled) stylesheet cannot be run.
 - One run or debug session at a time; Run/Debug are disabled while a session is active, and editors are read-only during a debug session.
-- A failed run clears the output pane; partial output from a mid-run failure is discarded.
+- Output written before a failure or Stop stays in the output pane, and the status says the run failed or was stopped (R24).
 - Closing the program during a paused or running session stops it; the process does not hang.
 - The XSLT pane has tabs. The first tab holds the XSLT file that Run and Debug execute, and navigation never replaces it. A diagnostic or a debug pause in an included/imported file opens that file in an extra tab, or switches to its tab when already open. [paraphrase]
 - A modified XSLT or XML document must be saved before another file is opened in its place (save or cancel; no discard). The output pane never asks to save. [paraphrase]
@@ -82,7 +85,7 @@ flowchart LR
 ## Acceptance Criteria
 
 - **R1:** XML and XSLT files can be opened, edited and saved in an editor with XML syntax highlighting. Errors: missing or unreadable file → message, editor content unchanged; malformed XML stays editable (no blocking). [paraphrase]
-- **R2:** The user can run the XSLT against the XML input and see the result in an output pane. Errors: compile or runtime failure → no output shown as success; the failure is reported per R4. [paraphrase]
+- **R2:** The user can run the XSLT against the XML input and see the result in an output pane. Errors: compile or runtime failure → never shown as success: the status says it failed and the failure is reported per R4; output written before a runtime failure stays (R24). [paraphrase]
 - **R4:** Compile errors, runtime errors and `xsl:message` output are listed with file and line; selecting an entry moves the editor cursor to that location. Errors: an entry without location is listed but not navigable. [paraphrase]
 - **R5:** The user can set breakpoints on XSLT lines (including in included/imported stylesheets); a debug run pauses before executing an instruction on such a line. Errors: a breakpoint on a line with no instruction is never hit and is shown as unbound. [paraphrase]
 - **R6:** While debugging, the user can step into, step over, step out, continue and stop. Errors: stop during a running or paused transformation ends the run and leaves the program responsive. [paraphrase]
@@ -99,7 +102,9 @@ flowchart LR
 - **R19:** While a debug run is paused, the paused line has an orange background in the editor that shows it; the highlight moves with every step (into, over, out) and continue, and disappears when the run stops, completes or fails. Errors: no location for the paused instruction → no highlight, session continues. [paraphrase]
 - **R20:** The program has its own icon like the user's Hoboman app: the exe, the window/taskbar and the Start menu shortcut show it, and the README header shows it as an image. The icon uses the brand mark from the approved mockup (</> on the blue rounded square). Errors: no error surface. [paraphrase]
 - **R21:** Ctrl+S saves the file of the editor that has focus: the XML input, or the selected XSLT tab. With focus elsewhere it saves the editor that last had focus. An untitled document opens the save dialog. Errors: a failed save shows the existing save error message; nothing else changes. [paraphrase]
-- **R22:** The Stop button (■) and Shift+F5 stop any running transformation at once — a plain Run as well as a Debug session, running or paused, including an infinite loop inside a single XPath expression — without closing the program; the program stays responsive and a new Run or Debug can start right after. Errors: a stopped run shows no output and a status saying it was stopped; no partial output. [paraphrase]
+- **R22:** The Stop button (■) and Shift+F5 stop any running transformation at once — a plain Run as well as a Debug session, running or paused, including an infinite loop inside a single XPath expression — without closing the program; the program stays responsive and a new Run or Debug can start right after. Errors: a stopped run keeps the output written so far and shows a status saying it was stopped (R24). [paraphrase]
+- **R23:** Compile errors, runtime errors and `xsl:message` entries appear in Fejl og beskeder while a Run or Debug session is still running, as Saxon reports them; nothing reported before a Stop, a failure or a pause is lost. Errors: no error surface beyond R4. [paraphrase]
+- **R24:** The output pane shows the result while it is being written, during Run and Debug, also while the debugger is paused. On Stop or failure the output written so far stays, and the status says the run was stopped or failed (incomplete output). Whether the final text is highlighted as XML or shown as plain text (R11) is decided when the run ends. Errors: no error surface beyond R2/R11/R22. [paraphrase]
 
 ## Early proof point
 
@@ -133,7 +138,7 @@ dotnet test tests/HoboXslt.Core.Tests
 | Req | Description | Task(s) | Gap justification |
 | --- | --- | --- | --- |
 | R1 | XML and XSLT files can be opened, edited and saved in an editor with XML syntax highlighting. Errors: missing or unreadable file → message, editor content unchanged; malformed XML stays editable (no blocking). | fn-1-xslt-editor-and-debugger-xmlspy-like.3 | — |
-| R2 | The user can run the XSLT against the XML input and see the result in an output pane. Errors: compile or runtime failure → no output shown as success; the failure is reported per R4. | fn-1-xslt-editor-and-debugger-xmlspy-like.1, fn-1-xslt-editor-and-debugger-xmlspy-like.3 | — |
+| R2 | The user can run the XSLT against the XML input and see the result in an output pane. Errors: compile or runtime failure → never shown as success: the status says it failed and the failure is reported per R4; output written before a runtime failure stays (R24). | fn-1-xslt-editor-and-debugger-xmlspy-like.1, fn-1-xslt-editor-and-debugger-xmlspy-like.15, fn-1-xslt-editor-and-debugger-xmlspy-like.3 | — |
 | R4 | Compile errors, runtime errors and `xsl:message` output are listed with file and line; selecting an entry moves the editor cursor to that location. Errors: an entry without location is listed but not navigable. | fn-1-xslt-editor-and-debugger-xmlspy-like.1, fn-1-xslt-editor-and-debugger-xmlspy-like.3 | — |
 | R5 | The user can set breakpoints on XSLT lines (including in included/imported stylesheets); a debug run pauses before executing an instruction on such a line. Errors: a breakpoint on a line with no instruction is never hit and is shown as unbound. | fn-1-xslt-editor-and-debugger-xmlspy-like.2, fn-1-xslt-editor-and-debugger-xmlspy-like.5 | — |
 | R6 | While debugging, the user can step into, step over, step out, continue and stop. Errors: stop during a running or paused transformation ends the run and leaves the program responsive. | fn-1-xslt-editor-and-debugger-xmlspy-like.2, fn-1-xslt-editor-and-debugger-xmlspy-like.5 | — |
@@ -150,4 +155,6 @@ dotnet test tests/HoboXslt.Core.Tests
 | R19 | While a debug run is paused, the paused line has an orange background in the editor that shows it; the highlight moves with every step (into, over, out) and continue, and disappears when the run stops, completes or fails. Errors: no location for the paused instruction → no highlight, session continues. | fn-1-xslt-editor-and-debugger-xmlspy-like.10 | — |
 | R20 | The program has its own icon like the user's Hoboman app: the exe, the window/taskbar and the Start menu shortcut show it, and the README header shows it as an image. The icon uses the brand mark from the approved mockup (</> on the blue rounded square). Errors: no error surface. | fn-1-xslt-editor-and-debugger-xmlspy-like.12 | — |
 | R21 | Ctrl+S saves the file of the editor that has focus: the XML input, or the selected XSLT tab. With focus elsewhere it saves the editor that last had focus. An untitled document opens the save dialog. Errors: a failed save shows the existing save error message; nothing else changes. | fn-1-xslt-editor-and-debugger-xmlspy-like.13 | — |
-| R22 | The Stop button (■) and Shift+F5 stop any running transformation at once — a plain Run as well as a Debug session, running or paused, including an infinite loop inside a single XPath expression — without closing the program; the program stays responsive and a new Run or Debug can start right after. Errors: a stopped run shows no output and a status saying it was stopped; no partial output. | fn-1-xslt-editor-and-debugger-xmlspy-like.14 | — |
+| R22 | The Stop button (■) and Shift+F5 stop any running transformation at once — a plain Run as well as a Debug session, running or paused, including an infinite loop inside a single XPath expression — without closing the program; the program stays responsive and a new Run or Debug can start right after. Errors: a stopped run keeps the output written so far and shows a status saying it was stopped (R24). | fn-1-xslt-editor-and-debugger-xmlspy-like.14, fn-1-xslt-editor-and-debugger-xmlspy-like.15 | — |
+| R23 | Compile errors, runtime errors and `xsl:message` entries appear in Fejl og beskeder while a Run or Debug session is still running, as Saxon reports them; nothing reported before a Stop, a failure or a pause is lost. Errors: no error surface beyond R4. | fn-1-xslt-editor-and-debugger-xmlspy-like.15 | — |
+| R24 | The output pane shows the result while it is being written, during Run and Debug, also while the debugger is paused. On Stop or failure the output written so far stays, and the status says the run was stopped or failed (incomplete output). Whether the final text is highlighted as XML or shown as plain text (R11) is decided when the run ends. Errors: no error surface beyond R2/R11/R22. | fn-1-xslt-editor-and-debugger-xmlspy-like.15 | — |
