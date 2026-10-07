@@ -11,14 +11,12 @@ public sealed class EditorDocument
 {
     private readonly TextEditor _editor;
     private readonly TextBlock _title;
-    private readonly string? _label;
     private readonly string _filter;
 
-    public EditorDocument(TextEditor editor, TextBlock title, string? label, string filter)
+    public EditorDocument(TextEditor editor, TextBlock title, string filter)
     {
         _editor = editor;
         _title = title;
-        _label = label;
         _filter = filter;
         DependencyPropertyDescriptor.FromProperty(TextEditor.IsModifiedProperty, typeof(TextEditor))
             .AddValueChanged(editor, (_, _) => UpdateTitle());
@@ -98,7 +96,7 @@ public sealed class EditorDocument
     private void UpdateTitle()
     {
         var name = FilePath is null ? "ikke gemt" : Path.GetFileName(FilePath);
-        _title.Text = $"{(_label is null ? "" : $"{_label} · ")}{name}{(_editor.IsModified ? " *" : "")}";
+        _title.Text = $"{name}{(_editor.IsModified ? " *" : "")}";
         _title.ToolTip = FilePath;
     }
 

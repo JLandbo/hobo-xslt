@@ -3,26 +3,106 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
         Title="hobo-xslt" Height="800" Width="1400"
+        Background="{StaticResource ChromeBrush}" Foreground="{StaticResource InkBrush}"
+        FontFamily="{StaticResource UiFont}" FontSize="13"
         Loaded="Window_Loaded" Closed="Window_Closed" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
         <Style TargetType="avalonEdit:TextEditor">
-            <Setter Property="FontFamily" Value="Consolas" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="ShowLineNumbers" Value="True" />
+            <Setter Property="FontFamily" Value="{StaticResource CodeFont}" />
+            <Setter Property="FontSize" Value="12.5" />
+            <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+            <Setter Property="LineNumbersForeground" Value="{StaticResource FaintBrush}" />
+            <Setter Property="Padding" Value="0,6,0,0" />
+            <Setter Property="Margin" Value="0,0,0,6" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
         </Style>
-        <Style x:Key="PaneTitle" TargetType="TextBlock">
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-        </Style>
-        <Style x:Key="PaneButton" TargetType="Button">
-            <Setter Property="Padding" Value="8,1" />
-            <Setter Property="Margin" Value="4,0,0,0" />
-        </Style>
+
+        <Viewbox x:Key="OpenIcon" x:Shared="False" Style="{StaticResource Icon}">
+            <Canvas Width="24" Height="24">
+                <Path Style="{StaticResource IconStroke}" Data="M3,7 A2,2 0 0 1 5,5 H9 L11,7 H19 A2,2 0 0 1 21,9 V10 H7.5 A2,2 0 0 0 5.6,11.4 L3,19 Z" />
+                <Path Style="{StaticResource IconStroke}" Data="M3,19 L5.6,11.4 A2,2 0 0 1 7.5,10 H22 L19.3,17.6 A2,2 0 0 1 17.4,19 Z" />
+            </Canvas>
+        </Viewbox>
+        <Viewbox x:Key="SaveIcon" x:Shared="False" Style="{StaticResource Icon}">
+            <Canvas Width="24" Height="24">
+                <Path Style="{StaticResource IconStroke}" Data="M5,3 H16 L20,7 V19 A2,2 0 0 1 18,21 H6 A2,2 0 0 1 4,19 V5 A2,2 0 0 1 5,3 Z M8,3 V8 H15 V3" />
+                <Path Style="{StaticResource IconStroke}">
+                    <Path.Data>
+                        <RectangleGeometry Rect="8,13,8,6" RadiusX="1" RadiusY="1" />
+                    </Path.Data>
+                </Path>
+            </Canvas>
+        </Viewbox>
+        <Viewbox x:Key="RunIcon" x:Shared="False" Style="{StaticResource Icon}">
+            <Canvas Width="24" Height="24">
+                <Path Style="{StaticResource IconFill}" Data="M7,4.5 V19.5 A1,1 0 0 0 8.5,20.4 L20.5,12.9 A1,1 0 0 0 20.5,11.1 L8.5,3.6 A1,1 0 0 0 7,4.5 Z" />
+            </Canvas>
+        </Viewbox>
+        <Viewbox x:Key="DebugIcon" x:Shared="False" Style="{StaticResource Icon}">
+            <Canvas Width="24" Height="24">
+                <Path Style="{StaticResource IconStroke}">
+                    <Path.Data>
+                        <RectangleGeometry Rect="7,7,10,13" RadiusX="5" RadiusY="5" />
+                    </Path.Data>
+                </Path>
+                <Path Style="{StaticResource IconStroke}" Data="M9,7.5 V6 A3,3 0 0 1 15,6 V7.5 M3,13 H7 M17,13 H21 M4,8 L7,10 M20,8 L17,10 M4,19 L7,17 M20,19 L17,17 M12,11 V19" />
+            </Canvas>
+        </Viewbox>
+        <Viewbox x:Key="ContinueIcon" x:Shared="False" Style="{StaticResource Icon}">
+            <Canvas Width="24" Height="24">
+                <Path Style="{StaticResource IconFill}" Data="M5,4.5 V19.5 A1,1 0 0 0 6.5,20.4 L16.5,12.9 A1,1 0 0 0 16.5,11.1 L6.5,3.6 A1,1 0 0 0 5,4.5 Z" />
+                <Path Style="{StaticResource IconFill}">
+                    <Path.Data>
+                        <RectangleGeometry Rect="17.5,4,2.5,16" RadiusX="1" RadiusY="1" />
+                    </Path.Data>
+                </Path>
+            </Canvas>
+        </Viewbox>
+        <Viewbox x:Key="StepIntoIcon" x:Shared="False" Style="{StaticResource Icon}">
+            <Canvas Width="24" Height="24">
+                <Path Style="{StaticResource IconStroke}" Data="M12,3 V14 M7.5,9.5 L12,14 L16.5,9.5" />
+                <Path Style="{StaticResource IconStroke}">
+                    <Path.Data>
+                        <EllipseGeometry Center="12,19.5" RadiusX="1.8" RadiusY="1.8" />
+                    </Path.Data>
+                </Path>
+            </Canvas>
+        </Viewbox>
+        <Viewbox x:Key="StepOverIcon" x:Shared="False" Style="{StaticResource Icon}">
+            <Canvas Width="24" Height="24">
+                <Path Style="{StaticResource IconStroke}" Data="M4,14 A8,8 0 0 1 19.5,11 M20,5 V11 H14" />
+                <Path Style="{StaticResource IconStroke}">
+                    <Path.Data>
+                        <EllipseGeometry Center="12,19.5" RadiusX="1.8" RadiusY="1.8" />
+                    </Path.Data>
+                </Path>
+            </Canvas>
+        </Viewbox>
+        <Viewbox x:Key="StepOutIcon" x:Shared="False" Style="{StaticResource Icon}">
+            <Canvas Width="24" Height="24">
+                <Path Style="{StaticResource IconStroke}" Data="M12,15 V4 M7.5,8.5 L12,4 L16.5,8.5" />
+                <Path Style="{StaticResource IconStroke}">
+                    <Path.Data>
+                        <EllipseGeometry Center="12,19.5" RadiusX="1.8" RadiusY="1.8" />
+                    </Path.Data>
+                </Path>
+            </Canvas>
+        </Viewbox>
+        <Viewbox x:Key="StopIcon" x:Shared="False" Style="{StaticResource Icon}">
+            <Canvas Width="24" Height="24">
+                <Path Style="{StaticResource IconFill}">
+                    <Path.Data>
+                        <RectangleGeometry Rect="5,5,14,14" RadiusX="2" RadiusY="2" />
+                    </Path.Data>
+                </Path>
+            </Canvas>
+        </Viewbox>
     </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" MinHeight="100" />
             <RowDefinition Height="6" />
@@ -30,34 +110,120 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0">
-            <ToolBar>
-                <Button x:Name="RunButton" Content="Kør" IsEnabled="False" Click="Run_Click" />
-                <Button x:Name="DebugButton" Content="Debug" ToolTip="Start debugging (F5)" IsEnabled="False" Click="Debug_Click" />
-                <Separator />
-                <Button x:Name="ContinueButton" Content="Fortsæt" ToolTip="Fortsæt (F5)" IsEnabled="False" Click="Continue_Click" />
-                <Button x:Name="StepIntoButton" Content="Step into" ToolTip="Step into (F11)" IsEnabled="False" Click="StepInto_Click" />
-                <Button x:Name="StepOverButton" Content="Step over" ToolTip="Step over (F10)" IsEnabled="False" Click="StepOver_Click" />
-                <Button x:Name="StepOutButton" Content="Step out" ToolTip="Step out (Shift+F11)" IsEnabled="False" Click="StepOut_Click" />
-                <Button x:Name="StopButton" Content="Stop" ToolTip="Stop (Shift+F5)" IsEnabled="False" Click="Stop_Click" />
-            </ToolBar>
+        <Border Grid.Row="0" Height="34" Padding="12,0" BorderBrush="{StaticResource LineSoftBrush}" BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="18" Height="18" CornerRadius="4" Background="{StaticResource AccentBrush}">
+                        <TextBlock Text="&lt;/&gt;" FontFamily="{StaticResource CodeFont}" FontSize="9" FontWeight="SemiBold"
+                                   Foreground="{StaticResource OnAccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="hobo-xslt" FontWeight="SemiBold" Margin="8,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+                <Menu Grid.Column="1" Margin="16,0,0,0" Background="Transparent" VerticalAlignment="Center">
+                    <MenuItem Header="Filer" Style="{StaticResource MenuHeader}">
+                        <MenuItem Header="Åbn XML…" IsEnabled="{Binding IsEnabled, ElementName=OpenXmlButton}" Click="OpenXml_Click" />
+                        <MenuItem Header="Gem XML" Click="SaveXml_Click" />
+                        <Separator />
+                        <MenuItem Header="Åbn XSLT…" IsEnabled="{Binding IsEnabled, ElementName=OpenXsltButton}" Click="OpenXslt_Click" />
+                        <MenuItem Header="Gem XSLT" Click="SaveXslt_Click" />
+                    </MenuItem>
+                    <MenuItem Header="Rediger" Style="{StaticResource MenuHeader}" />
+                    <MenuItem Header="Vis" Style="{StaticResource MenuHeader}" />
+                    <MenuItem Header="Kør" Style="{StaticResource MenuHeader}">
+                        <MenuItem Header="Kør" IsEnabled="{Binding IsEnabled, ElementName=RunButton}" Click="Run_Click" />
+                        <MenuItem Header="Evaluér XPath" IsEnabled="{Binding IsEnabled, ElementName=XPathButton}" Click="EvaluateXPath_Click" />
+                    </MenuItem>
+                    <MenuItem Header="Debug" Style="{StaticResource MenuHeader}">
+                        <MenuItem Header="Start debugging" InputGestureText="F5" IsEnabled="{Binding IsEnabled, ElementName=DebugButton}" Click="Debug_Click" />
+                        <MenuItem Header="Fortsæt" InputGestureText="F5" IsEnabled="{Binding IsEnabled, ElementName=ContinueButton}" Click="Continue_Click" />
+                        <MenuItem Header="Step into" InputGestureText="F11" IsEnabled="{Binding IsEnabled, ElementName=StepIntoButton}" Click="StepInto_Click" />
+                        <MenuItem Header="Step over" InputGestureText="F10" IsEnabled="{Binding IsEnabled, ElementName=StepOverButton}" Click="StepOver_Click" />
+                        <MenuItem Header="Step out" InputGestureText="Shift+F11" IsEnabled="{Binding IsEnabled, ElementName=StepOutButton}" Click="StepOut_Click" />
+                        <MenuItem Header="Stop" InputGestureText="Shift+F5" IsEnabled="{Binding IsEnabled, ElementName=StopButton}" Click="Stop_Click" />
+                    </MenuItem>
+                    <MenuItem Header="Hjælp" Style="{StaticResource MenuHeader}" />
+                </Menu>
+                <TextBlock x:Name="RunFileText" Grid.Column="2" Margin="16,0,0,0" FontSize="12" Foreground="{StaticResource FaintBrush}"
+                           HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+            </Grid>
+        </Border>
 
-            <Grid Margin="6,4">
+        <Border Grid.Row="1" Padding="10,6" BorderBrush="{StaticResource LineSoftBrush}" BorderThickness="0,0,0,1">
+            <DockPanel>
+                <Border x:Name="PauseBadge" DockPanel.Dock="Right" Visibility="Collapsed" CornerRadius="10" Padding="10,3"
+                        Background="{StaticResource PauseBackgroundBrush}" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="6" Height="6" Fill="{StaticResource PauseInkBrush}" VerticalAlignment="Center" />
+                        <TextBlock x:Name="PauseText" Margin="6,0,0,0" FontSize="12" FontWeight="Medium" Foreground="{StaticResource PauseInkBrush}" />
+                    </StackPanel>
+                </Border>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="RunButton" Style="{StaticResource LabeledToolButton}" AutomationProperties.Name="Kør" IsEnabled="False" Click="Run_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <StaticResource ResourceKey="RunIcon" />
+                            <TextBlock Text="Kør" Margin="6,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="DebugButton" Style="{StaticResource LabeledToolButton}" AutomationProperties.Name="Debug" ToolTip="Start debugging (F5)" IsEnabled="False" Click="Debug_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <StaticResource ResourceKey="DebugIcon" />
+                            <TextBlock Text="Debug" Margin="6,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Border Style="{StaticResource ToolSeparator}" />
+                    <Button x:Name="ContinueButton" Style="{StaticResource ToolButton}" Foreground="{StaticResource AccentBrush}" AutomationProperties.Name="Fortsæt"
+                            ToolTip="Fortsæt (F5)" IsEnabled="False" Click="Continue_Click" Content="{StaticResource ContinueIcon}" />
+                    <Button x:Name="StepIntoButton" Style="{StaticResource ToolButton}" AutomationProperties.Name="Step into"
+                            ToolTip="Step into (F11)" IsEnabled="False" Click="StepInto_Click" Content="{StaticResource StepIntoIcon}" />
+                    <Button x:Name="StepOverButton" Style="{StaticResource ToolButton}" AutomationProperties.Name="Step over"
+                            ToolTip="Step over (F10)" IsEnabled="False" Click="StepOver_Click" Content="{StaticResource StepOverIcon}" />
+                    <Button x:Name="StepOutButton" Style="{StaticResource ToolButton}" AutomationProperties.Name="Step out"
+                            ToolTip="Step out (Shift+F11)" IsEnabled="False" Click="StepOut_Click" Content="{StaticResource StepOutIcon}" />
+                    <Button x:Name="StopButton" Style="{StaticResource ToolButton}" Foreground="{StaticResource BreakpointBrush}" AutomationProperties.Name="Stop"
+                            ToolTip="Stop (Shift+F5)" IsEnabled="False" Click="Stop_Click" Content="{StaticResource StopIcon}" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <Border Grid.Row="2" Padding="10,6" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1">
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="XPath" Margin="0,0,8,0" VerticalAlignment="Top" Padding="0,2" Style="{StaticResource PaneTitle}" />
-                <TextBox x:Name="XPathBox" Grid.Column="1" VerticalAlignment="Top" FontFamily="Consolas" KeyDown="XPathBox_KeyDown" />
-                <Button x:Name="XPathButton" Grid.Column="2" VerticalAlignment="Top" Content="Evaluér" IsEnabled="False" Style="{StaticResource PaneButton}" Click="EvaluateXPath_Click" />
-                <TextBox x:Name="XPathResultBox" Grid.Column="3" Margin="8,0,0,0" MaxHeight="120" IsReadOnly="True" FontFamily="Consolas"
-                         VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" />
+                <TextBlock Text="XPATH" Margin="0,0,10,0" VerticalAlignment="Center" FontSize="11" FontWeight="Medium" Foreground="{StaticResource FaintBrush}" />
+                <TextBox x:Name="XPathBox" Grid.Column="1" VerticalAlignment="Top" KeyDown="XPathBox_KeyDown" AutomationProperties.Name="XPath"
+                         Height="28" Padding="6,0" VerticalContentAlignment="Center" FontFamily="{StaticResource CodeFont}" FontSize="12"
+                         Background="{StaticResource PanelBrush}" Foreground="{StaticResource InkBrush}">
+                    <TextBox.Template>
+                        <ControlTemplate TargetType="TextBox">
+                            <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="6">
+                                <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsKeyboardFocused" Value="True">
+                                    <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </TextBox.Template>
+                </TextBox>
+                <Button x:Name="XPathButton" Grid.Column="2" Margin="8,0,0,0" VerticalAlignment="Top" Content="Evaluér" IsEnabled="False"
+                        Style="{StaticResource LabeledToolButton}" Click="EvaluateXPath_Click" />
+                <TextBox x:Name="XPathResultBox" Grid.Column="3" Margin="10,0,0,0" MaxHeight="120" IsReadOnly="True" VerticalContentAlignment="Center"
+                         MinHeight="28" BorderThickness="0" Background="Transparent" FontFamily="{StaticResource CodeFont}" FontSize="12"
+                         Foreground="{StaticResource ValueBrush}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" />
             </Grid>
-        </StackPanel>
+        </Border>
 
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="3" Margin="8,8,8,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" MinWidth="150" />
                 <ColumnDefinition Width="6" />
@@ -66,74 +232,177 @@
                 <ColumnDefinition Width="*" MinWidth="150" />
             </Grid.ColumnDefinitions>
 
-            <DockPanel Grid.Column="0">
-                <DockPanel DockPanel.Dock="Top" Margin="6,4">
-                    <Button DockPanel.Dock="Right" Content="Gem" Style="{StaticResource PaneButton}" Click="SaveXml_Click" />
-                    <Button DockPanel.Dock="Right" Content="Åbn…" Style="{StaticResource PaneButton}" Click="OpenXml_Click" />
-                    <TextBlock x:Name="XmlTitle" Style="{StaticResource PaneTitle}" />
+            <Border Grid.Column="0" Style="{StaticResource Card}">
+                <DockPanel>
+                    <Border DockPanel.Dock="Top" Style="{StaticResource PaneHead}">
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Style="{StaticResource PaneButton}" ToolTip="Gem" AutomationProperties.Name="Gem"
+                                    Click="SaveXml_Click" Content="{StaticResource SaveIcon}" />
+                            <Button x:Name="OpenXmlButton" DockPanel.Dock="Right" Style="{StaticResource PaneButton}" ToolTip="Åbn…" AutomationProperties.Name="Åbn…"
+                                    Click="OpenXml_Click" Content="{StaticResource OpenIcon}" />
+                            <TextBlock x:Name="XmlMeta" DockPanel.Dock="Right" Style="{StaticResource Meta}" />
+                            <Label Content="XML" Style="{StaticResource Kind}" />
+                            <TextBlock x:Name="XmlTitle" Style="{StaticResource FileName}" />
+                            <TextBlock Text="Input" Style="{StaticResource Meta}" TextTrimming="CharacterEllipsis" />
+                        </DockPanel>
+                    </Border>
+                    <avalonEdit:TextEditor x:Name="XmlEditor" SyntaxHighlighting="XML" />
                 </DockPanel>
-                <avalonEdit:TextEditor x:Name="XmlEditor" SyntaxHighlighting="XML" />
-            </DockPanel>
+            </Border>
 
-            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" ResizeBehavior="PreviousAndNext" />
+            <GridSplitter Grid.Column="1" Style="{StaticResource ColumnSplitter}" />
 
-            <DockPanel Grid.Column="2">
-                <DockPanel DockPanel.Dock="Top" Margin="6,4">
-                    <Button DockPanel.Dock="Right" Content="Gem" Style="{StaticResource PaneButton}" Click="SaveXslt_Click" />
-                    <Button DockPanel.Dock="Right" Content="Åbn…" Style="{StaticResource PaneButton}" Click="OpenXslt_Click" />
-                    <TextBlock Text="XSLT" Style="{StaticResource PaneTitle}" />
+            <Border Grid.Column="2" Style="{StaticResource Card}">
+                <Grid>
+                    <!-- The tab strip sits in the pane header, between the badge and the buttons laid over it below. -->
+                    <TabControl x:Name="XsltTabs" ItemContainerStyle="{StaticResource Tab}">
+                        <TabControl.Template>
+                            <ControlTemplate TargetType="TabControl">
+                                <DockPanel>
+                                    <Border DockPanel.Dock="Top" Style="{StaticResource PaneHead}" Padding="44,0,0,0">
+                                        <TabPanel IsItemsHost="True" />
+                                    </Border>
+                                    <ContentPresenter x:Name="PART_SelectedContentHost" ContentSource="SelectedContent" />
+                                </DockPanel>
+                            </ControlTemplate>
+                        </TabControl.Template>
+                        <TabItem x:Name="XsltMainTab">
+                            <TabItem.Header>
+                                <TextBlock x:Name="XsltTitle" />
+                            </TabItem.Header>
+                            <avalonEdit:TextEditor x:Name="XsltEditor" SyntaxHighlighting="XML" />
+                        </TabItem>
+                    </TabControl>
+                    <Grid Height="33" Margin="10,0,0,0" VerticalAlignment="Top" HorizontalAlignment="Left">
+                        <Label Content="XSLT" Style="{StaticResource Kind}" />
+                    </Grid>
+                    <StackPanel Orientation="Horizontal" Height="33" Margin="0,0,10,0" VerticalAlignment="Top" HorizontalAlignment="Right"
+                                Background="{StaticResource PanelBrush}">
+                        <TextBlock x:Name="XsltMeta" Style="{StaticResource Meta}" />
+                        <Button x:Name="OpenXsltButton" Style="{StaticResource PaneButton}" ToolTip="Åbn…" AutomationProperties.Name="Åbn…"
+                                Click="OpenXslt_Click" Content="{StaticResource OpenIcon}" />
+                        <Button Style="{StaticResource PaneButton}" ToolTip="Gem" AutomationProperties.Name="Gem"
+                                Click="SaveXslt_Click" Content="{StaticResource SaveIcon}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <GridSplitter Grid.Column="3" Style="{StaticResource ColumnSplitter}" />
+
+            <Border Grid.Column="4" Style="{StaticResource Card}">
+                <DockPanel>
+                    <Border DockPanel.Dock="Top" Style="{StaticResource PaneHead}">
+                        <DockPanel>
+                            <TextBlock x:Name="OutputMeta" DockPanel.Dock="Right" Style="{StaticResource Meta}" />
+                            <Label Content="XML" Style="{StaticResource Kind}" />
+                            <TextBlock Text="Output" Style="{StaticResource FileName}" />
+                            <TextBlock Text="Seneste kørsel" Style="{StaticResource Meta}" TextTrimming="CharacterEllipsis" />
+                        </DockPanel>
+                    </Border>
+                    <avalonEdit:TextEditor x:Name="OutputEditor" IsReadOnly="True" />
                 </DockPanel>
-                <TabControl x:Name="XsltTabs">
-                    <TabItem x:Name="XsltMainTab">
-                        <TabItem.Header>
-                            <TextBlock x:Name="XsltTitle" />
-                        </TabItem.Header>
-                        <avalonEdit:TextEditor x:Name="XsltEditor" SyntaxHighlighting="XML" />
-                    </TabItem>
-                </TabControl>
-            </DockPanel>
-
-            <GridSplitter Grid.Column="3" HorizontalAlignment="Stretch" ResizeBehavior="PreviousAndNext" />
-
-            <DockPanel Grid.Column="4">
-                <TextBlock DockPanel.Dock="Top" Margin="6,4" Padding="0,2" Text="Output" Style="{StaticResource PaneTitle}" />
-                <avalonEdit:TextEditor x:Name="OutputEditor" IsReadOnly="True" />
-            </DockPanel>
+            </Border>
         </Grid>
 
-        <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" />
+        <GridSplitter Grid.Row="4" Style="{StaticResource RowSplitter}" />
 
-        <TabControl Grid.Row="3">
-            <TabItem x:Name="DiagnosticsTab" Header="Fejl og beskeder">
-                <ListView x:Name="DiagnosticsList">
-                    <ListView.ItemContainerStyle>
-                        <Style TargetType="ListViewItem">
-                            <EventSetter Event="MouseDoubleClick" Handler="Diagnostic_DoubleClick" />
-                        </Style>
-                    </ListView.ItemContainerStyle>
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn Header="Placering" Width="160" DisplayMemberBinding="{Binding Location}" />
-                            <GridViewColumn Header="Type" Width="120" DisplayMemberBinding="{Binding Kind}" />
-                            <GridViewColumn Header="Besked" Width="900" DisplayMemberBinding="{Binding Text}" />
-                        </GridView>
-                    </ListView.View>
-                </ListView>
-            </TabItem>
-            <TabItem x:Name="VariablesTab" Header="Variabler">
-                <ListView x:Name="VariablesList">
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn Header="Navn" Width="200" DisplayMemberBinding="{Binding Name, StringFormat='${0}'}" />
-                            <GridViewColumn Header="Værdi" Width="900" DisplayMemberBinding="{Binding Value, TargetNullValue=utilgængelig}" />
-                        </GridView>
-                    </ListView.View>
-                </ListView>
-            </TabItem>
-        </TabControl>
+        <Border Grid.Row="5" Margin="8,0,8,8" Style="{StaticResource Card}">
+            <TabControl ItemContainerStyle="{StaticResource Tab}">
+                <TabControl.Template>
+                    <ControlTemplate TargetType="TabControl">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Top" Height="34" Padding="6,0" BorderBrush="{StaticResource LineSoftBrush}" BorderThickness="0,0,0,1">
+                                <TabPanel IsItemsHost="True" />
+                            </Border>
+                            <ContentPresenter x:Name="PART_SelectedContentHost" ContentSource="SelectedContent" Margin="0,0,0,4" />
+                        </DockPanel>
+                    </ControlTemplate>
+                </TabControl.Template>
+                <TabItem x:Name="VariablesTab">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Variabler" />
+                            <Label Style="{StaticResource Count}" Content="{Binding Items.Count, ElementName=VariablesList}" />
+                        </StackPanel>
+                    </TabItem.Header>
+                    <ListView x:Name="VariablesList" Style="{StaticResource Table}" ItemContainerStyle="{StaticResource TableRow}">
+                        <ListView.View>
+                            <GridView ColumnHeaderContainerStyle="{StaticResource TableHeader}">
+                                <GridViewColumn Header="NAVN" Width="300">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Style="{StaticResource CodeCell}" Foreground="{StaticResource AttributeBrush}" Text="{Binding Name, StringFormat='${0}'}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="VÆRDI" Width="900">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Style="{StaticResource CodeCell}" Text="{Binding Value, TargetNullValue=utilgængelig}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </TabItem>
+                <TabItem x:Name="DiagnosticsTab">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Fejl og beskeder" />
+                            <Label Style="{StaticResource Count}" Content="{Binding Items.Count, ElementName=DiagnosticsList}" />
+                        </StackPanel>
+                    </TabItem.Header>
+                    <ListView x:Name="DiagnosticsList" Style="{StaticResource Table}">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem" BasedOn="{StaticResource TableRow}">
+                                <EventSetter Event="MouseDoubleClick" Handler="Diagnostic_DoubleClick" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.View>
+                            <GridView ColumnHeaderContainerStyle="{StaticResource TableHeader}">
+                                <GridViewColumn Header="PLACERING" Width="220">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Style="{StaticResource CodeCell}" FontSize="12" Foreground="{StaticResource AccentBrush}" Text="{Binding Location}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="TYPE" Width="160">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Label Style="{StaticResource Kind}" Margin="6,0" FontFamily="{StaticResource UiFont}" FontSize="11" FontWeight="Normal"
+                                                   Padding="6,1" HorizontalAlignment="Left" Content="{Binding Kind}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="BESKED" Width="900">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Style="{StaticResource Cell}" Text="{Binding Text}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </TabItem>
+            </TabControl>
+        </Border>
 
-        <StatusBar Grid.Row="4">
-            <TextBlock x:Name="StatusText" Text="Starter Saxon…" />
-        </StatusBar>
+        <Border Grid.Row="6" Height="26" Padding="12,0" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0">
+            <DockPanel TextElement.FontSize="11.5" TextElement.Foreground="{StaticResource MutedBrush}">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock x:Name="CaretText" Text="Ln 1, Col 1" />
+                    <TextBlock x:Name="EncodingText" Text="UTF-8" Margin="16,0,0,0" />
+                    <TextBlock x:Name="LineEndingText" Text="CRLF" Margin="16,0,0,0" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Ellipse Width="7" Height="7" Fill="{StaticResource OkBrush}" Margin="0,0,6,0" VerticalAlignment="Center" />
+                    <TextBlock Text="Saxon-HE 12 · XSLT 3.0" />
+                    <TextBlock x:Name="StatusText" Text="Starter Saxon…" Margin="16,0,0,0" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
     </Grid>
 </Window>

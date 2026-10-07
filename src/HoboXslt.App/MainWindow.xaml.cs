@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -8,6 +9,8 @@ using System.Windows.Threading;
 using System.Xml;
 using HoboXslt.Core;
 using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Highlighting;
 
 namespace HoboXslt.App;
@@ -23,14 +26,109 @@ public partial class MainWindow : Window
     private XsltRunner? _runner;
     private XPathEvaluator? _xpath;
     private DebugSession? _session;
+    private TextEditor? _activeEditor;
 
     public MainWindow()
     {
         InitializeComponent();
-        _xml = new(XmlEditor, XmlTitle, "XML-input", XmlFilter);
-        _xslt = new(XsltEditor, XsltTitle, null, XsltFilter);
+        ApplySyntaxColors();
+        _xml = new(XmlEditor, XmlTitle, XmlFilter);
+        _xslt = new(XsltEditor, XsltTitle, XsltFilter);
         XsltMainTab.Tag = _xslt;
-        XsltEditor.TextArea.LeftMargins.Insert(0, new BreakpointMargin(_xslt, _breakpoints));
+        SetUpEditor(XmlEditor);
+        SetUpEditor(XsltEditor);
+        SetUpEditor(OutputEditor);
+        XsltEditor.TextArea.LeftMargins.Insert(0, NewBreakpointMargin(_xslt));
+        XmlEditor.TextChanged += (_, _) => UpdateXmlMeta();
+        XsltTabs.SelectionChanged += (_, _) => UpdateXsltMeta();
+        UpdateXmlMeta();
+        UpdateXsltMeta();
+    }
+
+    private void ApplySyntaxColors()
+    {
+        var xml = HighlightingManager.Instance.GetDefinition("XML");
+        HighlightingBrush Brush(string key) => new SimpleHighlightingBrush(((SolidColorBrush)FindResource(key)).Color);
+
+        xml.GetNamedColor("XmlTag").Foreground = Brush("TagBrush");
+        xml.GetNamedColor("AttributeName").Foreground = Brush("AttributeBrush");
+        xml.GetNamedColor("AttributeValue").Foreground = Brush("ValueBrush");
+        xml.GetNamedColor("Comment").Foreground = Brush("ProcessingInstructionBrush");
+        xml.GetNamedColor("XmlDeclaration").Foreground = Brush("ProcessingInstructionBrush");
+        xml.GetNamedColor("Entity").Foreground = Brush("ExpressionBrush");
+
+        // The mockup draws the angle brackets of a tag in the faint color, the name in the tag color.
+        var brackets = new HighlightingColor { Foreground = Brush("FaintBrush") };
+        foreach (var span in xml.MainRuleSet.Spans.Where(span => span.SpanColor == xml.GetNamedColor("XmlTag")))
+            span.StartColor = span.EndColor = brackets;
+    }
+
+    private void SetUpEditor(TextEditor editor)
+    {
+        editor.ShowLineNumbers = true;
+        // Namespace URIs are attribute values in the mockup, not links.
+        editor.Options.EnableHyperlinks = editor.Options.EnableEmailHyperlinks = false;
+        foreach (var margin in editor.TextArea.LeftMargins)
+        {
+            if (DottedLineMargin.IsDottedLineMargin(margin))
+                margin.Visibility = Visibility.Hidden;
+            else if (margin is LineNumberMargin numbers)
+                numbers.Margin = new(0, 0, 7, 0);
+        }
+
+        editor.TextArea.GotKeyboardFocus += (_, _) =>
+        {
+            _activeEditor = editor;
+            UpdateEditorStatus();
+        };
+        editor.TextArea.Caret.PositionChanged += (_, _) => UpdateEditorStatusFor(editor);
+        editor.TextChanged += (_, _) => UpdateEditorStatusFor(editor);
+    }
+
+    private BreakpointMargin NewBreakpointMargin(EditorDocument document)
+    {
+        var margin = new BreakpointMargin(document, _breakpoints) { IsEnabled = _session is null };
+        margin.Changed += (_, _) => UpdateXsltMeta();
+        return margin;
+    }
+
+    private void UpdateEditorStatusFor(TextEditor editor)
+    {
+        if (editor == _activeEditor)
+            UpdateEditorStatus();
+    }
+
+    private void UpdateEditorStatus()
+    {
+        if (_activeEditor is not { } editor)
+            return;
+
+        var caret = editor.TextArea.Caret;
+        CaretText.Text = $"Ln {caret.Line}, Col {caret.Column}";
+        EncodingText.Text = (editor.Encoding ?? Encoding.UTF8).WebName.ToUpperInvariant();
+        LineEndingText.Text = LineEnding(editor.Document);
+    }
+
+    private static string LineEnding(TextDocument document)
+    {
+        var line = document.GetLineByNumber(1);
+        return document.GetText(line.EndOffset, line.DelimiterLength) switch
+        {
+            "\n" => "LF",
+            "\r" => "CR",
+            _ => "CRLF"
+        };
+    }
+
+    private void UpdateXmlMeta() => XmlMeta.Text = XmlEditor.LineCount == 1 ? "1 linje" : $"{XmlEditor.LineCount} linjer";
+
+    private void UpdateXsltMeta()
+    {
+        if (XsltTabs.SelectedItem is not TabItem { Content: TextEditor editor })
+            return;
+
+        var count = BreakpointMarginOf(editor).Count;
+        XsltMeta.Text = count == 1 ? "1 breakpoint" : $"{count} breakpoints";
     }
 
     private IEnumerable<EditorDocument> XsltDocuments => XsltTabs.Items.Cast<TabItem>().Select(Document);
@@ -105,7 +203,7 @@ public partial class MainWindow : Window
         }
 
         XPathResultBox.Text = result.Error ?? (result.Items.Count == 0 ? "Tom sekvens" : string.Join(Environment.NewLine, result.Items));
-        XPathResultBox.Foreground = result.Error is null ? SystemColors.ControlTextBrush : Brushes.Firebrick;
+        XPathResultBox.Foreground = (Brush)FindResource(result.Error is null ? "ValueBrush" : "BreakpointBrush");
         XPathButton.IsEnabled = true;
     }
 
@@ -120,9 +218,14 @@ public partial class MainWindow : Window
         margin.SaveLines();
         if (_xslt.Open())
             margin.LoadLines();
+        RunFileText.Text = _xslt.FilePath;
     }
 
-    private void SaveXslt_Click(object sender, RoutedEventArgs e) => Document((TabItem)XsltTabs.SelectedItem).Save();
+    private void SaveXslt_Click(object sender, RoutedEventArgs e)
+    {
+        Document((TabItem)XsltTabs.SelectedItem).Save();
+        RunFileText.Text = _xslt.FilePath;
+    }
 
     private async void Run_Click(object sender, RoutedEventArgs e)
     {
@@ -144,6 +247,7 @@ public partial class MainWindow : Window
             result = new(null, [new(DiagnosticKind.RuntimeError, null, null, ex.Message)]);
         }
 
+        DiagnosticsTab.IsSelected = true;
         ShowResult(result.Output, result.Diagnostics);
         StatusText.Text = result.Output is null ? "Kørsel fejlede" : "Kørsel fuldført";
         SetIdle(true);
@@ -162,6 +266,7 @@ public partial class MainWindow : Window
         _session = session;
         SetIdle(false);
         SetEditorsReadOnly(true);
+        OpenXmlButton.IsEnabled = OpenXsltButton.IsEnabled = false;
         StopButton.IsEnabled = true;
         StatusText.Text = "Debugger kører…";
         ShowResult(null, []);
@@ -181,6 +286,7 @@ public partial class MainWindow : Window
         SetPaused(false);
         StopButton.IsEnabled = false;
         SetEditorsReadOnly(false);
+        OpenXmlButton.IsEnabled = OpenXsltButton.IsEnabled = true;
         VariablesList.ItemsSource = null;
         DiagnosticsTab.IsSelected = true;
         ShowResult(result.Output, result.Diagnostics);
@@ -201,7 +307,8 @@ public partial class MainWindow : Window
             return;
 
         SetPaused(true);
-        StatusText.Text = $"Pauset ved {Path.GetFileName(snapshot.File)}:{snapshot.Line}";
+        PauseText.Text = $"Pauset ved {Path.GetFileName(snapshot.File)}:{snapshot.Line}";
+        StatusText.Text = "Debugsession aktiv · editorer er skrivebeskyttede";
         VariablesList.ItemsSource = snapshot.Variables;
         VariablesTab.IsSelected = true;
         ShowXsltLine(snapshot.File, snapshot.Line);
@@ -238,14 +345,21 @@ public partial class MainWindow : Window
 
     private void SetIdle(bool idle) => RunButton.IsEnabled = DebugButton.IsEnabled = idle;
 
-    private void SetPaused(bool paused) =>
+    private void SetPaused(bool paused)
+    {
         ContinueButton.IsEnabled = StepIntoButton.IsEnabled = StepOverButton.IsEnabled = StepOutButton.IsEnabled = paused;
+        PauseBadge.Visibility = paused ? Visibility.Visible : Visibility.Collapsed;
+    }
 
     private void SetEditorsReadOnly(bool readOnly)
     {
         XmlEditor.IsReadOnly = readOnly;
         foreach (var editor in XsltEditors)
+        {
             editor.IsReadOnly = readOnly;
+            // The session copies the breakpoints at start, so toggles during it would not reach it.
+            BreakpointMarginOf(editor).IsEnabled = !readOnly;
+        }
     }
 
     private void ShowUnbound(IEnumerable<Breakpoint> unbound)
@@ -281,6 +395,7 @@ public partial class MainWindow : Window
     private void ShowOutput(string? output)
     {
         OutputEditor.Text = output ?? "";
+        OutputMeta.Text = output is null ? "" : DateTime.Now.ToString("HH:mm");
         OutputEditor.SyntaxHighlighting = output is not null && IsWellFormedXml(output)
             ? HighlightingManager.Instance.GetDefinition("XML")
             : null;
@@ -325,8 +440,9 @@ public partial class MainWindow : Window
     {
         var editor = new TextEditor { SyntaxHighlighting = HighlightingManager.Instance.GetDefinition("XML"), IsReadOnly = _session is not null };
         var title = new TextBlock();
-        var document = new EditorDocument(editor, title, null, XsltFilter);
-        var margin = new BreakpointMargin(document, _breakpoints);
+        var document = new EditorDocument(editor, title, XsltFilter);
+        SetUpEditor(editor);
+        var margin = NewBreakpointMargin(document);
         editor.TextArea.LeftMargins.Insert(0, margin);
         if (!document.Load(file))
             return null;

@@ -9,13 +9,15 @@ namespace HoboXslt.App;
 
 public sealed class BreakpointMargin(EditorDocument document, BreakpointStore store) : AbstractMargin
 {
-    private const double MarginWidth = 16;
-    private const double Radius = 5;
-    private static readonly Brush BreakpointBrush = new SolidColorBrush(Color.FromRgb(0xD3, 0x3B, 0x3B));
-    private static readonly Pen UnboundPen = new(BreakpointBrush, 1.5);
+    private const double MarginWidth = 18;
+    private const double Radius = 4.5;
 
     // Anchors keep breakpoints on their lines while the text is edited.
     private readonly List<TextAnchor> _anchors = [];
+
+    public event EventHandler? Changed;
+
+    public int Count => Lines().Count();
 
     // Loading a file replaces the whole text and deletes the anchors, so the lines are kept in the store per file.
     public void SaveLines()
@@ -33,6 +35,7 @@ public sealed class BreakpointMargin(EditorDocument document, BreakpointStore st
                 Add(line);
         }
         InvalidateVisual();
+        Changed?.Invoke(this, EventArgs.Empty);
     }
 
     protected override Size MeasureOverride(Size availableSize) => new(MarginWidth, 0);
@@ -55,6 +58,7 @@ public sealed class BreakpointMargin(EditorDocument document, BreakpointStore st
         if (TextView is not { VisualLinesValid: true } view)
             return;
 
+        var brush = (Brush)FindResource("BreakpointBrush");
         var lines = Lines().ToHashSet();
         foreach (var visualLine in view.VisualLines)
         {
@@ -64,9 +68,9 @@ public sealed class BreakpointMargin(EditorDocument document, BreakpointStore st
 
             var center = new Point(MarginWidth / 2, visualLine.VisualTop - view.VerticalOffset + visualLine.Height / 2);
             if (document.FilePath is { } file && store.Unbound.Contains(new(file, line)))
-                drawingContext.DrawEllipse(null, UnboundPen, center, Radius, Radius);
+                drawingContext.DrawEllipse(null, new Pen(brush, 1.5), center, Radius, Radius);
             else
-                drawingContext.DrawEllipse(BreakpointBrush, null, center, Radius, Radius);
+                drawingContext.DrawEllipse(brush, null, center, Radius, Radius);
         }
     }
 
@@ -93,6 +97,7 @@ public sealed class BreakpointMargin(EditorDocument document, BreakpointStore st
         if (_anchors.RemoveAll(anchor => anchor.Line == line) == 0)
             Add(line);
         InvalidateVisual();
+        Changed?.Invoke(this, EventArgs.Empty);
     }
 
     private void Add(int line)
