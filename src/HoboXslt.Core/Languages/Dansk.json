@@ -46,6 +46,7 @@
     "XPath.EmptySequence": "Tom sekvens",
     "Pane.Open": "Åbn…",
     "Pane.Save": "Gem",
+    "Pane.WordWrap": "Ombryd lange linjer",
     "Pane.Input": "Input",
     "Pane.Output": "Output",
     "Pane.LastRun": "Seneste kørsel",

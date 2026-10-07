@@ -45,7 +45,7 @@
             <Setter Property="Height" Value="16" />
         </Style>
 
-        <Style x:Key="ToolButton" TargetType="Button">
+        <Style x:Key="ToolButton" TargetType="ButtonBase">
             <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderBrush" Value="Transparent" />
@@ -54,7 +54,7 @@
             <Setter Property="Margin" Value="0,0,4,0" />
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="Button">
+                    <ControlTemplate TargetType="ButtonBase">
                         <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
                             <ContentPresenter VerticalAlignment="Center" />
@@ -76,10 +76,18 @@
             <Setter Property="Background" Value="{StaticResource PanelBrush}" />
             <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
         </Style>
-        <Style x:Key="PaneButton" TargetType="Button" BasedOn="{StaticResource ToolButton}">
+        <Style x:Key="PaneButton" TargetType="ButtonBase" BasedOn="{StaticResource ToolButton}">
             <Setter Property="Height" Value="24" />
             <Setter Property="Padding" Value="4,0" />
             <Setter Property="Margin" Value="4,0,0,0" />
+        </Style>
+        <Style x:Key="PaneToggle" TargetType="ToggleButton" BasedOn="{StaticResource PaneButton}">
+            <Style.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                    <Setter Property="Background" Value="{StaticResource AccentSoftBrush}" />
+                </Trigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="ToolSeparator" TargetType="Border">

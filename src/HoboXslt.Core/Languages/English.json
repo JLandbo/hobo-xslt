@@ -46,6 +46,7 @@
     "XPath.EmptySequence": "Empty sequence",
     "Pane.Open": "Open…",
     "Pane.Save": "Save",
+    "Pane.WordWrap": "Wrap long lines",
     "Pane.Input": "Input",
     "Pane.Output": "Output",
     "Pane.LastRun": "Last run",

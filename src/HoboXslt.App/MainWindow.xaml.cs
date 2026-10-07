@@ -3,6 +3,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -39,6 +40,10 @@ public partial class MainWindow : Window
         _translator = translator;
         InitializeComponent();
         ApplySyntaxColors();
+        var settings = Settings.Load(Settings.DefaultPath);
+        XmlWrapButton.IsChecked = settings.XmlWordWrap;
+        XsltWrapButton.IsChecked = settings.XsltWordWrap;
+        OutputWrapButton.IsChecked = settings.OutputWordWrap;
         _xml = new(XmlEditor, XmlTitle, XmlFilter, translator);
         _xslt = new(XsltEditor, XsltTitle, XsltFilter, translator);
         XsltMainTab.Tag = _xslt;
@@ -283,6 +288,14 @@ public partial class MainWindow : Window
     private void OpenXml_Click(object sender, RoutedEventArgs e) => _xml.Open();
 
     private void SaveXml_Click(object sender, RoutedEventArgs e) => _xml.Save();
+
+    private void WordWrap_Click(object sender, RoutedEventArgs e) =>
+        App.SaveSettings(_translator, settings => settings with
+        {
+            XmlWordWrap = XmlWrapButton.IsChecked == true,
+            XsltWordWrap = XsltWrapButton.IsChecked == true,
+            OutputWordWrap = OutputWrapButton.IsChecked == true,
+        });
 
     private void OpenXslt_Click(object sender, RoutedEventArgs e)
     {
@@ -577,6 +590,7 @@ public partial class MainWindow : Window
     private TabItem? OpenXsltTab(string file)
     {
         var editor = new TextEditor { SyntaxHighlighting = XsltHighlighting.Definition, IsReadOnly = _session is not null };
+        editor.SetBinding(TextEditor.WordWrapProperty, new Binding(nameof(ToggleButton.IsChecked)) { Source = XsltWrapButton });
         var title = new TextBlock();
         var document = new EditorDocument(editor, title, XsltFilter, _translator);
         SetUpEditor(editor);

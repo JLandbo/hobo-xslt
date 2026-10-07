@@ -24,7 +24,7 @@ public partial class App : Application
         translator.Changed += () =>
         {
             UseTexts(translator.Current);
-            SaveLanguage(translator);
+            SaveSettings(translator, settings => settings with { LanguageName = translator.Current.Name });
         };
         new MainWindow(translator).Show();
     }
@@ -41,11 +41,11 @@ public partial class App : Application
         Resources.MergedDictionaries.Add(_texts);
     }
 
-    private static void SaveLanguage(Translator translator)
+    public static void SaveSettings(Translator translator, Func<Settings, Settings> change)
     {
         try
         {
-            new Settings(translator.Current.Name).Save(Settings.DefaultPath);
+            Settings.Update(Settings.DefaultPath, change);
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {

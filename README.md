@@ -16,6 +16,7 @@ hobo-xslt samler det, du skal bruge, når et XSLT-stylesheet ikke gør, som du f
 - **XSLT-farver** – i **XSLT** er `xsl:`-elementer mørkerøde, så de skiller sig ud fra dine egne elementer, og `$variabler` i `select`, `test`, `match` og `{…}` er orange.
 - **Foldning** – klik på `−` eller `+` i den smalle kant til højre for linjenumrene i **XML** og **XSLT** for at folde et element sammen eller ud igen.
 - **Indrykningslinjer** – svage, prikkede lodrette linjer i **XML** og **XSLT** viser, hvilke linjer der hører under hvilket element.
+- **Ombrydning** – knappen med pilen i toppen af **XML**, **XSLT** og **Output** ombryder lange linjer, så de ikke går ud over kanten. Det ændrer kun visningen, ikke filen, og valget huskes for hver rude.
 - **Kør med ét klik** – **Kør** transformerer dit XML med dit XSLT og viser resultatet som XML i **Output**.
 - **Fejl og beskeder** – fejl i stylesheetet, fejl under kørslen og `xsl:message` står i en liste med fil og linje. Dobbeltklik, så står du på linjen.
 - **Include og import** – en fejl eller en pause i en fil, som dit stylesheet inkluderer, åbner filen i en ekstra fane.

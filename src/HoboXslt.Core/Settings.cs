@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace HoboXslt.Core;
 
-public sealed record Settings(string? LanguageName = null)
+public sealed record Settings(string? LanguageName = null, bool XmlWordWrap = false, bool XsltWordWrap = false, bool OutputWordWrap = false)
 {
     private static readonly JsonSerializerOptions _options = new(JsonSerializerDefaults.Web) { WriteIndented = true };
 
@@ -20,6 +20,9 @@ public sealed record Settings(string? LanguageName = null)
             return new();
         }
     }
+
+    // Load before save, so a change to one setting keeps the others.
+    public static void Update(string path, Func<Settings, Settings> change) => change(Load(path)).Save(path);
 
     public void Save(string path)
     {

@@ -35,6 +35,11 @@
                 </Path>
             </Canvas>
         </Viewbox>
+        <Viewbox x:Key="WrapIcon" x:Shared="False" Style="{StaticResource Icon}">
+            <Canvas Width="24" Height="24">
+                <Path Style="{StaticResource IconStroke}" Data="M4,6 H20 M4,12 H17 A3,3 0 0 1 17,18 H12 M14,15.5 L11.5,18 L14,20.5 M4,18 H8" />
+            </Canvas>
+        </Viewbox>
         <Viewbox x:Key="RunIcon" x:Shared="False" Style="{StaticResource Icon}">
             <Canvas Width="24" Height="24">
                 <Path Style="{StaticResource IconFill}" Data="M7,4.5 V19.5 A1,1 0 0 0 8.5,20.4 L20.5,12.9 A1,1 0 0 0 20.5,11.1 L8.5,3.6 A1,1 0 0 0 7,4.5 Z" />
@@ -247,13 +252,15 @@
                                     Click="SaveXml_Click" Content="{StaticResource SaveIcon}" />
                             <Button x:Name="OpenXmlButton" DockPanel.Dock="Right" Style="{StaticResource PaneButton}" ToolTip="{DynamicResource Pane.Open}" AutomationProperties.Name="{DynamicResource Pane.Open}"
                                     Click="OpenXml_Click" Content="{StaticResource OpenIcon}" />
+                            <ToggleButton x:Name="XmlWrapButton" DockPanel.Dock="Right" Style="{StaticResource PaneToggle}" ToolTip="{DynamicResource Pane.WordWrap}" AutomationProperties.Name="{DynamicResource Pane.WordWrap}"
+                                          Click="WordWrap_Click" Content="{StaticResource WrapIcon}" />
                             <TextBlock x:Name="XmlMeta" DockPanel.Dock="Right" Style="{StaticResource Meta}" />
                             <Label Content="XML" Style="{StaticResource Kind}" />
                             <TextBlock x:Name="XmlTitle" Style="{StaticResource FileName}" />
                             <TextBlock Text="{DynamicResource Pane.Input}" Style="{StaticResource Meta}" TextTrimming="CharacterEllipsis" />
                         </DockPanel>
                     </Border>
-                    <avalonEdit:TextEditor x:Name="XmlEditor" SyntaxHighlighting="XML" />
+                    <avalonEdit:TextEditor x:Name="XmlEditor" SyntaxHighlighting="XML" WordWrap="{Binding IsChecked, ElementName=XmlWrapButton}" />
                 </DockPanel>
             </Border>
 
@@ -277,7 +284,8 @@
                             <TabItem.Header>
                                 <TextBlock x:Name="XsltTitle" />
                             </TabItem.Header>
-                            <avalonEdit:TextEditor x:Name="XsltEditor" SyntaxHighlighting="{x:Static local:XsltHighlighting.Definition}" />
+                            <avalonEdit:TextEditor x:Name="XsltEditor" SyntaxHighlighting="{x:Static local:XsltHighlighting.Definition}"
+                                                   WordWrap="{Binding IsChecked, ElementName=XsltWrapButton}" />
                         </TabItem>
                     </TabControl>
                     <Grid Height="33" Margin="10,0,0,0" VerticalAlignment="Top" HorizontalAlignment="Left">
@@ -286,6 +294,8 @@
                     <StackPanel Orientation="Horizontal" Height="33" Margin="0,0,10,0" VerticalAlignment="Top" HorizontalAlignment="Right"
                                 Background="{StaticResource PanelBrush}">
                         <TextBlock x:Name="XsltMeta" Style="{StaticResource Meta}" />
+                        <ToggleButton x:Name="XsltWrapButton" Style="{StaticResource PaneToggle}" ToolTip="{DynamicResource Pane.WordWrap}" AutomationProperties.Name="{DynamicResource Pane.WordWrap}"
+                                      Click="WordWrap_Click" Content="{StaticResource WrapIcon}" />
                         <Button x:Name="OpenXsltButton" Style="{StaticResource PaneButton}" ToolTip="{DynamicResource Pane.Open}" AutomationProperties.Name="{DynamicResource Pane.Open}"
                                 Click="OpenXslt_Click" Content="{StaticResource OpenIcon}" />
                         <Button x:Name="SaveXsltButton" Style="{StaticResource PaneButton}" ToolTip="{DynamicResource Pane.Save}" AutomationProperties.Name="{DynamicResource Pane.Save}"
@@ -300,13 +310,15 @@
                 <DockPanel>
                     <Border DockPanel.Dock="Top" Style="{StaticResource PaneHead}">
                         <DockPanel>
+                            <ToggleButton x:Name="OutputWrapButton" DockPanel.Dock="Right" Style="{StaticResource PaneToggle}" ToolTip="{DynamicResource Pane.WordWrap}" AutomationProperties.Name="{DynamicResource Pane.WordWrap}"
+                                          Click="WordWrap_Click" Content="{StaticResource WrapIcon}" />
                             <TextBlock x:Name="OutputMeta" DockPanel.Dock="Right" Style="{StaticResource Meta}" />
                             <Label Content="XML" Style="{StaticResource Kind}" />
                             <TextBlock Text="{DynamicResource Pane.Output}" Style="{StaticResource FileName}" />
                             <TextBlock Text="{DynamicResource Pane.LastRun}" Style="{StaticResource Meta}" TextTrimming="CharacterEllipsis" />
                         </DockPanel>
                     </Border>
-                    <avalonEdit:TextEditor x:Name="OutputEditor" IsReadOnly="True" />
+                    <avalonEdit:TextEditor x:Name="OutputEditor" IsReadOnly="True" WordWrap="{Binding IsChecked, ElementName=OutputWrapButton}" />
                 </DockPanel>
             </Border>
         </Grid>
