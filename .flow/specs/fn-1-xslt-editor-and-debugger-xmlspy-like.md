@@ -21,6 +21,9 @@
 > user (turn 5, selected): "Responsiv UI"
 > user (turn 5, selected): "Testbar kerne"
 > user (turn 6, selected): "Ja, markør til linjen"
+> user (turn 7): "Det går an på hvad du mener med anden fil. Anden XSLT? Så skal den kræve man gemmer. Anden XML? Så skal den kræve man gemmer HVIS der er rettet i den. Output behøver man ikke gemme."
+> user (turn 8): "Den skal ikke skifte til at vise moms.xsl."
+> user (turn 8, selected): "Faner i XSLT-ruden (Recommended)"
 
 ## Goal & Context
 
@@ -62,6 +65,8 @@ flowchart LR
 - One run or debug session at a time; Run/Debug are disabled while a session is active, and editors are read-only during a debug session.
 - A failed run clears the output pane; partial output from a mid-run failure is discarded.
 - Closing the program during a paused or running session stops it; the process does not hang.
+- The XSLT pane has tabs. The first tab holds the XSLT file that Run and Debug execute, and navigation never replaces it. A diagnostic or a debug pause in an included/imported file opens that file in an extra tab, or switches to its tab when already open. [paraphrase]
+- A modified XSLT or XML document must be saved before another file is opened in its place (save or cancel; no discard). The output pane never asks to save. [paraphrase]
 
 ## Acceptance Criteria
 
@@ -114,3 +119,4 @@ dotnet test tests/HoboXslt.Core.Tests
 | R9 | The user can evaluate an XPath expression against the input XML and see the result. Errors: invalid XPath or missing input → error message, no crash. | fn-1-xslt-editor-and-debugger-xmlspy-like.4 | — |
 | R11 | The output pane shows the transformation result as XML with XML syntax highlighting. Errors: output that is not well-formed XML is shown as plain text, no crash. | fn-1-xslt-editor-and-debugger-xmlspy-like.3 | — |
 | R12 | When a debug run pauses (breakpoint or step), the editor opens the file holding the paused instruction, including an included/imported stylesheet, and moves the caret to the paused line. Errors: no location for the paused instruction → caret unchanged, session continues. | fn-1-xslt-editor-and-debugger-xmlspy-like.2, fn-1-xslt-editor-and-debugger-xmlspy-like.5 | — |
+
