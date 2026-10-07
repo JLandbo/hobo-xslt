@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
         xmlns:local="clr-namespace:HoboXslt.App"
-        Title="hobo-xslt" Height="800" Width="1400"
+        Title="hobo-xslt" Height="800" Width="1400" WindowStartupLocation="CenterScreen"
         Background="{StaticResource ChromeBrush}" Foreground="{StaticResource InkBrush}"
         FontFamily="{StaticResource UiFont}" FontSize="13"
         Loaded="Window_Loaded" Closed="Window_Closed" PreviewKeyDown="Window_PreviewKeyDown">
@@ -148,7 +148,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" MinHeight="100" />
             <RowDefinition Height="6" />
-            <RowDefinition Height="180" MinHeight="60" />
+            <RowDefinition x:Name="BottomRow" Height="180" MinHeight="60" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
@@ -281,11 +281,11 @@
 
         <Grid Grid.Row="3" Margin="8,8,8,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" MinWidth="150" />
+                <ColumnDefinition x:Name="XmlColumn" Width="*" MinWidth="150" />
                 <ColumnDefinition Width="6" />
-                <ColumnDefinition Width="1.3*" MinWidth="150" />
+                <ColumnDefinition x:Name="XsltColumn" Width="1.3*" MinWidth="150" />
                 <ColumnDefinition Width="6" />
-                <ColumnDefinition Width="*" MinWidth="150" />
+                <ColumnDefinition x:Name="OutputColumn" Width="*" MinWidth="150" />
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0" Style="{StaticResource Card}">

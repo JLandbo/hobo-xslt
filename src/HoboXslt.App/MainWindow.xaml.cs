@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -44,6 +45,9 @@ public partial class MainWindow : Window
         XmlWrapButton.IsChecked = settings.XmlWordWrap;
         XsltWrapButton.IsChecked = settings.XsltWordWrap;
         OutputWrapButton.IsChecked = settings.OutputWordWrap;
+        // A layout saved on a bigger screen would not fit, so the default layout is used instead.
+        if (settings.Layout is { } layout && layout.Width <= SystemParameters.WorkArea.Width && layout.Height <= SystemParameters.WorkArea.Height)
+            ApplyLayout(layout);
         _xml = new(XmlEditor, XmlTitle, XmlFilter, translator);
         _xslt = new(XsltEditor, XsltTitle, XsltFilter, translator);
         XsltMainTab.Tag = _xslt;
@@ -224,6 +228,26 @@ public partial class MainWindow : Window
         SetText(StatusText, "Status.Ready");
         SetIdle(true);
         XPathButton.IsEnabled = true;
+    }
+
+    private void ApplyLayout(Layout layout)
+    {
+        (Width, Height) = (layout.Width, layout.Height);
+        XmlColumn.Width = new(layout.XmlWidth, GridUnitType.Star);
+        XsltColumn.Width = new(layout.XsltWidth, GridUnitType.Star);
+        OutputColumn.Width = new(layout.OutputWidth, GridUnitType.Star);
+        BottomRow.Height = new(layout.BottomHeight);
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        base.OnClosing(e);
+        // RestoreBounds is the normal size, also while the window is maximized.
+        var bounds = RestoreBounds;
+        App.SaveSettings(_translator, settings => settings with
+        {
+            Layout = new(bounds.Width, bounds.Height, XmlColumn.ActualWidth, XsltColumn.ActualWidth, OutputColumn.ActualWidth, BottomRow.ActualHeight),
+        });
     }
 
     // A maximized window reaches past the screen by its resize frame, which the caption no longer covers.

@@ -19,4 +19,19 @@ public sealed class SettingsTests : IDisposable
         // Assert
         Assert.Equal(new Settings("English", XsltWordWrap: true), Settings.Load(path));
     }
+
+    [Fact]
+    public void Load_WhenLayoutWasSaved_ThenLayoutIsLoaded()
+    {
+        // Arrange
+        var path = _files.Write("settings.json", "{}");
+        var layout = new Layout(1400, 800.5, 300, 520.25, 310, 240);
+        new Settings(Layout: layout).Save(path);
+
+        // Act
+        var loaded = Settings.Load(path).Layout;
+
+        // Assert
+        Assert.Equal(layout, loaded);
+    }
 }

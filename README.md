@@ -26,6 +26,7 @@ hobo-xslt samler det, du skal bruge, når et XSLT-stylesheet ikke gør, som du f
 - **Dansk eller engelsk** – vælg sprog under **Vis → Sprog**.
 - **Én exe-fil** – `install.ps1` laver én exe og lægger en genvej i Start-menuen.
 - **Licenser** – **Hjælp → Licenser…** viser de komponenter, programmet bruger, med version, licens og link til projektet.
+- **Layout huskes** – vinduets størrelse, bredden på de tre ruder og højden på ruden nederst huskes til næste gang. Vinduet starter altid midt på skærmen, og kan den gemte størrelse ikke være på skærmen, bruges standardlayoutet.
 - **Egen titellinje** – den øverste linje med logo, menuer og filsti er vinduets titellinje med knapper til minimer, maksimer og luk. Træk i den for at flytte vinduet, og dobbeltklik for at maksimere.
 
 ![Hovedvinduet efter en kørsel: ordrer.xml til venstre, ordrer.xsl i midten, fakturaer i Output og to xsl:message-beskeder nederst](docs/images/koersel.png)

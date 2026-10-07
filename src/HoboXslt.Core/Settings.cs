@@ -2,7 +2,8 @@ using System.Text.Json;
 
 namespace HoboXslt.Core;
 
-public sealed record Settings(string? LanguageName = null, bool XmlWordWrap = false, bool XsltWordWrap = false, bool OutputWordWrap = false)
+public sealed record Settings(
+    string? LanguageName = null, bool XmlWordWrap = false, bool XsltWordWrap = false, bool OutputWordWrap = false, Layout? Layout = null)
 {
     private static readonly JsonSerializerOptions _options = new(JsonSerializerDefaults.Web) { WriteIndented = true };
 
