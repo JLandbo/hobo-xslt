@@ -31,9 +31,21 @@ Stream diagnostics/messages and output from the worker process to the UI while t
 - [ ] TBD
 
 ## Done summary
-TBD
+Worker streams diagnostics as Saxon reports them and output in 100 ms batches (flushed before a pause and before the result); WorkerSession raises Reported/Written and keeps reported diagnostics on Stop; the UI appends both live, keeps them on Stop/failure, decides XML highlighting on the accumulated text when the run ends, and adds " · output er ufuldstændigt" / " · output is incomplete" (new key Status.IncompleteOutput) to the stopped/failed status when output was written. README updated.
 
+Tests (R23/R24): WorkerSessionTests.Run_WhenMessageEmittedBeforeEndlessLoop_ThenMessageArrivesBeforeStopAndIsKept, Run_WhenOutputWrittenBeforeEndlessLoop_ThenOutputArrivesBeforeStop, Debug_WhenPausedAfterOutput_ThenOutputHasArrived.
+Gates: dotnet build HoboXslt.slnx rc=0 (0 warnings); dotnet test tests/HoboXslt.Core.Tests rc=0, 43 passed. baseline: green via handoff (verified at 7c1418bf by .14; only .flow/ changed since).
+Manual (published single exe, scratch folder): Kør on a slow stylesheet showed output 77 -> 175 chars and messages 3 -> 5 while running; after Stop both stayed (175 chars, 5 messages) and the status read "Kørsel stoppet · output er ufuldstændigt"; a following run completed with "Kørsel fuldført". Debug-pause live output covered by the test, not driven manually.
+Design note: a stopped/failed DebugResult keeps Output = null (the existing contract and tests); the partial output lives in the UI via the Written chunks.
+
+
+Tier: session (jev-unavailable(no_key))
+stage: impl-review - ran (host, 3 draws, SHIP; first dispatch lost to a machine crash and refunded; receipt /tmp/impl-review-receipt-22e37af6a82b-fn-1-xslt-editor-and-debugger-xmlspy-like.15.json) (model: fable)
+Review P3 fixed in README (debug stop status). FYI: output in the last <100 ms before Stop can be lost (batching).
+Integrated verify after README fix: dotnet build rc=0; dotnet test green.
+
+stage: plan-sync - skipped(config: planSync.enabled != true)
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 0d5ba98470fc6569b18bb4bbd082a23a735846d5, ffcc8a5126d188dd51f818e581e772a96b4c1a65
+- Tests: dotnet build HoboXslt.slnx, dotnet test tests/HoboXslt.Core.Tests
 - PRs:
