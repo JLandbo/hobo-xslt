@@ -9,10 +9,11 @@ public sealed class WorkerSessionTests : IDisposable
     private static readonly TimeSpan StopTime = TimeSpan.FromSeconds(2);
     private static readonly TimeSpan Timeout = TimeSpan.FromMinutes(1);
 
-    // The looping instruction is on line 3 in both.
+    // Line 3 reports that the loop starts, so a test can stop it at once instead of letting it burn CPU; the looping instruction is on line 4 in both.
     private const string EndlessXPath = """
         <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
           <xsl:template match="/">
+            <xsl:message>looping</xsl:message>
             <r><xsl:value-of select="count(for $i in 1 to 2000000000, $j in 1 to 2000000000 return $j)"/></r>
           </xsl:template>
         </xsl:stylesheet>
@@ -21,6 +22,7 @@ public sealed class WorkerSessionTests : IDisposable
     private const string EndlessRecursion = """
         <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
           <xsl:template match="/">
+            <xsl:message>looping</xsl:message>
             <r><xsl:call-template name="t"><xsl:with-param name="n" select="0"/></xsl:call-template></r>
           </xsl:template>
           <xsl:template name="t">
@@ -46,9 +48,10 @@ public sealed class WorkerSessionTests : IDisposable
         // Arrange
         var xslt = _files.Write("main.xsl", stylesheet);
         using var session = new WorkerSession(WorkerPath, _translator);
+        var looping = new TaskCompletionSource();
+        session.Reported += _ => looping.TrySetResult();
         var run = session.Run(xslt, _xml);
-        // Long enough for the worker to start and enter the loop.
-        await Task.Delay(TimeSpan.FromSeconds(3));
+        await looping.Task.WaitAsync(Timeout);
 
         // Act
         var result = await Stop(session, run);
@@ -68,10 +71,10 @@ public sealed class WorkerSessionTests : IDisposable
         using var session = new WorkerSession(WorkerPath, _translator);
         var paused = new TaskCompletionSource();
         session.Paused += _ => paused.TrySetResult();
-        var run = session.Debug(xslt, _xml, [new Breakpoint(xslt, 3)]);
+        var run = session.Debug(xslt, _xml, [new Breakpoint(xslt, 4)]);
         await paused.Task.WaitAsync(Timeout);
+        // Stopped right after Continue, before endless recursion can end the run on its own.
         session.Continue();
-        await Task.Delay(TimeSpan.FromMilliseconds(500));
 
         // Act
         var result = await Stop(session, run);
