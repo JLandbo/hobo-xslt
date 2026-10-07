@@ -198,9 +198,12 @@
                 <TextBlock x:Name="RunFileText" Grid.Column="2" Margin="16,0,12,0" FontSize="12" Foreground="{StaticResource FaintBrush}"
                            HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                 <StackPanel Grid.Column="3" Orientation="Horizontal">
-                    <Button Style="{StaticResource CaptionButton}" Content="&#xE921;" Click="Minimize_Click" />
-                    <Button x:Name="MaximizeButton" Style="{StaticResource CaptionButton}" Content="&#xE922;" Click="Maximize_Click" />
-                    <Button Style="{StaticResource CloseCaptionButton}" Content="&#xE8BB;" Click="Close_Click" />
+                    <Button Style="{StaticResource CaptionButton}" ToolTip="{DynamicResource Window.Minimize}" AutomationProperties.Name="{DynamicResource Window.Minimize}"
+                            Content="&#xE921;" Click="Minimize_Click" />
+                    <Button x:Name="MaximizeButton" Style="{StaticResource CaptionButton}" ToolTip="{DynamicResource Window.Maximize}" AutomationProperties.Name="{DynamicResource Window.Maximize}"
+                            Content="&#xE922;" Click="Maximize_Click" />
+                    <Button Style="{StaticResource CloseCaptionButton}" ToolTip="{DynamicResource Window.Close}" AutomationProperties.Name="{DynamicResource Window.Close}"
+                            Content="&#xE8BB;" Click="Close_Click" />
                 </StackPanel>
             </Grid>
         </Border>

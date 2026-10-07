@@ -19,14 +19,15 @@ public partial class App : Application
             return;
         }
 
-        var translator = new Translator(Translation.Find(Settings.Load(Settings.DefaultPath).LanguageName));
+        var settings = Settings.Load(Settings.DefaultPath);
+        var translator = new Translator(Translation.Find(settings.LanguageName));
         UseTexts(translator.Current);
         translator.Changed += () =>
         {
             UseTexts(translator.Current);
             SaveSettings(translator, settings => settings with { LanguageName = translator.Current.Name });
         };
-        new MainWindow(translator).Show();
+        new MainWindow(translator, settings).Show();
     }
 
     // XAML reads its texts as dynamic resources, so swapping the dictionary switches the language at once.

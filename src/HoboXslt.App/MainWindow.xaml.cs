@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
@@ -35,12 +36,11 @@ public partial class MainWindow : Window
     private TextEditor? _activeEditor;
     private Button? _saveButton;
 
-    public MainWindow(Translator translator)
+    public MainWindow(Translator translator, Settings settings)
     {
         _translator = translator;
         InitializeComponent();
         ApplySyntaxColors();
-        var settings = Settings.Load(Settings.DefaultPath);
         XmlWrapButton.IsChecked = settings.XmlWordWrap;
         XsltWrapButton.IsChecked = settings.XsltWordWrap;
         OutputWrapButton.IsChecked = settings.OutputWordWrap;
@@ -232,7 +232,9 @@ public partial class MainWindow : Window
         base.OnStateChanged(e);
         var maximized = WindowState == WindowState.Maximized;
         RootGrid.Margin = maximized ? new Thickness(8) : new Thickness(0);
-        MaximizeButton.Content = maximized ? "" : "";
+        MaximizeButton.Content = maximized ? "\uE923" : "\uE922";
+        MaximizeButton.SetResourceReference(ToolTipProperty, maximized ? "Window.Restore" : "Window.Maximize");
+        MaximizeButton.SetResourceReference(AutomationProperties.NameProperty, maximized ? "Window.Restore" : "Window.Maximize");
     }
 
     private void Minimize_Click(object sender, RoutedEventArgs e) => SystemCommands.MinimizeWindow(this);
