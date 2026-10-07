@@ -1,7 +1,7 @@
 {
   "branch_name": "fn-1-xslt-editor-and-debugger-xmlspy-like",
-  "completion_review_status": "unknown",
-  "completion_reviewed_at": "2026-10-07T19:16:09.909315Z",
+  "completion_review_status": "ship",
+  "completion_reviewed_at": "2026-10-07T19:32:29.322332Z",
   "created_at": "2026-10-07T10:48:01.141210Z",
   "default_impl": null,
   "default_review": null,
@@ -640,6 +640,34 @@
       "task": "fn-1-xslt-editor-and-debugger-xmlspy-like.16",
       "timestamp": "2026-10-07T19:27:45.292572Z",
       "verdict": "SHIP"
+    },
+    {
+      "artifact_sha256": "237740408b7b0ddf4643b307c88172f83e599898ddf6e2c116c0748c24133883",
+      "backend": "host",
+      "base_sha": "c3765a7d7b01db396d3292c81f5b850d98ed6a45",
+      "counter_kind": "plan",
+      "failure_class": null,
+      "finalized": {
+        "digest": "complete",
+        "receipt": "complete",
+        "status": "complete"
+      },
+      "forced": false,
+      "hash_epoch": 4,
+      "head_sha": "248cb263dd704e8ddf8229f0c6c8db89d702924b",
+      "head_sha_observed": true,
+      "kind": "completion",
+      "model": "fable",
+      "outcome": "verdict",
+      "output_bytes": 951,
+      "output_sha256": "15d57ed8ae19af2bae9821f25e0b2935e706891252b622fae4031d464223c2e7",
+      "reservation_id": "af58a71b360b475ca37dddb6b262038e",
+      "round_consumed": true,
+      "scope": "completion",
+      "superseded_by": null,
+      "task": null,
+      "timestamp": "2026-10-07T19:32:29.295682Z",
+      "verdict": "SHIP"
     }
   ],
   "review_hash_epoch": {
@@ -657,7 +685,7 @@
     "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.6": 1,
     "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.7": 1,
     "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.8": 1,
-    "plan#completion": 4
+    "plan#completion": 5
   },
   "review_pending_rounds": {},
   "review_reservations": {},
@@ -692,5 +720,5 @@
     "mergeBaseTracker": null,
     "url": null
   },
-  "updated_at": "2026-10-07T19:27:45.375761Z"
+  "updated_at": "2026-10-07T19:32:29.338407Z"
 }
