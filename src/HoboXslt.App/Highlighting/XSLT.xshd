@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lexical only: XPath is coloured token by token, not parsed. Colours are the mockup's syntax tokens plus one for literal result elements and two for XPath. -->
+<SyntaxDefinition name="XSLT" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+  <Color name="Punctuation" foreground="#8A92A2" />
+  <Color name="Comment" foreground="#8A92A2" />
+  <Color name="XslElement" foreground="#1D5CBD" />
+  <Color name="Element" foreground="#0E7490" />
+  <Color name="AttributeName" foreground="#8645AD" />
+  <Color name="AttributeValue" foreground="#2B7A4B" />
+  <Color name="Entity" foreground="#B0520C" />
+  <Color name="XPath" foreground="#B0520C" />
+  <Color name="XPathVariable" foreground="#8645AD" />
+  <Color name="XPathString" foreground="#2B7A4B" />
+  <Color name="XPathFunction" foreground="#1D5CBD" />
+  <Color name="XPathNumber" foreground="#B42346" />
+  <Color name="XPathOperator" foreground="#1C2230" fontWeight="bold" />
+
+  <RuleSet>
+    <Span color="Comment" multiline="true"><Begin>&lt;!--</Begin><End>--&gt;</End></Span>
+    <Span multiline="true"><Begin color="Punctuation">&lt;!\[CDATA\[</Begin><End color="Punctuation">\]\]&gt;</End></Span>
+    <Span color="Comment" multiline="true"><Begin>&lt;!DOCTYPE</Begin><End>&gt;</End></Span>
+    <Span color="Comment" multiline="true"><Begin>&lt;\?</Begin><End>\?&gt;</End></Span>
+    <Span color="XslElement" ruleSet="XslTag" multiline="true">
+      <Begin color="Punctuation">&lt;/?(?=xsl:)</Begin>
+      <End color="Punctuation">/?&gt;</End>
+    </Span>
+    <Span color="Element" ruleSet="Attributes" multiline="true">
+      <Begin color="Punctuation">&lt;/?</Begin>
+      <End color="Punctuation">/?&gt;</End>
+    </Span>
+    <Import ruleSet="Entities" />
+  </RuleSet>
+
+  <RuleSet name="XslTag">
+    <!-- The lookbehind sees the whole line, so the attribute name decides whether its value is XPath. -->
+    <Span color="XPath" ruleSet="XPathInDoubleQuotes" multiline="true">
+      <Begin color="AttributeValue">(?&lt;=(?&lt;![\w.:-])(select|test|match|use|count|from|value|group-by|group-adjacent|group-starting-with|group-ending-with|use-when|xpath|context-item|with-params|initial-value)\s*=\s*)"</Begin>
+      <End color="AttributeValue">"|(?=&lt;)</End>
+    </Span>
+    <Span color="XPath" ruleSet="XPathInSingleQuotes" multiline="true">
+      <Begin color="AttributeValue">(?&lt;=(?&lt;![\w.:-])(select|test|match|use|count|from|value|group-by|group-adjacent|group-starting-with|group-ending-with|use-when|xpath|context-item|with-params|initial-value)\s*=\s*)'</Begin>
+      <End color="AttributeValue">'|(?=&lt;)</End>
+    </Span>
+    <Import ruleSet="Attributes" />
+  </RuleSet>
+
+  <RuleSet name="Attributes">
+    <Span color="AttributeValue" ruleSet="ValueInDoubleQuotes" multiline="true"><Begin>"</Begin><End>"|(?=&lt;)</End></Span>
+    <Span color="AttributeValue" ruleSet="ValueInSingleQuotes" multiline="true"><Begin>'</Begin><End>'|(?=&lt;)</End></Span>
+    <Rule color="AttributeName">[\w.:-]+(?=\s*=)</Rule>
+    <Rule color="Punctuation">=</Rule>
+  </RuleSet>
+
+  <!-- A span start wins over the enclosing span's end at the same position, so a string may only start with the quote that does not close the attribute. -->
+  <RuleSet name="ValueInDoubleQuotes">
+    <Span color="XPath" ruleSet="XPathInDoubleQuotes" multiline="true"><Begin>(?&lt;!\{)\{(?!\{)</Begin><End>\}|(?=&lt;)</End></Span>
+    <Import ruleSet="Entities" />
+  </RuleSet>
+
+  <RuleSet name="ValueInSingleQuotes">
+    <Span color="XPath" ruleSet="XPathInSingleQuotes" multiline="true"><Begin>(?&lt;!\{)\{(?!\{)</Begin><End>\}|(?=&lt;)</End></Span>
+    <Import ruleSet="Entities" />
+  </RuleSet>
+
+  <RuleSet name="XPathInDoubleQuotes">
+    <Span color="XPathString" multiline="true"><Begin>'</Begin><End>'|(?=&lt;)</End></Span>
+    <Import ruleSet="XPath" />
+  </RuleSet>
+
+  <RuleSet name="XPathInSingleQuotes">
+    <Span color="XPathString" multiline="true"><Begin>"</Begin><End>"|(?=&lt;)</End></Span>
+    <Import ruleSet="XPath" />
+  </RuleSet>
+
+  <RuleSet name="XPath">
+    <Rule color="XPathVariable">\$[\w.-]+(:[\w.-]+)?</Rule>
+    <Rule color="XPathOperator">[\w-]+::|@</Rule>
+    <Rule color="XPathOperator">(?&lt;![\w.:$/@*-])(and|or|div|idiv|mod|eq|ne|lt|le|gt|ge|is|to|union|intersect|except|instance|of|cast|castable|treat|as|if|then|else|for|let|in|return|some|every|satisfies)(?=[\s(])</Rule>
+    <Rule color="XPathFunction">[\w.-]+(:[\w.-]+)?(?=\s*\()</Rule>
+    <Rule color="XPathNumber">(?&lt;![\w.$-])\d+(\.\d+)?([eE][+-]?\d+)?(?![\w.-])</Rule>
+    <Rule color="XPathOperator">!=|=|&amp;lt;=?|&amp;gt;=?|&gt;=?|\||\+|(?&lt;=\s)-(?=\s)</Rule>
+    <Import ruleSet="Entities" />
+  </RuleSet>
+
+  <RuleSet name="Entities">
+    <Rule color="Entity">&amp;[\w\d\#]+;</Rule>
+  </RuleSet>
+</SyntaxDefinition>

@@ -565,7 +565,7 @@ public partial class MainWindow : Window
 
     private TabItem? OpenXsltTab(string file)
     {
-        var editor = new TextEditor { SyntaxHighlighting = HighlightingManager.Instance.GetDefinition("XML"), IsReadOnly = _session is not null };
+        var editor = new TextEditor { SyntaxHighlighting = XsltHighlighting.Definition, IsReadOnly = _session is not null };
         var title = new TextBlock();
         var document = new EditorDocument(editor, title, XsltFilter, _translator);
         SetUpEditor(editor);

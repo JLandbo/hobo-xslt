@@ -20,6 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Highlighting\XSLT.xshd" LogicalName="Highlighting/XSLT.xshd" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\HoboXslt.Core\HoboXslt.Core.csproj" />
   </ItemGroup>
 
