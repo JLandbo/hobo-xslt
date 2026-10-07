@@ -7,7 +7,42 @@
         Background="{StaticResource ChromeBrush}" Foreground="{StaticResource InkBrush}"
         FontFamily="{StaticResource UiFont}" FontSize="13"
         Loaded="Window_Loaded" Closed="Window_Closed" PreviewKeyDown="Window_PreviewKeyDown">
+    <!-- The top bar is the title bar, so the window draws its own caption buttons. -->
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="34" ResizeBorderThickness="6" GlassFrameThickness="0,0,0,1" UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
     <Window.Resources>
+        <Style x:Key="CaptionButton" TargetType="Button">
+            <Setter Property="Width" Value="46" />
+            <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource LineSoftBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="CloseCaptionButton" TargetType="Button" BasedOn="{StaticResource CaptionButton}">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource BreakpointBrush}" />
+                    <Setter Property="Foreground" Value="{StaticResource OnAccentBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
         <Style TargetType="avalonEdit:TextEditor">
             <Setter Property="FontFamily" Value="{StaticResource CodeFont}" />
             <Setter Property="FontSize" Value="12.5" />
@@ -106,7 +141,7 @@
         </Viewbox>
     </Window.Resources>
 
-    <Grid>
+    <Grid x:Name="RootGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -117,12 +152,13 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Height="34" Padding="12,0" BorderBrush="{StaticResource LineSoftBrush}" BorderThickness="0,0,0,1">
+        <Border Grid.Row="0" Height="34" Padding="12,0,0,0" BorderBrush="{StaticResource LineSoftBrush}" BorderThickness="0,0,0,1">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Border Width="18" Height="18" CornerRadius="4" Background="{StaticResource AccentBrush}">
@@ -131,7 +167,7 @@
                     </Border>
                     <TextBlock Text="hobo-xslt" FontWeight="SemiBold" Margin="8,0,0,0" VerticalAlignment="Center" />
                 </StackPanel>
-                <Menu Grid.Column="1" Margin="16,0,0,0" Background="Transparent" VerticalAlignment="Center">
+                <Menu Grid.Column="1" Margin="16,0,0,0" Background="Transparent" VerticalAlignment="Center" WindowChrome.IsHitTestVisibleInChrome="True">
                     <MenuItem Header="{DynamicResource Menu.File}" Style="{StaticResource MenuHeader}">
                         <MenuItem Header="{DynamicResource Menu.OpenXml}" IsEnabled="{Binding IsEnabled, ElementName=OpenXmlButton}" Click="OpenXml_Click" />
                         <MenuItem Header="{DynamicResource Menu.SaveXml}" InputGestureText="Ctrl+S" Click="SaveXml_Click" />
@@ -159,8 +195,13 @@
                         <MenuItem Header="{DynamicResource Menu.Licenses}" Click="Licenses_Click" />
                     </MenuItem>
                 </Menu>
-                <TextBlock x:Name="RunFileText" Grid.Column="2" Margin="16,0,0,0" FontSize="12" Foreground="{StaticResource FaintBrush}"
+                <TextBlock x:Name="RunFileText" Grid.Column="2" Margin="16,0,12,0" FontSize="12" Foreground="{StaticResource FaintBrush}"
                            HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                <StackPanel Grid.Column="3" Orientation="Horizontal">
+                    <Button Style="{StaticResource CaptionButton}" Content="&#xE921;" Click="Minimize_Click" />
+                    <Button x:Name="MaximizeButton" Style="{StaticResource CaptionButton}" Content="&#xE922;" Click="Maximize_Click" />
+                    <Button Style="{StaticResource CloseCaptionButton}" Content="&#xE8BB;" Click="Close_Click" />
+                </StackPanel>
             </Grid>
         </Border>
 

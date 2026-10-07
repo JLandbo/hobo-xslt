@@ -226,6 +226,27 @@ public partial class MainWindow : Window
         XPathButton.IsEnabled = true;
     }
 
+    // A maximized window reaches past the screen by its resize frame, which the caption no longer covers.
+    protected override void OnStateChanged(EventArgs e)
+    {
+        base.OnStateChanged(e);
+        var maximized = WindowState == WindowState.Maximized;
+        RootGrid.Margin = maximized ? new Thickness(8) : new Thickness(0);
+        MaximizeButton.Content = maximized ? "" : "";
+    }
+
+    private void Minimize_Click(object sender, RoutedEventArgs e) => SystemCommands.MinimizeWindow(this);
+
+    private void Maximize_Click(object sender, RoutedEventArgs e)
+    {
+        if (WindowState == WindowState.Maximized)
+            SystemCommands.RestoreWindow(this);
+        else
+            SystemCommands.MaximizeWindow(this);
+    }
+
+    private void Close_Click(object sender, RoutedEventArgs e) => SystemCommands.CloseWindow(this);
+
     private void Window_Closed(object? sender, EventArgs e)
     {
         (_session ?? _run)?.Stop();
