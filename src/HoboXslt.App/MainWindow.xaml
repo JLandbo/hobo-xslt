@@ -11,6 +11,7 @@
         <Style TargetType="avalonEdit:TextEditor">
             <Setter Property="FontFamily" Value="{StaticResource CodeFont}" />
             <Setter Property="FontSize" Value="12.5" />
+            <Setter Property="FontWeight" Value="Light" />
             <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
             <Setter Property="LineNumbersForeground" Value="{StaticResource FaintBrush}" />
             <Setter Property="Padding" Value="0,6,0,0" />
