@@ -103,6 +103,15 @@ public partial class MainWindow : Window
         var brackets = new HighlightingColor { Foreground = Brush("FaintBrush") };
         foreach (var span in xml.MainRuleSet.Spans.Where(span => span.SpanColor == xml.GetNamedColor("XmlTag")))
             span.StartColor = span.EndColor = brackets;
+
+        var xslt = XsltHighlighting.Definition;
+        foreach (var (name, key) in new[]
+        {
+            ("Punctuation", "FaintBrush"), ("Comment", "ProcessingInstructionBrush"), ("XslElement", "XslElementBrush"), ("Element", "TagBrush"),
+            ("AttributeName", "AttributeBrush"), ("AttributeValue", "ValueBrush"), ("Entity", "ExpressionBrush"), ("XPath", "ValueBrush"),
+            ("XPathVariable", "ExpressionBrush"), ("XPathString", "ValueBrush"), ("Expression", "ExpressionBrush"),
+        })
+            xslt.GetNamedColor(name).Foreground = Brush(key);
     }
 
     private void SetUpEditor(TextEditor editor)
@@ -399,11 +408,7 @@ public partial class MainWindow : Window
         VariablesList.ItemsSource = snapshot.Variables;
         VariablesTab.IsSelected = true;
         if (ShowXsltLine(snapshot.File, snapshot.Line) is { Content: TextEditor editor } && snapshot.Line <= editor.Document.LineCount)
-        {
-            var line = editor.Document.GetLineByNumber(snapshot.Line);
-            EditorFolding.Reveal(editor, line.Offset);
-            PausedLineRendererOf(editor).Show(line);
-        }
+            PausedLineRendererOf(editor).Show(editor.Document.GetLineByNumber(snapshot.Line));
 
         if (snapshot.Context is { } context && StartTag(XmlEditor.Document, context) is { } tag)
         {

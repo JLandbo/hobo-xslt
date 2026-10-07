@@ -20,6 +20,7 @@
         <SolidColorBrush x:Key="ContextNodeBrush" Color="#CCE0FA" />
         <SolidColorBrush x:Key="OkBrush" Color="#2B7A4B" />
         <SolidColorBrush x:Key="TagBrush" Color="#1D5CBD" />
+        <SolidColorBrush x:Key="XslElementBrush" Color="#9B1C1C" />
         <SolidColorBrush x:Key="AttributeBrush" Color="#8645AD" />
         <SolidColorBrush x:Key="ValueBrush" Color="#2B7A4B" />
         <SolidColorBrush x:Key="ProcessingInstructionBrush" Color="#8A92A2" />

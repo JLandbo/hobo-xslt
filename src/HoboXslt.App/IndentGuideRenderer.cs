@@ -73,7 +73,8 @@ public sealed class IndentGuideRenderer : IBackgroundRenderer
     private static int? Indent(TextDocument document, DocumentLine line, int tabSize)
     {
         var column = 0;
-        for (var offset = line.Offset; offset < line.EndOffset; offset++)
+        // EndOffset walks the line tree, so it is read once and not per character.
+        for (int offset = line.Offset, end = line.EndOffset; offset < end; offset++)
         {
             switch (document.GetCharAt(offset))
             {
