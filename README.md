@@ -71,6 +71,8 @@ Mens Saxon starter, står der **Starter Saxon…** nederst, og **Kør** og **Deb
 
 Fejler kørslen, er **Output** tom, og der står **Kørsel fejlede** nederst. Fejlen står under **Fejl og beskeder**.
 
+**Stop en kørsel** med stop-knappen (■) eller Shift+F5, fx hvis stylesheetet er gået i en uendelig løkke. Kørslen stopper med det samme, også midt i ét enkelt XPath-udtryk. **Output** er tom, der står **Kørsel stoppet** nederst, og du kan starte en ny kørsel med det samme.
+
 I rudernes overskrift står filnavnet, og et `*` efter navnet betyder, at filen er ændret og ikke gemt. **XML** viser antallet af linjer, og **XSLT** antallet af breakpoints i den valgte fane. Nederst står Saxons version, hvad programmet laver lige nu, markørens linje og kolonne, tegnsæt og linjeskift.
 
 ### Det skal du vide om at gemme
@@ -156,7 +158,7 @@ Teksterne ligger i `src/HoboXslt.Core/Languages/Dansk.json` og `English.json` og
 |---|---|
 | `Ctrl+S` | Gem filen i **XML** eller den valgte fane i **XSLT**, alt efter hvor du står |
 | `F5` | Start debuggeren, eller fortsæt, når den holder pause |
-| `Shift+F5` | Stop debuggeren |
+| `Shift+F5` | Stop kørslen eller debuggeren |
 | `F10` | Step over |
 | `F11` | Step into |
 | `Shift+F11` | Step out |
@@ -167,8 +169,6 @@ Teksterne ligger i `src/HoboXslt.Core/Languages/Dansk.json` og `English.json` og
 ## Det kan programmet ikke
 
 - Saxon-HE kan ikke streaming eller schema-aware XSLT. Det kræver en betalt udgave af Saxon.
-- En almindelig **Kør** kan ikke stoppes. Kør med **Debug**, hvis du er bange for en uendelig løkke, så kan du trykke **Stop**.
-- En uendelig løkke inde i ét enkelt XPath-udtryk kan heller ikke stoppes under debugging, kun ved at lukke programmet.
 - Ekstra resultater fra `xsl:result-document` vises ikke.
 - Der er intet sted at give stylesheetets parametre en værdi. De bruger deres standardværdi.
 - Kun én kørsel ad gangen.
@@ -187,7 +187,7 @@ hobo-xslt/
 └─ HoboXslt.slnx                Solution
 ```
 
-Programmet bruger .NET 10, WPF, AvalonEdit som editor og Saxon-HE 12 gennem IKVM. Al logik ligger i `HoboXslt.Core`, så den kan testes uden vinduer. WPF-delen viser bare tilstanden og sender kommandoer. Debuggeren bruger Saxons trace: hver instruktion melder sig, før den kører, og kørslen venter, når den skal holde pause.
+Programmet bruger .NET 10, WPF, AvalonEdit som editor og Saxon-HE 12 gennem IKVM. Al logik ligger i `HoboXslt.Core`, så den kan testes uden vinduer. WPF-delen viser bare tilstanden og sender kommandoer. Debuggeren bruger Saxons trace: hver instruktion melder sig, før den kører, og kørslen venter, når den skal holde pause. Saxon-HE kan ikke afbrydes midt i en transformation, så hver kørsel og debugkørsel sker i sin egen proces (exe-filen startet med `--worker`), og **Stop** lukker den proces.
 
 ### Build og test
 
@@ -196,4 +196,4 @@ dotnet build HoboXslt.slnx
 dotnet test tests/HoboXslt.Core.Tests
 ```
 
-Testene dækker kørsel, fejl med fil og linje, debuggeren (breakpoints, trin, stop og variabler), XPath og sprogfilerne. WPF-delen har ingen automatiske tests.
+Testene dækker kørsel, fejl med fil og linje, debuggeren (breakpoints, trin, stop og variabler), XPath, sprogfilerne og at **Stop** stopper en uendelig løkke i både **Kør** og **Debug**. WPF-delen har ingen automatiske tests.

@@ -27,9 +27,10 @@ public partial class MainWindow : Window
     private readonly BreakpointStore _breakpoints = new();
     // Texts set from code keep their setters, so a language switch can set them again.
     private readonly Dictionary<object, Action> _texts = [];
-    private XsltRunner? _runner;
     private XPathEvaluator? _xpath;
-    private DebugSession? _session;
+    private WorkerSession? _session;
+    private WorkerSession? _run;
+    private WorkerSession? _spareWorker;
     private TextEditor? _activeEditor;
     private Button? _saveButton;
 
@@ -187,9 +188,10 @@ public partial class MainWindow : Window
 
     private async void Window_Loaded(object sender, RoutedEventArgs e)
     {
+        _spareWorker = NewWorker();
         try
         {
-            (_runner, _xpath) = await Task.Run(() => (new XsltRunner(), new XPathEvaluator()));
+            _xpath = await Task.Run(() => new XPathEvaluator());
         }
         catch (Exception ex)
         {
@@ -202,7 +204,11 @@ public partial class MainWindow : Window
         XPathButton.IsEnabled = true;
     }
 
-    private void Window_Closed(object? sender, EventArgs e) => _session?.Stop();
+    private void Window_Closed(object? sender, EventArgs e)
+    {
+        (_session ?? _run)?.Stop();
+        _spareWorker?.Dispose();
+    }
 
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {
@@ -279,27 +285,36 @@ public partial class MainWindow : Window
 
     private async void Run_Click(object sender, RoutedEventArgs e)
     {
-        if (_runner is not { } runner || !ReadyToStart())
+        if (!ReadyToStart())
             return;
 
-        var (xsltPath, xmlPath) = (_xslt.FilePath!, _xml.FilePath!);
+        using var session = TakeWorker();
+        _run = session;
         SetIdle(false);
+        StopButton.IsEnabled = true;
         SetText(StatusText, "Status.Running");
-        ShowResult(null, []);
+        await ShowResult(null, []);
 
-        RunResult result;
+        DebugResult result;
         try
         {
-            result = await Task.Run(() => runner.Run(xsltPath, xmlPath));
+            result = await session.Run(_xslt.FilePath!, _xml.FilePath!);
         }
         catch (Exception ex)
         {
-            result = new(null, [new(DiagnosticKind.RuntimeError, null, null, ex.Message)]);
+            result = new(DebugOutcome.Failed, null, [new(DiagnosticKind.RuntimeError, null, null, ex.Message)], []);
         }
 
+        _run = null;
+        StopButton.IsEnabled = false;
         DiagnosticsTab.IsSelected = true;
-        ShowResult(result.Output, result.Diagnostics);
-        SetText(StatusText, result.Output is null ? "Status.RunFailed" : "Status.RunCompleted");
+        await ShowResult(result.Output, result.Diagnostics);
+        SetText(StatusText, result.Outcome switch
+        {
+            DebugOutcome.Completed => "Status.RunCompleted",
+            DebugOutcome.Stopped => "Status.RunStopped",
+            _ => "Status.RunFailed"
+        });
         SetIdle(true);
     }
 
@@ -311,7 +326,7 @@ public partial class MainWindow : Window
         foreach (var margin in BreakpointMargins)
             margin.SaveLines();
 
-        var session = new DebugSession(_xslt.FilePath!, _xml.FilePath!, _breakpoints.All, _translator);
+        using var session = TakeWorker();
         session.Paused += snapshot => Dispatcher.BeginInvoke(() => ShowPause(session, snapshot));
         _session = session;
         SetIdle(false);
@@ -319,13 +334,13 @@ public partial class MainWindow : Window
         OpenXmlButton.IsEnabled = OpenXsltButton.IsEnabled = false;
         StopButton.IsEnabled = true;
         SetText(StatusText, "Status.Debugging");
-        ShowResult(null, []);
+        await ShowResult(null, []);
         ShowUnbound([]);
 
         DebugResult result;
         try
         {
-            result = await session.Start();
+            result = await session.Debug(_xslt.FilePath!, _xml.FilePath!, _breakpoints.All);
         }
         catch (Exception ex)
         {
@@ -339,7 +354,7 @@ public partial class MainWindow : Window
         OpenXmlButton.IsEnabled = OpenXsltButton.IsEnabled = true;
         VariablesList.ItemsSource = null;
         DiagnosticsTab.IsSelected = true;
-        ShowResult(result.Output, result.Diagnostics);
+        await ShowResult(result.Output, result.Diagnostics);
         // Breakpoints never reached by a stopped or failed run are not known to be unbound.
         ShowUnbound(result.Outcome == DebugOutcome.Completed ? result.UnboundBreakpoints : []);
         SetText(StatusText, result.Outcome switch
@@ -351,7 +366,17 @@ public partial class MainWindow : Window
         SetIdle(true);
     }
 
-    private void ShowPause(DebugSession session, PauseSnapshot snapshot)
+    // A worker started ahead has Saxon loaded by the time Run or Debug needs it.
+    private WorkerSession TakeWorker()
+    {
+        var worker = _spareWorker ?? NewWorker();
+        _spareWorker = NewWorker();
+        return worker;
+    }
+
+    private WorkerSession NewWorker() => new(Environment.ProcessPath!, _translator);
+
+    private void ShowPause(WorkerSession session, PauseSnapshot snapshot)
     {
         if (_session != session)
             return;
@@ -373,7 +398,7 @@ public partial class MainWindow : Window
 
     private void StepOut_Click(object sender, RoutedEventArgs e) => Resume(session => session.StepOut());
 
-    private void Resume(Action<DebugSession> command)
+    private void Resume(Action<WorkerSession> command)
     {
         if (_session is not { } session)
             return;
@@ -385,7 +410,7 @@ public partial class MainWindow : Window
 
     private void Stop_Click(object sender, RoutedEventArgs e)
     {
-        if (_session is not { } session)
+        if ((_session ?? _run) is not { } session)
             return;
 
         SetPaused(false);
@@ -440,21 +465,21 @@ public partial class MainWindow : Window
         return !document.IsModified || document.Save();
     }
 
-    private void ShowResult(string? output, IReadOnlyList<Diagnostic> diagnostics)
+    private async Task ShowResult(string? output, IReadOnlyList<Diagnostic> diagnostics)
     {
-        ShowOutput(output);
+        // Checking a large output takes a while, so it runs in the background.
+        var isXml = output is not null && await Task.Run(() => IsWellFormedXml(output));
+        ShowOutput(output, isXml);
         DiagnosticsList.Items.Clear();
         foreach (var diagnostic in diagnostics)
             DiagnosticsList.Items.Add(new DiagnosticRow(diagnostic));
     }
 
-    private void ShowOutput(string? output)
+    private void ShowOutput(string? output, bool isXml)
     {
         OutputEditor.Text = output ?? "";
         OutputMeta.Text = output is null ? "" : DateTime.Now.ToString("HH:mm");
-        OutputEditor.SyntaxHighlighting = output is not null && IsWellFormedXml(output)
-            ? HighlightingManager.Instance.GetDefinition("XML")
-            : null;
+        OutputEditor.SyntaxHighlighting = isXml ? HighlightingManager.Instance.GetDefinition("XML") : null;
     }
 
     private static bool IsWellFormedXml(string text)

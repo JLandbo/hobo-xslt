@@ -12,6 +12,13 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        if (e.Args is [Worker.Argument])
+        {
+            Worker.Serve();
+            Shutdown();
+            return;
+        }
+
         var translator = new Translator(Translation.Find(Settings.Load(Settings.DefaultPath).LanguageName));
         UseTexts(translator.Current);
         translator.Changed += () =>

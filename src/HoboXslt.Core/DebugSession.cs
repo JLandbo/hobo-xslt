@@ -59,7 +59,7 @@ public sealed class DebugSession(string xsltPath, string xmlPath, IEnumerable<Br
         }
     }
 
-    private void Send(DebugCommand command)
+    internal void Send(DebugCommand command)
     {
         lock (_gate)
         {
