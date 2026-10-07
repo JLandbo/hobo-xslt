@@ -1,7 +1,7 @@
 {
   "branch_name": "fn-1-xslt-editor-and-debugger-xmlspy-like",
-  "completion_review_status": "unknown",
-  "completion_reviewed_at": "2026-10-07T17:35:40.109862Z",
+  "completion_review_status": "ship",
+  "completion_reviewed_at": "2026-10-07T18:28:51.850187Z",
   "created_at": "2026-10-07T10:48:01.141210Z",
   "default_impl": null,
   "default_review": null,
@@ -498,6 +498,34 @@
       "task": "fn-1-xslt-editor-and-debugger-xmlspy-like.14",
       "timestamp": "2026-10-07T18:18:30.853583Z",
       "verdict": "SHIP"
+    },
+    {
+      "artifact_sha256": "8bb975c30d9dc77cf89d25e0b3310ad33cb1a1bee672474ecf4d3193d692c79f",
+      "backend": "host",
+      "base_sha": "6bb72a2568f56634212a910e18d9c277c56edb78",
+      "counter_kind": "plan",
+      "failure_class": null,
+      "finalized": {
+        "digest": "complete",
+        "receipt": "complete",
+        "status": "complete"
+      },
+      "forced": false,
+      "hash_epoch": 2,
+      "head_sha": "77c9ff10d015989b6c9a1e80ab2d2adcc21334f2",
+      "head_sha_observed": true,
+      "kind": "completion",
+      "model": "fable",
+      "outcome": "verdict",
+      "output_bytes": 2448,
+      "output_sha256": "919bf2b151bc280a3b2151bb3b5c9a2067925577b4960cf45631da8e2b92b603",
+      "reservation_id": "3df5f4e8d3a34e48b5cf6234ca25b7e0",
+      "round_consumed": true,
+      "scope": "completion",
+      "superseded_by": null,
+      "task": null,
+      "timestamp": "2026-10-07T18:28:51.754021Z",
+      "verdict": "SHIP"
     }
   ],
   "review_hash_epoch": {
@@ -513,7 +541,7 @@
     "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.6": 1,
     "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.7": 1,
     "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.8": 1,
-    "plan#completion": 2
+    "plan#completion": 3
   },
   "review_pending_rounds": {},
   "review_reservations": {},
@@ -546,5 +574,5 @@
     "mergeBaseTracker": null,
     "url": null
   },
-  "updated_at": "2026-10-07T18:18:30.976148Z"
+  "updated_at": "2026-10-07T18:28:52.304906Z"
 }
