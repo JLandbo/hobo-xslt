@@ -127,10 +127,10 @@
                 <Menu Grid.Column="1" Margin="16,0,0,0" Background="Transparent" VerticalAlignment="Center">
                     <MenuItem Header="{DynamicResource Menu.File}" Style="{StaticResource MenuHeader}">
                         <MenuItem Header="{DynamicResource Menu.OpenXml}" IsEnabled="{Binding IsEnabled, ElementName=OpenXmlButton}" Click="OpenXml_Click" />
-                        <MenuItem Header="{DynamicResource Menu.SaveXml}" Click="SaveXml_Click" />
+                        <MenuItem Header="{DynamicResource Menu.SaveXml}" InputGestureText="Ctrl+S" Click="SaveXml_Click" />
                         <Separator />
                         <MenuItem Header="{DynamicResource Menu.OpenXslt}" IsEnabled="{Binding IsEnabled, ElementName=OpenXsltButton}" Click="OpenXslt_Click" />
-                        <MenuItem Header="{DynamicResource Menu.SaveXslt}" Click="SaveXslt_Click" />
+                        <MenuItem Header="{DynamicResource Menu.SaveXslt}" InputGestureText="Ctrl+S" Click="SaveXslt_Click" />
                     </MenuItem>
                     <MenuItem Header="{DynamicResource Menu.Edit}" Style="{StaticResource MenuHeader}" />
                     <MenuItem Header="{DynamicResource Menu.View}" Style="{StaticResource MenuHeader}">
@@ -239,7 +239,7 @@
                 <DockPanel>
                     <Border DockPanel.Dock="Top" Style="{StaticResource PaneHead}">
                         <DockPanel>
-                            <Button DockPanel.Dock="Right" Style="{StaticResource PaneButton}" ToolTip="{DynamicResource Pane.Save}" AutomationProperties.Name="{DynamicResource Pane.Save}"
+                            <Button x:Name="SaveXmlButton" DockPanel.Dock="Right" Style="{StaticResource PaneButton}" ToolTip="{DynamicResource Pane.Save}" AutomationProperties.Name="{DynamicResource Pane.Save}"
                                     Click="SaveXml_Click" Content="{StaticResource SaveIcon}" />
                             <Button x:Name="OpenXmlButton" DockPanel.Dock="Right" Style="{StaticResource PaneButton}" ToolTip="{DynamicResource Pane.Open}" AutomationProperties.Name="{DynamicResource Pane.Open}"
                                     Click="OpenXml_Click" Content="{StaticResource OpenIcon}" />
@@ -284,7 +284,7 @@
                         <TextBlock x:Name="XsltMeta" Style="{StaticResource Meta}" />
                         <Button x:Name="OpenXsltButton" Style="{StaticResource PaneButton}" ToolTip="{DynamicResource Pane.Open}" AutomationProperties.Name="{DynamicResource Pane.Open}"
                                 Click="OpenXslt_Click" Content="{StaticResource OpenIcon}" />
-                        <Button Style="{StaticResource PaneButton}" ToolTip="{DynamicResource Pane.Save}" AutomationProperties.Name="{DynamicResource Pane.Save}"
+                        <Button x:Name="SaveXsltButton" Style="{StaticResource PaneButton}" ToolTip="{DynamicResource Pane.Save}" AutomationProperties.Name="{DynamicResource Pane.Save}"
                                 Click="SaveXslt_Click" Content="{StaticResource SaveIcon}" />
                     </StackPanel>
                 </Grid>

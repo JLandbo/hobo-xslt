@@ -80,6 +80,7 @@ I rudernes overskrift står filnavnet, og et `*` efter navnet betyder, at filen 
 - Åbner du en anden fil i stedet for en, du har rettet i, beder programmet dig gemme først. **OK** gemmer og åbner den nye fil, **Annuller** lader alt være. Du kan ikke smide ændringerne væk.
 - **Output** skal aldrig gemmes.
 - Gem-knappen i ruden **XSLT** og **Filer → Gem XSLT** gemmer filen i den valgte fane.
+- `Ctrl+S` gemmer filen i den rude, du står i: **XML** eller den valgte fane i **XSLT**. Står du et andet sted, fx i **Output**, gemmes den af de to, du sidst stod i.
 
 ## Fejl og beskeder
 
@@ -153,6 +154,7 @@ Teksterne ligger i `src/HoboXslt.Core/Languages/Dansk.json` og `English.json` og
 
 | Genvej | Handling |
 |---|---|
+| `Ctrl+S` | Gem filen i **XML** eller den valgte fane i **XSLT**, alt efter hvor du står |
 | `F5` | Start debuggeren, eller fortsæt, når den holder pause |
 | `Shift+F5` | Stop debuggeren |
 | `F10` | Step over |

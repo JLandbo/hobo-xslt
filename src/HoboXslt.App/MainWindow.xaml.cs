@@ -31,6 +31,7 @@ public partial class MainWindow : Window
     private XPathEvaluator? _xpath;
     private DebugSession? _session;
     private TextEditor? _activeEditor;
+    private Button? _saveButton;
 
     public MainWindow(Translator translator)
     {
@@ -118,6 +119,8 @@ public partial class MainWindow : Window
         editor.TextArea.GotKeyboardFocus += (_, _) =>
         {
             _activeEditor = editor;
+            if (editor != OutputEditor)
+                _saveButton = editor == XmlEditor ? SaveXmlButton : SaveXsltButton;
             UpdateEditorStatus();
         };
         editor.TextArea.Caret.PositionChanged += (_, _) => UpdateEditorStatusFor(editor);
@@ -211,6 +214,7 @@ public partial class MainWindow : Window
             (Key.F10, ModifierKeys.None) => StepOverButton,
             (Key.F11, ModifierKeys.None) => StepIntoButton,
             (Key.F11, ModifierKeys.Shift) => StepOutButton,
+            (Key.S, ModifierKeys.Control) => _saveButton,
             _ => null
         };
         if (button is null)
