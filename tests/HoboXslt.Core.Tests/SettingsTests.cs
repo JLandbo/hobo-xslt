@@ -25,7 +25,7 @@ public sealed class SettingsTests : IDisposable
     {
         // Arrange
         var path = _files.Write("settings.json", "{}");
-        var layout = new Layout(1400, 800.5, 300, 520.25, 310, 240);
+        var layout = new Layout(1400, 800.5, new PaneLayout(300, 520.25, 310, 240, false, true), new PaneLayout(250, 600, 400, 300, true, false));
         new Settings(Layout: layout).Save(path);
 
         // Act

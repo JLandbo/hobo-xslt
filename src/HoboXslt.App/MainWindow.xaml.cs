@@ -29,7 +29,8 @@ public partial class MainWindow : Window
     private readonly EditorDocument _xml;
     private readonly EditorDocument _xslt;
     private readonly BreakpointStore _breakpoints = new();
-    private readonly Layout _defaultLayout;
+    private readonly Size _defaultSize;
+    private readonly PaneLayout _defaultPanes;
     // Texts set from code keep their setters, so a language switch can set them again.
     private readonly Dictionary<object, Action> _texts = [];
     private XPathEvaluator? _xpath;
@@ -40,6 +41,9 @@ public partial class MainWindow : Window
     private Button? _saveButton;
     private double? _hiddenXmlWidth;
     private double? _hiddenOutputWidth;
+    // While debugging, the panes to go back to; while editing, the panes the next debug session starts with.
+    private PaneLayout? _editPanes;
+    private PaneLayout? _debugPanes;
 
     public MainWindow(Translator translator, Settings settings)
     {
@@ -49,10 +53,16 @@ public partial class MainWindow : Window
         XmlWrapButton.IsChecked = settings.XmlWordWrap;
         XsltWrapButton.IsChecked = settings.XsltWordWrap;
         OutputWrapButton.IsChecked = settings.OutputWordWrap;
-        _defaultLayout = new(Width, Height, XmlColumn.Width.Value, XsltColumn.Width.Value, OutputColumn.Width.Value, BottomRow.Height.Value);
+        _defaultSize = new(Width, Height);
+        _defaultPanes = new(XmlColumn.Width.Value, XsltColumn.Width.Value, OutputColumn.Width.Value, BottomRow.Height.Value, false, false);
         // A layout saved on a bigger screen would not fit, so the default layout is used instead.
         if (settings.Layout is { } layout && layout.Width <= SystemParameters.WorkArea.Width && layout.Height <= SystemParameters.WorkArea.Height)
-            ApplyLayout(layout);
+        {
+            (Width, Height) = (layout.Width, layout.Height);
+            if (layout.Edit is { } edit)
+                ApplyPanes(edit);
+            _debugPanes = layout.Debug;
+        }
         _xml = new(XmlEditor, XmlTitle, XmlFilter, translator);
         _xslt = new(XsltEditor, XsltTitle, XsltFilter, translator);
         XsltMainTab.Tag = _xslt;
@@ -235,13 +245,36 @@ public partial class MainWindow : Window
         XPathButton.IsEnabled = true;
     }
 
-    private void ApplyLayout(Layout layout)
+    private PaneLayout CurrentPanes()
     {
-        (Width, Height) = (layout.Width, layout.Height);
-        XmlColumn.Width = new(layout.XmlWidth, GridUnitType.Star);
-        XsltColumn.Width = new(layout.XsltWidth, GridUnitType.Star);
-        OutputColumn.Width = new(layout.OutputWidth, GridUnitType.Star);
-        BottomRow.Height = new(layout.BottomHeight);
+        // Widths set just before are only measured by a layout pass.
+        UpdateLayout();
+        // The XSLT pane holds the width of a hidden pane, so it is stored as if all panes were shown.
+        var xslt = XsltColumn.ActualWidth - (_hiddenXmlWidth - XmlRail.Width ?? 0) - (_hiddenOutputWidth - OutputRail.Width ?? 0);
+        return new(_hiddenXmlWidth ?? XmlColumn.ActualWidth, Math.Max(xslt, PaneMinWidth), _hiddenOutputWidth ?? OutputColumn.ActualWidth,
+            BottomRow.ActualHeight, _hiddenXmlWidth is not null, _hiddenOutputWidth is not null);
+    }
+
+    private void ApplyPanes(PaneLayout panes)
+    {
+        var xslt = panes.XsltWidth + (panes.XmlHidden ? panes.XmlWidth - XmlRail.Width : 0) + (panes.OutputHidden ? panes.OutputWidth - OutputRail.Width : 0);
+        XsltColumn.Width = new(xslt, GridUnitType.Star);
+        _hiddenXmlWidth = SetPane(XmlColumn, XmlCard, XmlRail, XmlSplitter, panes.XmlWidth, panes.XmlHidden);
+        _hiddenOutputWidth = SetPane(OutputColumn, OutputCard, OutputRail, OutputSplitter, panes.OutputWidth, panes.OutputHidden);
+        BottomRow.Height = new(panes.BottomHeight);
+    }
+
+    private void SwitchToDebugPanes()
+    {
+        _editPanes = CurrentPanes();
+        ApplyPanes(_debugPanes ?? _defaultPanes);
+    }
+
+    private void SwitchToEditPanes()
+    {
+        _debugPanes = CurrentPanes();
+        ApplyPanes(_editPanes!);
+        _editPanes = null;
     }
 
     private void ToggleXml_Click(object sender, RoutedEventArgs e) =>
@@ -260,20 +293,27 @@ public partial class MainWindow : Window
         if (other.Width.IsStar)
             other.Width = new(other.ActualWidth, GridUnitType.Star);
         XsltColumn.Width = new(Math.Max(XsltColumn.ActualWidth + (hide ? width - rail.Width : rail.Width - width), PaneMinWidth), GridUnitType.Star);
-        (column.MinWidth, column.Width) = hide ? (0, GridLength.Auto) : (PaneMinWidth, new GridLength(width, GridUnitType.Star));
-        card.Visibility = splitter.Visibility = hide ? Visibility.Collapsed : Visibility.Visible;
-        rail.Visibility = hide ? Visibility.Visible : Visibility.Collapsed;
-        return hide ? width : null;
+        return SetPane(column, card, rail, splitter, width, hide);
+    }
+
+    // Returns the width a hidden pane comes back with, or null when the pane is shown.
+    private static double? SetPane(ColumnDefinition column, UIElement card, UIElement rail, UIElement splitter, double width, bool hidden)
+    {
+        (column.MinWidth, column.Width) = hidden ? (0, GridLength.Auto) : (PaneMinWidth, new GridLength(width, GridUnitType.Star));
+        card.Visibility = splitter.Visibility = hidden ? Visibility.Collapsed : Visibility.Visible;
+        rail.Visibility = hidden ? Visibility.Visible : Visibility.Collapsed;
+        return hidden ? width : null;
     }
 
     private void ResetLayout_Click(object sender, RoutedEventArgs e)
     {
-        if (_hiddenXmlWidth is not null)
-            ToggleXml_Click(sender, e);
-        if (_hiddenOutputWidth is not null)
-            ToggleOutput_Click(sender, e);
+        // Both layouts are reset; while debugging, editing then also comes back to the default.
+        _debugPanes = null;
+        if (_editPanes is not null)
+            _editPanes = _defaultPanes;
+        ApplyPanes(_defaultPanes);
         WindowState = WindowState.Normal;
-        ApplyLayout(_defaultLayout);
+        (Width, Height) = (_defaultSize.Width, _defaultSize.Height);
         var area = SystemParameters.WorkArea;
         (Left, Top) = (area.Left + (area.Width - Width) / 2, area.Top + (area.Height - Height) / 2);
         App.SaveSettings(_translator, settings => settings with { Layout = null });
@@ -284,10 +324,10 @@ public partial class MainWindow : Window
         base.OnClosing(e);
         // RestoreBounds is the normal size, also while the window is maximized.
         var bounds = RestoreBounds;
+        var current = CurrentPanes();
         App.SaveSettings(_translator, settings => settings with
         {
-            Layout = new(bounds.Width, bounds.Height, _hiddenXmlWidth ?? XmlColumn.ActualWidth, XsltColumn.ActualWidth,
-                _hiddenOutputWidth ?? OutputColumn.ActualWidth, BottomRow.ActualHeight),
+            Layout = _editPanes is null ? new(bounds.Width, bounds.Height, current, _debugPanes) : new(bounds.Width, bounds.Height, _editPanes, current),
         });
     }
 
@@ -451,6 +491,7 @@ public partial class MainWindow : Window
         ShowLive(session);
         session.Paused += snapshot => Dispatcher.BeginInvoke(() => ShowPause(session, snapshot));
         _session = session;
+        SwitchToDebugPanes();
         SetIdle(false);
         SetEditorsReadOnly(true);
         OpenXmlButton.IsEnabled = OpenXsltButton.IsEnabled = false;
@@ -470,6 +511,7 @@ public partial class MainWindow : Window
         }
 
         _session = null;
+        SwitchToEditPanes();
         SetPaused(false);
         StopButton.IsEnabled = false;
         SetEditorsReadOnly(false);

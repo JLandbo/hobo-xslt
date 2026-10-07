@@ -26,8 +26,8 @@ hobo-xslt samler det, du skal bruge, når et XSLT-stylesheet ikke gør, som du f
 - **Dansk eller engelsk** – vælg sprog under **Vis → Sprog**.
 - **Én exe-fil** – `install.ps1` laver én exe og lægger en genvej i Start-menuen.
 - **Licenser** – **Hjælp → Licenser…** viser de komponenter, programmet bruger, med version, licens og link til projektet.
-- **Skjul XML og Output** – trekanten i toppen af **XML** og **Output** skjuler ruden, så **XSLT** får pladsen. Ruden bliver til en smal stribe i kanten, og et klik på den henter ruden tilbage i samme bredde. Næste gang programmet starter, er alle ruder vist.
-- **Layout huskes** – vinduets størrelse, bredden på de tre ruder og højden på ruden nederst huskes til næste gang. Vinduet starter altid midt på skærmen, og kan den gemte størrelse ikke være på skærmen, bruges standardlayoutet. Knappen med de tre felter øverst til højre nulstiller layoutet.
+- **Skjul XML og Output** – trekanten i toppen af **XML** og **Output** skjuler ruden, så **XSLT** får pladsen. Ruden bliver til en smal stribe i kanten, og et klik på den henter ruden tilbage i samme bredde.
+- **Layout huskes** – vinduets størrelse, bredden på de tre ruder, hvilke ruder der er skjult, og højden på ruden nederst huskes til næste gang. Ruderne har to layouts: ét, mens du redigerer, og ét, mens du debugger. Programmet skifter selv, når debug starter og slutter, så Output fx kan være skjult, mens du skriver, og vist, mens du debugger. Første gang du debugger, bruges standardlayoutet. Vinduet starter altid midt på skærmen, og kan den gemte størrelse ikke være på skærmen, bruges standardlayoutet. Knappen med de tre felter øverst til højre nulstiller begge layouts.
 - **Egen titellinje** – den øverste linje med logo, menuer og filsti er vinduets titellinje med knapper til minimer, maksimer og luk. Træk i den for at flytte vinduet, og dobbeltklik for at maksimere.
 
 ![Hovedvinduet efter en kørsel: ordrer.xml til venstre, ordrer.xsl i midten, fakturaer i Output og to xsl:message-beskeder nederst](docs/images/koersel.png)
