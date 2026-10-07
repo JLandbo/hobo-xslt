@@ -78,7 +78,7 @@ public sealed class DebugSession(string xsltPath, string xmlPath, IEnumerable<Br
 
     private DebugResult Run()
     {
-        var listener = new DebugTraceListener(this, _breakpoints, translator);
+        var listener = new DebugTraceListener(this, _breakpoints, Path.GetFullPath(xmlPath), translator);
         List<Diagnostic> diagnostics = [];
         try
         {

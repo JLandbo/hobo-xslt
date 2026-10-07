@@ -26,6 +26,8 @@ public sealed class XsltRunner(Action<Diagnostic>? reported = null, Action<strin
         var compiler = _processor.newXsltCompiler();
         compiler.setErrorReporter(new CompileErrorReporter(Add));
         compiler.setCompileWithTracing(traceListener is not null);
+        // The debugger reads the context node's line from the input tree; a plain run skips that cost.
+        _processor.setConfigurationProperty(Feature.LINE_NUMBERING, java.lang.Boolean.valueOf(traceListener is not null));
         if (traceListener is not null)
         {
             // Saxon's miscellaneous optimizations inline literal variables, which hides them from the debugger.

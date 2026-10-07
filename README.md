@@ -112,6 +112,8 @@ Den første fane i **XSLT** er altid den fil, der bliver kørt. Ekstra faner kom
 
    Den orange linje flytter med for hvert trin, så du kan se, hvor du er. Den forsvinder, når kørslen stopper, bliver færdig eller fejler.
 
+   I ruden **XML** er starttagget for den node, kørslen arbejder på lige nu, lyseblåt (for en attribut eller tekst er det elementet, den ligger i). Er der ingen node, fx når en løkke går over tal, er der ingen markering.
+
 5. **Når kørslen er færdig**, står resultatet i **Output** og beskederne under **Fejl og beskeder**, og der står **Debugsession fuldført** nederst. Output og beskeder kommer frem undervejs, også mens debuggeren holder pause. Trykker du **Stop**, bliver det, der allerede er skrevet, stående, og der står **Debugsession stoppet** (med **output er ufuldstændigt**, hvis der er skrevet noget).
 
 ![Debuggeren holder pause på linje 8 i den inkluderede moms.xsl: linjen er orange, og Variabler viser $beloeb og $moms som Lokal og $moms-sats og $valuta som Global](docs/images/debug.png)
