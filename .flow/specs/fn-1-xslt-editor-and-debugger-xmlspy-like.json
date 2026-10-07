@@ -10,7 +10,7 @@
   "id": "fn-1-xslt-editor-and-debugger-xmlspy-like",
   "impl_review_rounds": {
     "fn-1-xslt-editor-and-debugger-xmlspy-like.1": 0,
-    "fn-1-xslt-editor-and-debugger-xmlspy-like.2": 1,
+    "fn-1-xslt-editor-and-debugger-xmlspy-like.2": 0,
     "fn-1-xslt-editor-and-debugger-xmlspy-like.3": 0
   },
   "next_task": 1,
@@ -129,10 +129,39 @@
       "task": "fn-1-xslt-editor-and-debugger-xmlspy-like.3",
       "timestamp": "2026-10-07T14:24:47.776441Z",
       "verdict": "SHIP"
+    },
+    {
+      "artifact_sha256": "e3de86a837e508c27fea15c354b09d9c79aca06e8916cf6ef892634c8f44139c",
+      "backend": "host",
+      "base_sha": "1e073c788fabdf8a3892932f1656d148d5457d1a",
+      "counter_kind": "impl",
+      "failure_class": null,
+      "finalized": {
+        "digest": "complete",
+        "receipt": "complete",
+        "status": "not_applicable"
+      },
+      "forced": false,
+      "hash_epoch": 0,
+      "head_sha": "47c039b66feb97b491093d19667aa09c6e6d976b",
+      "head_sha_observed": true,
+      "kind": "impl",
+      "model": "fable",
+      "outcome": "verdict",
+      "output_bytes": 1580,
+      "output_sha256": "c08fd204db8e7f464652ee15b4c902d3fcddccffa79c8ffa2486288327acb35d",
+      "reservation_id": "43392414e5904d15ba43469f2b8eba35",
+      "round_consumed": true,
+      "scope": "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.2",
+      "superseded_by": null,
+      "task": "fn-1-xslt-editor-and-debugger-xmlspy-like.2",
+      "timestamp": "2026-10-07T14:31:26.409123Z",
+      "verdict": "SHIP"
     }
   ],
   "review_hash_epoch": {
     "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.1": 1,
+    "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.2": 1,
     "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.3": 1
   },
   "review_pending_rounds": {},
@@ -156,5 +185,5 @@
     "mergeBaseTracker": null,
     "url": null
   },
-  "updated_at": "2026-10-07T14:24:48.286656Z"
+  "updated_at": "2026-10-07T14:31:26.549578Z"
 }
