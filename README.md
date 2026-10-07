@@ -187,7 +187,7 @@ hobo-xslt/
 └─ HoboXslt.slnx                Solution
 ```
 
-Programmet bruger .NET 10, WPF, AvalonEdit som editor og Saxon-HE 12 gennem IKVM. Al logik ligger i `HoboXslt.Core`, så den kan testes uden vinduer. WPF-delen viser bare tilstanden og sender kommandoer. Debuggeren bruger Saxons trace: hver instruktion melder sig, før den kører, og kørslen venter, når den skal holde pause. Saxon-HE kan ikke afbrydes midt i en transformation, så hver kørsel og debugkørsel sker i sin egen proces (exe-filen startet med `--worker`), og **Stop** lukker den proces.
+Programmet bruger .NET 10, WPF, AvalonEdit som editor og Saxon-HE 12 gennem IKVM. Al logik ligger i `HoboXslt.Core`, så den kan testes uden vinduer. WPF-delen viser bare tilstanden og sender kommandoer. Debuggeren bruger Saxons trace: hver instruktion melder sig, før den kører, og kørslen venter, når den skal holde pause. Saxon-HE kan ikke afbrydes midt i en transformation, så hver kørsel og debugkørsel sker i sin egen proces (exe-filen startet med `--worker`), og **Stop** lukker den proces. For at spare ventetid starter programmet altid den næste proces på forhånd, så du ser to `HoboXslt.App.exe` i Jobliste, mens programmet er åbent. Den ekstra proces lukker sammen med vinduet.
 
 ### Build og test
 
