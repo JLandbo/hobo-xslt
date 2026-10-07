@@ -11,6 +11,7 @@
   "impl_review_rounds": {
     "fn-1-xslt-editor-and-debugger-xmlspy-like.1": 0,
     "fn-1-xslt-editor-and-debugger-xmlspy-like.10": 0,
+    "fn-1-xslt-editor-and-debugger-xmlspy-like.11": 0,
     "fn-1-xslt-editor-and-debugger-xmlspy-like.2": 0,
     "fn-1-xslt-editor-and-debugger-xmlspy-like.3": 0,
     "fn-1-xslt-editor-and-debugger-xmlspy-like.4": 0,
@@ -377,11 +378,40 @@
       "task": "fn-1-xslt-editor-and-debugger-xmlspy-like.10",
       "timestamp": "2026-10-07T16:48:37.504837Z",
       "verdict": "SHIP"
+    },
+    {
+      "artifact_sha256": "9b918f341ce5499dd9803a44320c0fbd89a2690942d030fbe988da82342ffc2b",
+      "backend": "host",
+      "base_sha": "ab56981e6e46361bcde60a48ebab4219cf53003b",
+      "counter_kind": "impl",
+      "failure_class": null,
+      "finalized": {
+        "digest": "complete",
+        "receipt": "complete",
+        "status": "not_applicable"
+      },
+      "forced": false,
+      "hash_epoch": 0,
+      "head_sha": "d720b0e567988dd35d733ba93ec9a587d2a3174a",
+      "head_sha_observed": true,
+      "kind": "impl",
+      "model": "fable",
+      "outcome": "verdict",
+      "output_bytes": 1287,
+      "output_sha256": "18eb0c290a3003db4b5328563b4bf4a44265b01a25793dee87a3c97fd28700b7",
+      "reservation_id": "629c1e2dfd0e420a8522edda60f2f726",
+      "round_consumed": true,
+      "scope": "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.11",
+      "superseded_by": null,
+      "task": "fn-1-xslt-editor-and-debugger-xmlspy-like.11",
+      "timestamp": "2026-10-07T17:10:35.164579Z",
+      "verdict": "SHIP"
     }
   ],
   "review_hash_epoch": {
     "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.1": 1,
     "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.10": 1,
+    "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.11": 1,
     "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.2": 1,
     "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.3": 1,
     "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.4": 1,
@@ -397,6 +427,7 @@
     "completion": 0,
     "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.1": 0,
     "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.10": 0,
+    "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.11": 0,
     "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.2": 0,
     "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.3": 0,
     "impl:fn-1-xslt-editor-and-debugger-xmlspy-like.4": 0,
@@ -419,5 +450,5 @@
     "mergeBaseTracker": null,
     "url": null
   },
-  "updated_at": "2026-10-07T16:48:37.615788Z"
+  "updated_at": "2026-10-07T17:10:35.282955Z"
 }
