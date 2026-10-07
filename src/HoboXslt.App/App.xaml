@@ -7,6 +7,7 @@
         <SolidColorBrush x:Key="PanelBrush" Color="#FFFFFF" />
         <SolidColorBrush x:Key="LineBrush" Color="#D5DAE2" />
         <SolidColorBrush x:Key="LineSoftBrush" Color="#E7EAF0" />
+        <SolidColorBrush x:Key="ScrollThumbBrush" Color="#BEC5CF" />
         <SolidColorBrush x:Key="InkBrush" Color="#1C2230" />
         <SolidColorBrush x:Key="MutedBrush" Color="#5A6475" />
         <SolidColorBrush x:Key="FaintBrush" Color="#8A92A2" />
@@ -278,7 +279,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Thumb">
-                        <Border x:Name="Bd" CornerRadius="4" Margin="2" Background="{StaticResource LineBrush}" />
+                        <Border x:Name="Bd" CornerRadius="4" Margin="2" Background="{StaticResource ScrollThumbBrush}" />
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="Bd" Property="Background" Value="{StaticResource FaintBrush}" />
@@ -371,7 +372,7 @@
                             <ScrollBar x:Name="PART_VerticalScrollBar" Grid.Column="1" Value="{TemplateBinding VerticalOffset}"
                                        Maximum="{TemplateBinding ScrollableHeight}" ViewportSize="{TemplateBinding ViewportHeight}"
                                        Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" />
-                            <ScrollBar x:Name="PART_HorizontalScrollBar" Grid.Row="1" Orientation="Horizontal" Value="{TemplateBinding HorizontalOffset}"
+                            <ScrollBar x:Name="PART_HorizontalScrollBar" Grid.Row="1" Margin="10,0,0,0" Orientation="Horizontal" Value="{TemplateBinding HorizontalOffset}"
                                        Maximum="{TemplateBinding ScrollableWidth}" ViewportSize="{TemplateBinding ViewportWidth}"
                                        Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}" />
                         </Grid>
